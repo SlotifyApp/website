@@ -5,7 +5,7 @@ export default function SignIn() {
     <form
       action={async () => {
         "use server";
-        await signIn("MicrosoftEntraID");
+        await signIn("MicrosoftEntraID", { redirectTo: "/dashboard" });
       }}
     >
       <button type="submit">Signin with Microsoft</button>
