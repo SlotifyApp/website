@@ -23,5 +23,5 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Other commands
 
 ```bash
-npm run generate_openapi_types #See details in package.json
+npm run generate # Will generate openapi types, see package.json for the entire command
 ```

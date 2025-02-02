@@ -4,6 +4,42 @@
  */
 
 export interface paths {
+    "/user/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout user */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successfully logged out on backend */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/refresh": {
         parameters: {
             query?: never;
@@ -13,7 +49,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create new Slotify access token */
+        /** Create new Slotify access token and refresh token */
         post: {
             parameters: {
                 query?: never;
@@ -21,11 +57,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["RefreshBody"];
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description Successfully refreshed access token */
                 201: {
@@ -33,7 +65,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["RefreshResponse"];
+                        "application/json": string;
                     };
                 };
                 401: components["responses"]["UnauthorizedError"];
@@ -53,29 +85,7 @@ export interface paths {
             cookie?: never;
         };
         /** Auth route for authorisation code flow */
-        get: {
-            parameters: {
-                query: {
-                    code: string;
-                    state: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Successful auth */
-                302: {
-                    headers: {
-                        /** @description The URL to redirect to after successful authentication */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["GetAPIAuthCallback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -405,15 +415,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        RefreshBody: {
-            accessToken: string;
-            refreshToken: string;
-            userID: number;
-        };
-        RefreshResponse: {
-            accessToken: string;
-            refreshToken: string;
-        };
         UserCreate: {
             /** Format: email */
             email: string;
@@ -451,6 +452,29 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    GetAPIAuthCallback: {
+        parameters: {
+            query: {
+                code: string;
+                state: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful auth */
+            302: {
+                headers: {
+                    /** @description The URL to redirect to after successful authentication */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetUsersUserID: {
         parameters: {
             query?: never;
