@@ -9,7 +9,7 @@ const LoginButton = () => {
       "http://localhost:8080/api/auth/callback",
     );
     const scopes = encodeURIComponent(
-      "openid profile email User.ReadWrite Calendars.ReadBasic Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared offline_access",
+      "openid profile email User.ReadWrite Calendars.ReadBasic Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared",
     ); // Replace with your required scopes
     const state = "12345"; // Random string for CSRF protection
 
