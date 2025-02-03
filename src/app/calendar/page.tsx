@@ -20,9 +20,19 @@ export default function Calendar() {
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
+          await client.POST("/api/users/me/logout", {});
           window.location.href = "/";
         } else if (response.status == 201) {
-          const { data, error } = await client.GET("/api/calendar/me", {});
+          const { data, error, response } = await client.GET(
+            "/api/calendar/me",
+            {},
+          );
+          if (response.status == 401) {
+            //MSAL client may no longer have user in cache, no other option other than
+            //to log out
+            await client.POST("/api/users/me/logout", {});
+            window.location.href = "/";
+          }
           if (error) {
             setError(error);
           } else if (data) {

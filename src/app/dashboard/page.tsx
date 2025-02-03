@@ -19,6 +19,7 @@ export default function Dashboard() {
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
+          await client.POST("/api/users/me/logout", {});
           window.location.href = "/";
         } else if (response.status == 201) {
           //retry the /user route
