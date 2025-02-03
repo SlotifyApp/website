@@ -4,7 +4,7 @@ import client from "@/hooks/fetch";
 
 const LogoutButton = () => {
   const handleLogout = async () => {
-    const { error } = await client.POST("/user/logout", {});
+    const { error } = await client.POST("/api/users/me/logout", {});
     if (error) {
       console.log(`error: ${JSON.stringify(error)}`);
     }
