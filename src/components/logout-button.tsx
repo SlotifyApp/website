@@ -1,6 +1,7 @@
 "use client";
 
 import client from "@/hooks/fetch";
+import { Button } from "@/components/ui/button";
 
 const LogoutButton = () => {
   const handleLogout = async () => {
@@ -11,10 +12,10 @@ const LogoutButton = () => {
 
     // Want to redirect the user back to the home page
     // even if logout api failed
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
-  return <button onClick={handleLogout}>Logout</button>;
+  return <Button onClick={handleLogout}>Logout</Button>;
 };
 
 export default LogoutButton;
