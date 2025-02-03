@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import client from "@/hooks/fetch";
-import LogoutButton from "../components/logout-button";
+import LogoutButton from "@/components/logout-button";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -20,10 +20,19 @@ export default function Dashboard() {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
           await client.POST("/api/users/me/logout", {});
-          window.location.href = "/";
+          window.location.href = "/login";
         } else if (response.status == 201) {
           //retry the /user route
-          const { data, error } = await client.GET("/api/users/me", {});
+          const { data, error, response } = await client.GET(
+            "/api/users/me",
+            {},
+          );
+          if (response.status == 401) {
+            //MSAL client may no longer have user in cache, no other option other than
+            //to log out
+            await client.POST("/api/users/me/logout", {});
+            window.location.href = "/login";
+          }
           if (error) {
             setError(error);
           } else if (data) {
@@ -46,10 +55,19 @@ export default function Dashboard() {
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
-          window.location.href = "/";
+          window.location.href = "/login";
         } else if (response.status == 201) {
           //retry the /user route
-          const { data, error } = await client.GET("/api/teams/me", {});
+          const { data, error, response } = await client.GET(
+            "/api/teams/me",
+            {},
+          );
+          if (response.status == 401) {
+            //MSAL client may no longer have user in cache, no other option other than
+            //to log out
+            await client.POST("/api/users/me/logout", {});
+            window.location.href = "/login";
+          }
           if (error) {
             setError(error);
           } else if (data) {

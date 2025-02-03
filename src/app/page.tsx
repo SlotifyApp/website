@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
-import LoginButton from "./components/login-button";
 import client from "@/hooks/fetch";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function Home() {
   }, []);
   return (
     <div>
-      <LoginButton />
+      <Button onClick={() => (window.location.href = "/login")}>Login</Button>
     </div>
   );
 }
