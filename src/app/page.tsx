@@ -12,9 +12,9 @@ export default function Home() {
       // if 401 then attempt to refresh
       // If refresh fails then do nothing, if it succeeds then redirect to
       // /dashboard
-      const { response } = await client.GET("/user", {});
+      const { response } = await client.GET("/api/users/me", {});
       if (response.status == 401) {
-        const { response } = await client.POST("/refresh", {});
+        const { response } = await client.POST("/api/refresh", {});
         if (response.status == 201) {
           window.location.href = "/dashboard";
         }
