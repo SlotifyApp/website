@@ -4,531 +4,822 @@
  */
 
 export interface paths {
-  "/healthcheck": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/calendar/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** get a user's calendar events */
+        get: operations["GetAPICalendarMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Healthcheck route */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Healthcheck successful */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": string;
-          };
+    "/api/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        get?: never;
+        put?: never;
+        /** Refresh Slotify access token and refresh token */
+        post: operations["PostAPIRefresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/users": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/auth/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Auth route for authorisation code flow */
+        get: operations["GetAPIAuthCallback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get a user by query params */
-    get: {
-      parameters: {
-        query?: {
-          /** @description Email of user */
-          email?: string;
-          /** @description First name of user */
-          firstName?: string;
-          /** @description Last name of user */
-          lastName?: string;
+    "/api/healthcheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Users matching the query parameters */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["User"][];
-          };
-        };
-        /** @description Bad request (e.g., invalid team ID) */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
+        /** Healthcheck route */
+        get: operations["GetAPIHealthcheck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    /** Create a new user */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["UserCreate"];
+    "/api/users/me/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description User created successfully */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["User"];
-          };
-        };
-        /** @description Bad request (e.g., invalid team ID) */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
+        get?: never;
+        put?: never;
+        /** Logout user */
+        post: operations["PostAPIUsersMeLogout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/users/{userID}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a user by id */
-    get: operations["GetUsersUserID"];
-    put?: never;
-    post?: never;
-    /** Delete a user by id */
-    delete: operations["DeleteUsersUserID"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/teams": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a team by query params */
-    get: {
-      parameters: {
-        query?: {
-          /** @description Team name */
-          name?: string;
+    "/api/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Teams matching the query parameters */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["Team"][];
-          };
-        };
-        /** @description Bad request (e.g., invalid team name) */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
+        /** Get the user by id passed by JWT */
+        get: operations["GetAPIUsersMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    /** Create a new team */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["TeamCreate"];
+    "/api/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Team created successfully */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["Team"];
-          };
+        /** Get a user by query params */
+        get: operations["GetAPIUsers"];
+        put?: never;
+        /** Create a new user */
+        post: operations["PostAPIUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{userID}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        /** @description Bad request (e.g., invalid team name) */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": string;
-          };
+        /** Get a user by id */
+        get: operations["GetAPIUsersUserID"];
+        put?: never;
+        post?: never;
+        /** Delete a user by id */
+        delete: operations["DeleteAPIUsersUserID"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teams/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        /** Get all teams for user by id passed by JWT */
+        get: operations["GetAPITeamsMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/teams/{teamID}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a team by query params */
+        get: operations["GetAPITeams"];
+        put?: never;
+        /** Create a new team */
+        post: operations["PostAPITeams"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get a team by id */
-    get: operations["GetTeamsTeamID"];
-    put?: never;
-    post?: never;
-    /** Delete a team by id */
-    delete: operations["DeleteTeamsTeamID"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/teams/{teamID}/users": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/teams/{teamID}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a team by id */
+        get: operations["GetAPITeamsTeamID"];
+        put?: never;
+        post?: never;
+        /** Delete a team by id */
+        delete: operations["DeleteAPITeamsTeamID"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get all members of a team */
-    get: operations["GetTeamsTeamIDUsers"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/teams/{teamID}/users/{userID}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/teams/{teamID}/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all members of a team */
+        get: operations["GetAPITeamsTeamIDUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Add a user to a team */
-    post: operations["PostTeamsTeamIDUsersUserID"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/api/teams/{teamID}/users/{userID}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a user to a team */
+        post: operations["PostAPITeamsTeamIDUsersUserID"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    UserCreate: {
-      /** Format: email */
-      email: string;
-      firstName: string;
-      lastName: string;
+    schemas: {
+        CalendarEvent: {
+            subject?: string;
+            startTime?: string;
+            endTime?: string;
+        };
+        UserCreate: {
+            /** Format: email */
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        User: {
+            id: number;
+            /** Format: email */
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        TeamCreate: {
+            name: string;
+        };
+        Team: {
+            id: number;
+            name: string;
+        };
     };
-    User: {
-      id: number;
-      /** Format: email */
-      email: string;
-      firstName: string;
-      lastName: string;
+    responses: {
+        /** @description Access token is missing or invalid */
+        UnauthorizedError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
     };
-    TeamCreate: {
-      name: string;
-    };
-    Team: {
-      id: number;
-      name: string;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  GetUsersUserID: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Numeric ID of the user to get */
-        userID: number;
-      };
-      cookie?: never;
+    GetAPICalendarMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successfully got user calendar events */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarEvent"][];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["UnauthorizedError"];
+            /** @description Something went wrong internally */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Got user successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    PostAPIRefresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["User"];
+        requestBody?: never;
+        responses: {
+            /** @description Successfully refreshed access token */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            401: components["responses"]["UnauthorizedError"];
         };
-      };
-      /** @description Bad request (e.g., invalid team ID) */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description User not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
     };
-  };
-  DeleteUsersUserID: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Numeric ID of the user to delete */
-        userID: number;
-      };
-      cookie?: never;
+    GetAPIAuthCallback: {
+        parameters: {
+            query: {
+                code: string;
+                state: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful auth */
+            302: {
+                headers: {
+                    /** @description The URL to redirect to after successful authentication */
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Deleted user successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    GetAPIHealthcheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": string;
+        requestBody?: never;
+        responses: {
+            /** @description Healthcheck successful */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
         };
-      };
-      /** @description Bad request (e.g., invalid user ID) */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description User not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
     };
-  };
-  GetTeamsTeamID: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Numeric ID of the team to get */
-        teamID: number;
-      };
-      cookie?: never;
+    PostAPIUsersMeLogout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successfully logged out on backend */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Got team successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    GetAPIUsersMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["Team"];
+        requestBody?: never;
+        responses: {
+            /** @description Got user successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Bad request (e.g., invalid team ID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["UnauthorizedError"];
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
-      };
-      /** @description Team not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Something went wrong internally */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
     };
-  };
-  DeleteTeamsTeamID: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Numeric ID of the team to delete */
-        teamID: number;
-      };
-      cookie?: never;
+    GetAPIUsers: {
+        parameters: {
+            query?: {
+                /** @description Email of user */
+                email?: string;
+                /** @description First name of user */
+                firstName?: string;
+                /** @description Last name of user */
+                lastName?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Users matching the query parameters */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"][];
+                };
+            };
+            /** @description Bad request (e.g., invalid team ID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Deleted team successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    PostAPIUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": string;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreate"];
+            };
         };
-      };
-      /** @description Bad request (e.g., invalid team id) */
-      400: {
-        headers: {
-          [name: string]: unknown;
+        responses: {
+            /** @description User created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Bad request (e.g., invalid team ID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
-        content?: never;
-      };
-      /** @description Team not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
     };
-  };
-  GetTeamsTeamIDUsers: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description ID of the team */
-        teamID: number;
-      };
-      cookie?: never;
+    GetAPIUsersUserID: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Numeric ID of the user to get */
+                userID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Got user successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            /** @description Bad request (e.g., invalid team ID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Users successfully found */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    DeleteAPIUsersUserID: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Numeric ID of the user to delete */
+                userID: number;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["User"][];
+        requestBody?: never;
+        responses: {
+            /** @description Deleted user successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad request (e.g., invalid user ID) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
-      };
-      /** @description Bad request, team id is invalid */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": string;
-        };
-      };
-      /** @description Something went wrong */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": string;
-        };
-      };
     };
-  };
-  PostTeamsTeamIDUsersUserID: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description ID of the user */
-        userID: number;
-        /** @description ID of the team */
-        teamID: number;
-      };
-      cookie?: never;
+    GetAPITeamsMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Got all user's teams successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["UnauthorizedError"];
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description User successfully added to the team */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    GetAPITeams: {
+        parameters: {
+            query?: {
+                /** @description Team name */
+                name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": string;
+        requestBody?: never;
+        responses: {
+            /** @description Teams matching the query parameters */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
+            /** @description Bad request (e.g., invalid team name) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
-      };
-      /** @description Bad request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description User or team not found */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
     };
-  };
+    PostAPITeams: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamCreate"];
+            };
+        };
+        responses: {
+            /** @description Team created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            /** @description Bad request (e.g., invalid team name) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    GetAPITeamsTeamID: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Numeric ID of the team to get */
+                teamID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Got team successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            /** @description Team not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Something went wrong internally */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteAPITeamsTeamID: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Numeric ID of the team to delete */
+                teamID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted team successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad request (e.g., invalid team id) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Team not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAPITeamsTeamIDUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ID of the team */
+                teamID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Users successfully found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"][];
+                };
+            };
+            /** @description Bad request, team id is invalid */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Something went wrong */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    PostAPITeamsTeamIDUsersUserID: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ID of the user */
+                userID: number;
+                /** @description ID of the team */
+                teamID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User successfully added to the team */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User or team not found */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
 }

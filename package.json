@@ -7,11 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate_openapi_types": "npx openapi-typescript ./shared/openapi/openapi.yaml -o ./src/types/openapi.d.ts"
+    "generate": "npx openapi-typescript ./shared/openapi/openapi.yaml -o ./src/types/openapi.d.ts"
   },
   "dependencies": {
     "next": "15.1.4",
-    "next-auth": "^5.0.0-beta.25",
     "openapi-fetch": "^0.13.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -1,6 +1,9 @@
 import createClient from "openapi-fetch";
 import type { paths } from "../types/openapi.d.ts";
 
-const client = createClient<paths>({ baseUrl: "https://localhost:3000/" });
+const client = createClient<paths>({
+  baseUrl: "http://localhost:8080/",
+  credentials: "include", // fetch option to send http-only cookies
+});
 
-const { data, error } = await client.GET("/healthcheck", {});
+export default client;
