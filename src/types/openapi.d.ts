@@ -4,6 +4,135 @@
  */
 
 export interface paths {
+    "/api/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Subscribe to notifications
+         * @description Establishes a stream connection to receive real-time updates about rendering tasks via Server-Sent Events (SSE).
+         */
+        get: operations["renderEvent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** get user's unread notifications */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successfully updated notification. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Notification"][];
+                    };
+                };
+                401: components["responses"]["UnauthorizedError"];
+                /** @description Notification not found. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Something went wrong internally */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/{notificationID}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        /** CORS preflight for marking a notification as read */
+        options: operations["OptionsAPINotificationsNotificationIDRead"];
+        head?: never;
+        /** mark a notification as being read */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    notificationID: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successfully updated notification */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string;
+                    };
+                };
+                401: components["responses"]["UnauthorizedError"];
+                /** @description Notification not found. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Something went wrong internally */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string;
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/calendar/me": {
         parameters: {
             query?: never;
@@ -142,6 +271,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/teams/joinable/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all joinable teams for a user excluding teams they are already a part of */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Got all user's teams successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Team"][];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["UnauthorizedError"];
+                /** @description User not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/teams/me": {
         parameters: {
             query?: never;
@@ -172,7 +352,8 @@ export interface paths {
         /** Create a new team */
         post: operations["PostAPITeams"];
         delete?: never;
-        options?: never;
+        /** CORS preflight for teams */
+        options: operations["OptionsAPITeams"];
         head?: never;
         patch?: never;
         trace?: never;
@@ -212,6 +393,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/teams/{teamID}/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add current user to a team */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ID of the team */
+                    teamID: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description User successfully added to the team */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Team"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["UnauthorizedError"];
+                /** @description User or team not found */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/teams/{teamID}/users/{userID}": {
         parameters: {
             query?: never;
@@ -238,6 +473,13 @@ export interface components {
             startTime?: string;
             endTime?: string;
         };
+        Notification: {
+            /** Format: uint32 */
+            id: number;
+            message: string;
+            /** Format: date-time */
+            created: string;
+        };
         UserCreate: {
             /** Format: email */
             email: string;
@@ -245,6 +487,7 @@ export interface components {
             lastName: string;
         };
         User: {
+            /** Format: uint32 */
             id: number;
             /** Format: email */
             email: string;
@@ -255,6 +498,7 @@ export interface components {
             name: string;
         };
         Team: {
+            /** Format: uint32 */
             id: number;
             name: string;
         };
@@ -275,6 +519,60 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    renderEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A continuous stream of server-sent events. */
+            200: {
+                headers: {
+                    /** @description No caching is allowed for this stream. */
+                    "Cache-Control"?: string;
+                    /** @description Advises the client to keep the connection open. */
+                    Connection?: string;
+                    /** @description The MIME type of this stream is text/event-stream. */
+                    "Content-Type"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+        };
+    };
+    OptionsAPINotificationsNotificationIDRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notificationID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful CORS preflight */
+            204: {
+                headers: {
+                    /** @description The allowed origin for cross-origin requests */
+                    "Access-Control-Allow-Origin"?: string;
+                    /** @description Allowed HTTP methods */
+                    "Access-Control-Allow-Methods"?: string;
+                    /** @description Allowed headers in the actual request */
+                    "Access-Control-Allow-Headers"?: string;
+                    /** @description Whether credentials (cookies, HTTP authentication) are allowed */
+                    "Access-Control-Allow-Credentials"?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetAPICalendarMe: {
         parameters: {
             query?: never;
@@ -668,6 +966,32 @@ export interface operations {
             };
         };
     };
+    OptionsAPITeams: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful CORS preflight */
+            204: {
+                headers: {
+                    /** @description The allowed origin for cross-origin requests */
+                    "Access-Control-Allow-Origin"?: string;
+                    /** @description Allowed HTTP methods */
+                    "Access-Control-Allow-Methods"?: string;
+                    /** @description Allowed headers in the actual request */
+                    "Access-Control-Allow-Headers"?: string;
+                    /** @description Whether credentials (cookies, HTTP authentication) are allowed */
+                    "Access-Control-Allow-Credentials"?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GetAPITeamsTeamID: {
         parameters: {
             query?: never;
@@ -803,7 +1127,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string;
+                    "application/json": components["schemas"]["Team"];
                 };
             };
             /** @description Bad request */
@@ -813,6 +1137,7 @@ export interface operations {
                 };
                 content?: never;
             };
+            401: components["responses"]["UnauthorizedError"];
             /** @description User or team not found */
             403: {
                 headers: {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,8 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import React from "react";
 
-const MicrosoftSVG = (props: any) => (
+const MicrosoftSVG = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="800px"
     height="800px"
