@@ -11,7 +11,20 @@ git clone --recurse-submodules
 2. Copy the `.env.sample` contents into a new file named `.env.local` and fill those variables out by
    referring to either `terraform` or the microsoft entra UI.
 
-3. Navigate to the project root (same level as package.json) and:
+3. Install `pre-commit`:
+
+```bash
+    pip install pre-commit
+    pre-commit install --hook-type pre-push
+```
+
+4. Install the hooks:
+
+```bash
+    pre-commit install
+```
+
+4. Navigate to the project root (same level as package.json) and:
 
 ```bash
 npm i # install dependencies

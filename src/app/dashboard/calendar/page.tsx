@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from "react";
 import client from "@/hooks/fetch";
+import { toast } from "@/hooks/use-toast";
+
+interface Calendar {
+  subject?: string;
+  startTime?: string;
+  endTime?: string;
+}
 
 export default function Calendar() {
-  const [calendar, setCalendar] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+  const [calendar, setCalendar] = useState<Array<Calendar>>([]);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchCalendar = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
       const { data, error, response } = await client.GET(
@@ -34,27 +40,31 @@ export default function Calendar() {
             window.location.href = "/login";
           }
           if (error) {
-            setError(error);
+            toast({
+              title: "Error",
+              description: error,
+              variant: "destructive",
+            });
           } else if (data) {
             setCalendar(data);
           }
         } else if (error) {
-          setError(error);
+          toast({
+            title: "Error",
+            description: error,
+            variant: "destructive",
+          });
         }
       } else if (data) {
         setCalendar(data);
       }
     };
 
-    fetchUser();
+    fetchCalendar();
   }, []);
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   if (!calendar) {
-    return <div>Loading...</div>;
+    return <div>No calendar displayed.</div>;
   }
 
   return <div>{JSON.stringify(calendar)}</div>;
