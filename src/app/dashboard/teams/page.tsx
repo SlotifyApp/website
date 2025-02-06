@@ -23,79 +23,6 @@ export default function TeamsPage() {
   const [members, setMembers] = useState<Array<Member>>([]);
 
   //TODO: Handle 401 like dashboard
-  const getJoinableTeams = async () => {
-    const { data, error } = await client.GET("/api/teams/joinable/me");
-    if (data) {
-      setJoinableTeams(data);
-    }
-    if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  };
-  const getUserTeams = async () => {
-    // This code is ugly, but needs to be done for the refresh.
-    // It works, but we need better code
-    const { data, error, response } = await client.GET("/api/teams/me", {});
-    if (error && response.status == 401) {
-      const { error, response } = await client.POST("/api/refresh", {});
-      if (response.status == 401) {
-        // The refresh token was invalid, could not refresh
-        // so back to login. This has to be done for every fetch
-        window.location.href = "/login";
-      } else if (response.status == 201) {
-        //retry the /user route
-        const { data, error, response } = await client.GET("/api/teams/me", {});
-        if (response.status == 401) {
-          //MSAL client may no longer have user in cache, no other option other than
-          //to log out
-          await client.POST("/api/users/me/logout", {});
-          window.location.href = "/login";
-        }
-        if (error) {
-          toast({
-            title: "Error",
-            description: error,
-            variant: "destructive",
-          });
-        } else if (data) {
-          setYourTeams(data);
-        }
-      } else if (error) {
-        toast({
-          title: "Error",
-          description: error,
-          variant: "destructive",
-        });
-      }
-    } else if (data) {
-      setYourTeams(data);
-    }
-  };
-  const getTeamMembers = async () => {
-    if (!selectedTeam) {
-      return;
-    }
-    const teamID = selectedTeam?.id;
-    const { data, error } = await client.GET("/api/teams/{teamID}/users", {
-      params: {
-        path: { teamID: teamID },
-      },
-    });
-    if (data) {
-      setMembers(data);
-    }
-    if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleJoinTeam = async (teamID: number) => {
     const { data, error } = await client.POST("/api/teams/{teamID}/users/me", {
@@ -119,10 +46,87 @@ export default function TeamsPage() {
 
   // On every page refresh, set yourTeams and joinableTeams
   useEffect(() => {
+    const getUserTeams = async () => {
+      // This code is ugly, but needs to be done for the refresh.
+      // It works, but we need better code
+      const { data, error, response } = await client.GET("/api/teams/me", {});
+      if (error && response.status == 401) {
+        const { error, response } = await client.POST("/api/refresh", {});
+        if (response.status == 401) {
+          // The refresh token was invalid, could not refresh
+          // so back to login. This has to be done for every fetch
+          window.location.href = "/login";
+        } else if (response.status == 201) {
+          //retry the /user route
+          const { data, error, response } = await client.GET(
+            "/api/teams/me",
+            {},
+          );
+          if (response.status == 401) {
+            //MSAL client may no longer have user in cache, no other option other than
+            //to log out
+            await client.POST("/api/users/me/logout", {});
+            window.location.href = "/login";
+          }
+          if (error) {
+            toast({
+              title: "Error",
+              description: error,
+              variant: "destructive",
+            });
+          } else if (data) {
+            setYourTeams(data);
+          }
+        } else if (error) {
+          toast({
+            title: "Error",
+            description: error,
+            variant: "destructive",
+          });
+        }
+      } else if (data) {
+        setYourTeams(data);
+      }
+    };
+    const getJoinableTeams = async () => {
+      const { data, error } = await client.GET("/api/teams/joinable/me");
+      if (data) {
+        setJoinableTeams(data);
+      }
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+      }
+    };
+    const getTeamMembers = async () => {
+      if (!selectedTeam) {
+        return;
+      }
+      const teamID = selectedTeam?.id;
+      const { data, error } = await client.GET("/api/teams/{teamID}/users", {
+        params: {
+          path: { teamID: teamID },
+        },
+      });
+      if (data) {
+        setMembers(data);
+      }
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+      }
+    };
+
     getUserTeams();
     getJoinableTeams();
     getTeamMembers();
-  });
+  }, [selectedTeam]);
 
   //TODO: Do this search bar funcionality
   //handle your teams search bar
