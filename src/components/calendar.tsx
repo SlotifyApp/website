@@ -17,7 +17,7 @@ export default function DisplayCalendar() {
     const fetchCalendar = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
-      let calRoute = globalThis.stringToPairsPath("/api/calendar/me");
+      const calRoute = globalThis.stringToPairsPath("/api/calendar/me");
       const { data, error, response } = await client.GET(calRoute, {},);
       if (error && response.status == 401) {
         const refreshErrorOccurred = globalThis.refreshRetryAPIroute(calRoute);
