@@ -6,7 +6,6 @@ import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
 import { JoinableTeams } from "@/components/joinable-teams";
 import client from "@/hooks/fetch";
-import { toast } from "@/hooks/use-toast";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import "@/globalFunc";
@@ -93,7 +92,7 @@ export default function TeamsPage() {
         setMembers(data);
       }
       if (error) {
-        globalThis.toastDestructiveError(error);
+        globalThis.toastDestructiveError((error as unknown as undefined));
       }
     };
 
