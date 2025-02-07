@@ -56,10 +56,23 @@ export default function TeamsPage() {
   // On every page refresh, set yourTeams and joinableTeams
   useEffect(() => {
     const getUserTeams = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
+      // This code is less ugly now and needs to be done for the refresh.
       const teamsRoute = globalThis.stringToPairsPath("/api/teams/me");
-      const { data, error, response } = await client.GET(teamsRoute, {});
+
+      const getUserTeamsData = async () => {
+        const { data, error, response } = await client.GET(teamsRoute, {});
+        if (error && response.status == 401) {
+          const refreshErrorOccurred = await globalThis.refreshRetryAPIroute(teamsRoute);
+          return refreshErrorOccurred ? null : data;
+        }
+        return data;
+      };
+      
+      const teamsData = await getUserTeamsData();
+      if (teamsData) {
+        setYourTeams(teamsData);
+      }
+      /* const { data, error, response } = await client.GET(teamsRoute, {});
       if (error && response.status == 401) {
         const refreshErrorOccurred = globalThis.refreshRetryAPIroute(teamsRoute);
         if (!refreshErrorOccurred) {
@@ -67,7 +80,7 @@ export default function TeamsPage() {
         }
       } else if (data) {
         setYourTeams(data);
-      }
+      } */
     };
     const getJoinableTeams = async () => {
       const { data, error } = await client.GET("/api/teams/joinable/me");

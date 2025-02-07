@@ -14,18 +14,31 @@ export default function DisplayCalendar() {
 
   useEffect(() => {
     const fetchCalendar = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
+      // This code is less ugly now and needs to be done for the refresh.
       const calRoute = globalThis.stringToPairsPath("/api/calendar/me");
-      const { data, error, response } = await client.GET(calRoute, {},);
-      if (error && response.status == 401) {
+
+      const getUserCalData = async () => {
+        const { data, error, response } = await client.GET(calRoute, {});
+        if (error && response.status == 401) {
+          const refreshErrorOccurred = await globalThis.refreshRetryAPIroute(calRoute);
+          return refreshErrorOccurred ? null : data;
+        }
+        return data;
+      };
+      
+      const calData = await getUserCalData();
+      if (calData) {
+        setCalendar(calData);
+      }
+      // const { data, error, response } = await client.GET(calRoute, {},);
+      /* if (error && response.status == 401) {
         const refreshErrorOccurred = globalThis.refreshRetryAPIroute(calRoute);
         if (!refreshErrorOccurred) {
           setCalendar(data);
         }
       } else if (data) {
         setCalendar(data);
-      }
+      } */
     };
 
     fetchCalendar();
