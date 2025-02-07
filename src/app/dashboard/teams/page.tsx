@@ -50,11 +50,7 @@ export default function TeamsPage() {
       setJoinableTeams(joinableTeams.filter((team) => team.id !== teamID));
     }
     if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
+      globalThis.toastDestructiveError(error);
     }
   };
 
@@ -80,11 +76,7 @@ export default function TeamsPage() {
         setJoinableTeams(data);
       }
       if (error) {
-        toast({
-          title: "Error",
-          description: error,
-          variant: "destructive",
-        });
+        globalThis.toastDestructiveError(error);
       }
     };
     const getTeamMembers = async () => {
@@ -101,11 +93,7 @@ export default function TeamsPage() {
         setMembers(data);
       }
       if (error) {
-        toast({
-          title: "Error",
-          description: error,
-          variant: "destructive",
-        });
+        globalThis.toastDestructiveError(error);
       }
     };
 
