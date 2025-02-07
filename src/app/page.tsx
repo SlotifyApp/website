@@ -13,7 +13,6 @@ export default function Home() {
       // 1. Attempt to get /user route, if 200 then redirect to /dashboard
       // 2. if 401 then attempt to refresh
       // 3. If refresh fails then do nothing, if it succeeds then redirect to /dashboard
-      globalThis.fetchAPIroute('THIS IS A TEST');
       const { response } = await client.GET("/api/users/me", {});
       if (response.status == 200) {
         window.location.href = "/dashboard";

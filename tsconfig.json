@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "globalFunc.ts", "globalFunc.d.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/globalFunc.tssrc/types/globalFunc.d.tsd.ts"],
   "exclude": ["node_modules"]
 }
