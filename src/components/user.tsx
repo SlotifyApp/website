@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import client from "@/hooks/fetch";
 import { Member } from "@/components/team-members";
-import { toast } from "@/hooks/use-toast";
+import "@/globalFunc";
 
 export default function User() {
   const [user, setUser] = useState<Member | null>(null);
@@ -37,11 +37,7 @@ export default function User() {
           const { data, error } = await client.GET("/api/users/me", {});
           // setLoading(false);
           if (error) {
-            toast({
-              title: "Error",
-              description: error,
-              variant: "destructive",
-            });
+            globalThis.toastDestructiveError(error);
           }
           if (data) {
             setUser(data);

@@ -1,7 +1,7 @@
 "use client";
 import { toast } from "@/hooks/use-toast";
 import React, { useEffect, createContext, useContext, useState } from "react";
-
+import "@/globalFunc";
 import client from "@/hooks/fetch";
 
 export interface Notification {
@@ -32,11 +32,7 @@ export function NotificationProvider({
     const getUnreadNotifs = async () => {
       const { data, error } = await client.GET("/api/users/me/notifications");
       if (error) {
-        toast({
-          title: "Error",
-          description: error,
-          variant: "destructive",
-        });
+        globalThis.toastDestructiveError(error as unknown as undefined);
       }
       if (data) {
         setNotifications((prev) => [...prev, ...data]);
@@ -83,11 +79,7 @@ export function NotificationProvider({
         title: data,
       });
     } else {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
+      globalThis.toastDestructiveError((error as unknown as undefined));
     }
   }
 
