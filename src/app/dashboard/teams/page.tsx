@@ -63,7 +63,7 @@ export default function TeamsPage() {
     const getUserTeams = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
-      var teamsRoute = globalThis.stringToPairsPath("/api/teams/me");
+      let teamsRoute = globalThis.stringToPairsPath("/api/teams/me");
       const { data, error, response } = await client.GET(teamsRoute, {});
       if (error && response.status == 401) {
         const refreshErrorOccurred = globalThis.refreshRetryAPIroute(teamsRoute);

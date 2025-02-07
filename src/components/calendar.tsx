@@ -1,6 +1,6 @@
 "use client";
 import client from "@/hooks/fetch";
-import { toast } from "@/hooks/use-toast";
+// import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import "@/globalFunc";
 
@@ -17,7 +17,7 @@ export default function DisplayCalendar() {
     const fetchCalendar = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
-      var calRoute = globalThis.stringToPairsPath("/api/calendar/me");
+      let calRoute = globalThis.stringToPairsPath("/api/calendar/me");
       const { data, error, response } = await client.GET(calRoute, {},);
       if (error && response.status == 401) {
         const refreshErrorOccurred = globalThis.refreshRetryAPIroute(calRoute);
