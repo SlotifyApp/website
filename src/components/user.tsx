@@ -9,44 +9,42 @@ export default function User() {
   // const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
-      // setLoading(true);
-      const { data, response } = await client.GET("/api/users/me", {});
-      console.log(JSON.stringify(data));
-      console.log(JSON.stringify(response));
-      if (data) {
-        // setLoading(false);
-        setUser(data);
-        return;
-      }
-      if (response.status == 401) {
-        //unauthorized, hit /refresh
-        const { response } = await client.POST("/api/refresh", {});
-        if (response.status == 401) {
-          // refresh failed, just log user out
-          await client.POST("/api/users/me/logout", {});
-          // setLoading(false);
-          window.location.href = "/login";
-          return;
-        }
-
-        if (response.status == 201) {
-          // retry the user route
-          const { data, error } = await client.GET("/api/users/me", {});
-          // setLoading(false);
-          if (error) {
-            globalThis.toastDestructiveError(error);
-          }
-          if (data) {
-            setUser(data);
-            return;
-          }
-        }
-      }
+    const refreshUser = async () => {
+      const { response } = await client.POST("/api/refresh", {});
+      return response.status != 401;
     };
 
+    const fetchUser = async () => {
+      // This code is less ugly now and needs to be done for the refresh.
+      // I moved everything into 1 big try/catch block as it looks nicer than individual error handling
+      try {
+        const { data: userData, response } = await client.GET("/api/users/me", {});
+        console.log("User Data: ", JSON.stringify(userData));
+        console.log("Response: ", JSON.stringify(response));
+        // Switch case replaces if/else blocks
+        switch (response.status) {
+          case 200: // Success
+            if (userData)
+              setUser(userData)
+            break;
+          case 401: // user was unauthorised. Therefore, /refresh.
+            const refreshSuccessful = await refreshUser();
+            if (!refreshSuccessful) {
+              //If refresh fails due to unauthorized user, log the user out
+              await client.POST("/api/users/me/logout", {});
+              window.location.href = "/login";
+            } 
+            break;
+          case 201:
+            const { data: retryData } = await client.GET("/api/users/me", {});
+            if (retryData)
+              setUser(retryData);
+            break;
+        }
+      } catch (error) {
+        globalThis.toastDestructiveError(error as undefined);
+      }
+    };
     fetchUser();
   }, []);
 

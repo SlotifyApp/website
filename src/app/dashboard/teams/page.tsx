@@ -67,20 +67,11 @@ export default function TeamsPage() {
         }
         return data;
       };
-      
+
       const teamsData = await getUserTeamsData();
       if (teamsData) {
         setYourTeams(teamsData);
       }
-      /* const { data, error, response } = await client.GET(teamsRoute, {});
-      if (error && response.status == 401) {
-        const refreshErrorOccurred = globalThis.refreshRetryAPIroute(teamsRoute);
-        if (!refreshErrorOccurred) {
-          setYourTeams(data);
-        }
-      } else if (data) {
-        setYourTeams(data);
-      } */
     };
     const getJoinableTeams = async () => {
       const { data, error } = await client.GET("/api/teams/joinable/me");
