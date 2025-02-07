@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
 import { JoinableTeams } from "@/components/joinable-teams";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,11 +38,14 @@ export default function TeamsPage() {
   //TODO: Handle 401 like dashboard
 
   const handleJoinTeam = async (teamID: number) => {
-    const { data, error } = await client.POST("/api/teams/{teamID}/users/me", {
-      params: {
-        path: { teamID: teamID },
+    const { data, error } = await slotifyClient.POST(
+      "/api/teams/{teamID}/users/me",
+      {
+        params: {
+          path: { teamID: teamID },
+        },
       },
-    });
+    );
     console.log(`Joined team with id: ${teamID}`);
     if (data) {
       setYourTeams([...yourTeams, data]);
@@ -62,23 +65,29 @@ export default function TeamsPage() {
     const getUserTeams = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
-      const { data, error, response } = await client.GET("/api/teams/me", {});
+      const { data, error, response } = await slotifyClient.GET(
+        "/api/teams/me",
+        {},
+      );
       if (error && response.status == 401) {
-        const { error, response } = await client.POST("/api/refresh", {});
+        const { error, response } = await slotifyClient.POST(
+          "/api/refresh",
+          {},
+        );
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
           window.location.href = "/login";
         } else if (response.status == 201) {
           //retry the /user route
-          const { data, error, response } = await client.GET(
+          const { data, error, response } = await slotifyClient.GET(
             "/api/teams/me",
             {},
           );
           if (response.status == 401) {
             //MSAL client may no longer have user in cache, no other option other than
             //to log out
-            await client.POST("/api/users/me/logout", {});
+            await slotifyClient.POST("/api/users/me/logout", {});
             window.location.href = "/login";
           }
           if (error) {
@@ -102,7 +111,7 @@ export default function TeamsPage() {
       }
     };
     const getJoinableTeams = async () => {
-      const { data, error } = await client.GET("/api/teams/joinable/me");
+      const { data, error } = await slotifyClient.GET("/api/teams/joinable/me");
       if (data) {
         setJoinableTeams(data);
       }
@@ -119,11 +128,14 @@ export default function TeamsPage() {
         return;
       }
       const teamID = selectedTeam?.id;
-      const { data, error } = await client.GET("/api/teams/{teamID}/users", {
-        params: {
-          path: { teamID: teamID },
+      const { data, error } = await slotifyClient.GET(
+        "/api/teams/{teamID}/users",
+        {
+          params: {
+            path: { teamID: teamID },
+          },
         },
-      });
+      );
       if (data) {
         setMembers(data);
       }

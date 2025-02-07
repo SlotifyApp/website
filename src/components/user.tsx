@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { Member } from "@/components/team-members";
 import { toast } from "@/hooks/use-toast";
 
@@ -13,7 +13,7 @@ export default function User() {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
       // setLoading(true);
-      const { data, response } = await client.GET("/api/users/me", {});
+      const { data, response } = await slotifyClient.GET("/api/users/me", {});
       console.log(JSON.stringify(data));
       console.log(JSON.stringify(response));
       if (data) {
@@ -23,10 +23,10 @@ export default function User() {
       }
       if (response.status == 401) {
         //unauthorized, hit /refresh
-        const { response } = await client.POST("/api/refresh", {});
+        const { response } = await slotifyClient.POST("/api/refresh", {});
         if (response.status == 401) {
           // refresh failed, just log user out
-          await client.POST("/api/users/me/logout", {});
+          await slotifyClient.POST("/api/users/me/logout", {});
           // setLoading(false);
           window.location.href = "/login";
           return;
@@ -34,7 +34,7 @@ export default function User() {
 
         if (response.status == 201) {
           // retry the user route
-          const { data, error } = await client.GET("/api/users/me", {});
+          const { data, error } = await slotifyClient.GET("/api/users/me", {});
           // setLoading(false);
           if (error) {
             toast({

@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { Team } from "./team-list";
 import { toast } from "@/hooks/use-toast";
 
@@ -48,7 +48,7 @@ export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { data, error } = await client.POST("/api/teams", {
+    const { data, error } = await slotifyClient.POST("/api/teams", {
       body: { name: values.name },
     });
 

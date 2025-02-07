@@ -2,7 +2,7 @@
 import { toast } from "@/hooks/use-toast";
 import React, { useEffect, createContext, useContext, useState } from "react";
 
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 
 export interface Notification {
   id: number;
@@ -30,7 +30,9 @@ export function NotificationProvider({
 
   useEffect(() => {
     const getUnreadNotifs = async () => {
-      const { data, error } = await client.GET("/api/users/me/notifications");
+      const { data, error } = await slotifyClient.GET(
+        "/api/users/me/notifications",
+      );
       if (error) {
         toast({
           title: "Error",
@@ -69,7 +71,7 @@ export function NotificationProvider({
 
   async function markAsRead(notification_id: number): Promise<void> {
     console.log(`postNotificationRead, notificationID: ${notification_id}`);
-    const { data, error } = await client.PATCH(
+    const { data, error } = await slotifyClient.PATCH(
       "/api/notifications/{notificationID}/read",
       {
         params: {

@@ -1,5 +1,5 @@
 "use client";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 
@@ -16,26 +16,29 @@ export default function DisplayCalendar() {
     const fetchCalendar = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
-      const { data, error, response } = await client.GET(
+      const { data, error, response } = await slotifyClient.GET(
         "/api/calendar/me",
         {},
       );
       if (error && response.status == 401) {
-        const { error, response } = await client.POST("/api/refresh", {});
+        const { error, response } = await slotifyClient.POST(
+          "/api/refresh",
+          {},
+        );
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
-          await client.POST("/api/users/me/logout", {});
+          await slotifyClient.POST("/api/users/me/logout", {});
           window.location.href = "/login";
         } else if (response.status == 201) {
-          const { data, error, response } = await client.GET(
+          const { data, error, response } = await slotifyClient.GET(
             "/api/calendar/me",
             {},
           );
           if (response.status == 401) {
             //MSAL client may no longer have user in cache, no other option other than
             //to log out
-            await client.POST("/api/users/me/logout", {});
+            await slotifyClient.POST("/api/users/me/logout", {});
             window.location.href = "/login";
           }
           if (error) {
