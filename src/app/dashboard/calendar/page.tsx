@@ -1,71 +1,25 @@
-"use client";
+import DisplayCalendar from "@/components/calendar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
-import { useEffect, useState } from "react";
-import client from "@/hooks/fetch";
-import { toast } from "@/hooks/use-toast";
-
-interface Calendar {
-  subject?: string;
-  startTime?: string;
-  endTime?: string;
+function LoadingDashboardCalendar() {
+  return (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  );
 }
-
 export default function Calendar() {
-  const [calendar, setCalendar] = useState<Array<Calendar>>([]);
-
-  useEffect(() => {
-    const fetchCalendar = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
-      const { data, error, response } = await client.GET(
-        "/api/calendar/me",
-        {},
-      );
-      if (error && response.status == 401) {
-        const { error, response } = await client.POST("/api/refresh", {});
-        if (response.status == 401) {
-          // The refresh token was invalid, could not refresh
-          // so back to login. This has to be done for every fetch
-          await client.POST("/api/users/me/logout", {});
-          window.location.href = "/login";
-        } else if (response.status == 201) {
-          const { data, error, response } = await client.GET(
-            "/api/calendar/me",
-            {},
-          );
-          if (response.status == 401) {
-            //MSAL client may no longer have user in cache, no other option other than
-            //to log out
-            await client.POST("/api/users/me/logout", {});
-            window.location.href = "/login";
-          }
-          if (error) {
-            toast({
-              title: "Error",
-              description: error,
-              variant: "destructive",
-            });
-          } else if (data) {
-            setCalendar(data);
-          }
-        } else if (error) {
-          toast({
-            title: "Error",
-            description: error,
-            variant: "destructive",
-          });
-        }
-      } else if (data) {
-        setCalendar(data);
-      }
-    };
-
-    fetchCalendar();
-  }, []);
-
-  if (!calendar) {
-    return <div>No calendar displayed.</div>;
-  }
-
-  return <div>{JSON.stringify(calendar)}</div>;
+  return (
+    <div>
+      <h1 className="text-lg">These are your calendar events.</h1>
+      <Suspense fallback={<LoadingDashboardCalendar />}>
+        <DisplayCalendar />
+      </Suspense>
+    </div>
+  );
 }

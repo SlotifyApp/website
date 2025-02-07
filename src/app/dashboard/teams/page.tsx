@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
@@ -8,6 +8,19 @@ import { JoinableTeams } from "@/components/joinable-teams";
 import client from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import { ProfileForm } from "@/components/team-form";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function LoadingDashboardTeams() {
+  return (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  );
+}
 
 export default function TeamsPage() {
   // for search bars
@@ -160,15 +173,20 @@ export default function TeamsPage() {
             onChange={(e) => setYourTeamsSearchTerm(e.target.value)}
             className="w-full max-w-md mb-4"
           />
-          <TeamList teams={yourTeams} onSelectTeam={setSelectedTeam} />
+          <Suspense fallback={<LoadingDashboardTeams />}>
+            <TeamList teams={yourTeams} onSelectTeam={setSelectedTeam} />
+          </Suspense>
         </div>
         <div>
           <h2 className="text-xl font-semibold mb-4">Team Members</h2>
-          {selectedTeam ? (
-            <TeamMembers members={members} />
-          ) : (
-            <p>Select a team to view its members</p>
-          )}
+
+          <Suspense fallback={<LoadingDashboardTeams />}>
+            {selectedTeam ? (
+              <TeamMembers members={members} />
+            ) : (
+              <p>Select a team to view its members</p>
+            )}
+          </Suspense>
         </div>
       </div>
       <div className="mt-12">
@@ -180,7 +198,10 @@ export default function TeamsPage() {
           onChange={(e) => setJoinableTeamsSearchTerm(e.target.value)}
           className="w-full max-w-md mb-4"
         />
-        <JoinableTeams teams={joinableTeams} onJoinTeam={handleJoinTeam} />
+
+        <Suspense fallback={<LoadingDashboardTeams />}>
+          <JoinableTeams teams={joinableTeams} onJoinTeam={handleJoinTeam} />
+        </Suspense>
       </div>
     </div>
   );

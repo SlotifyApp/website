@@ -1,73 +1,25 @@
-"use client";
+import { Suspense } from "react";
+import User from "@/components/user";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import { useEffect, useState } from "react";
-import client from "@/hooks/fetch";
-import { Member } from "@/components/team-members";
-import { toast } from "@/hooks/use-toast";
-
+function LoadingDashboard() {
+  return (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  );
+}
 export default function Dashboard() {
-  const [user, setUser] = useState<Member | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
-      setLoading(true);
-      const { data, response } = await client.GET("/api/users/me", {});
-      console.log(JSON.stringify(data));
-      console.log(JSON.stringify(response));
-      if (data) {
-        setLoading(false);
-        setUser(data);
-        return;
-      }
-      if (response.status == 401) {
-        //unauthorized, hit /refresh
-        const { response } = await client.POST("/api/refresh", {});
-        if (response.status == 401) {
-          // refresh failed, just log user out
-          await client.POST("/api/users/me/logout", {});
-          setLoading(false);
-          window.location.href = "/login";
-          return;
-        }
-
-        if (response.status == 201) {
-          // retry the user route
-          const { data, error } = await client.GET("/api/users/me", {});
-          setLoading(false);
-          if (error) {
-            toast({
-              title: "Error",
-              description: error,
-              variant: "destructive",
-            });
-          }
-          if (data) {
-            setUser(data);
-            return;
-          }
-        }
-      }
-    };
-
-    fetchUser();
-  }, []);
-
   return (
     <div>
-      {loading && <div>Loading...</div>}
-
-      {!loading && user != null && (
-        <>
-          <h1>
-            Welcome, {user.firstName} {user.lastName}!
-          </h1>
-          <p>Email: {user.email}</p>
-          <p>User ID: {user.id}</p>
-        </>
-      )}
+      <h1>Welcome to the Dashboard!</h1>
+      <Suspense fallback={<LoadingDashboard />}>
+        <User />
+      </Suspense>
     </div>
   );
 }
