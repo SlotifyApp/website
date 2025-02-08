@@ -10,7 +10,7 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import NotificationBell from "./notification-bell";
 import Link from "next/link";
 
@@ -30,7 +30,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     //TODO: Try catch needed here, as with all client fetches as this could fail
     //(say API is not running)
-    const { error } = await client.POST("/api/users/me/logout", {});
+    const { error } = await slotifyClient.POST("/api/users/me/logout", {});
     if (error) {
       console.log(`error: ${JSON.stringify(error)}`);
     }

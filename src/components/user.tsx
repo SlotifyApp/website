@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { Member } from "@/components/team-members";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
@@ -10,7 +10,7 @@ export default function User() {
 
   useEffect(() => {
     const refreshUser = async () => {
-      const { response } = await client.POST("/api/refresh", {});
+      const { response } = await slotifyClient.POST("/api/refresh", {});
       return response.status != 401;
     };
 
@@ -18,7 +18,7 @@ export default function User() {
       // This code is less ugly now and needs to be done for the refresh.
       // I moved everything into 1 big try/catch block as it looks nicer than individual error handling
       try {
-        const { data: userData, response } = await client.GET(
+        const { data: userData, response } = await slotifyClient.GET(
           "/api/users/me",
           {},
         );
@@ -34,12 +34,15 @@ export default function User() {
             const refreshSuccessful = await refreshUser();
             if (!refreshSuccessful) {
               //If refresh fails due to unauthorized user, log the user out
-              await client.POST("/api/users/me/logout", {});
+              await slotifyClient.POST("/api/users/me/logout", {});
               window.location.href = "/login";
             }
             break;
           case 201:
-            const { data: retryData } = await client.GET("/api/users/me", {});
+            const { data: retryData } = await slotifyClient.GET(
+              "/api/users/me",
+              {},
+            );
             if (retryData) setUser(retryData);
             break;
         }

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
 import { JoinableTeams } from "@/components/joinable-teams";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
@@ -38,12 +38,14 @@ export default function TeamsPage() {
   //TODO: Handle 401 like dashboard
 
   const handleJoinTeam = async (teamID: number) => {
-    //TODO: Refresh here, as with everywhere
-    const { data, error } = await client.POST("/api/teams/{teamID}/users/me", {
-      params: {
-        path: { teamID: teamID },
+    const { data, error } = await slotifyClient.POST(
+      "/api/teams/{teamID}/users/me",
+      {
+        params: {
+          path: { teamID: teamID },
+        },
       },
-    });
+    );
     console.log(`Joined team with id: ${teamID}`);
     if (data) {
       setYourTeams([...yourTeams, data]);
@@ -61,7 +63,10 @@ export default function TeamsPage() {
       const teamRoute = "/api/teams/me";
       const getUserTeamsData = async () => {
         //TODO: try-catch
-        const { data, error, response } = await client.GET(teamRoute, {});
+        const { data, error, response } = await slotifyClient.GET(
+          teamRoute,
+          {},
+        );
         if (error && response.status == 401) {
           const refreshErrorOccurred =
             await fetchHelpers.refreshRetryAPIroute(teamRoute);
@@ -76,8 +81,7 @@ export default function TeamsPage() {
       }
     };
     const getJoinableTeams = async () => {
-      //TODO: Refresh and try-catch
-      const { data, error } = await client.GET("/api/teams/joinable/me");
+      const { data, error } = await slotifyClient.GET("/api/teams/joinable/me");
       if (data) {
         setJoinableTeams(data);
       }
@@ -92,11 +96,14 @@ export default function TeamsPage() {
 
       //TODO: Refresh and try-catch
       const teamID = selectedTeam?.id;
-      const { data, error } = await client.GET("/api/teams/{teamID}/users", {
-        params: {
-          path: { teamID: teamID },
+      const { data, error } = await slotifyClient.GET(
+        "/api/teams/{teamID}/users",
+        {
+          params: {
+            path: { teamID: teamID },
+          },
         },
-      });
+      );
       if (data) {
         setMembers(data);
       }

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -12,11 +12,11 @@ export default function Home() {
       // 1. Attempt to get /user route, if 200 then redirect to /dashboard
       // 2. if 401 then attempt to refresh
       // 3. If refresh fails then do nothing, if it succeeds then redirect to /dashboard
-      const { response } = await client.GET("/api/users/me", {});
+      const { response } = await slotifyClient.GET("/api/users/me", {});
       if (response.status == 200) {
         window.location.href = "/dashboard";
       } else if (response.status == 401) {
-        const { response } = await client.POST("/api/refresh", {});
+        const { response } = await slotifyClient.POST("/api/refresh", {});
         if (response.status == 201) {
           window.location.href = "/dashboard";
         }

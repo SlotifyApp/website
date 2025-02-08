@@ -1,5 +1,5 @@
 "use client";
-import client from "@/hooks/fetch";
+import slotifyClient from "@/hooks/fetch";
 import { useEffect, useState } from "react";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
@@ -18,7 +18,7 @@ export default function DisplayCalendar() {
       const calRoute = "/api/calendar/me";
 
       const getUserCalData = async () => {
-        const { data, error, response } = await client.GET(calRoute, {});
+        const { data, error, response } = await slotifyClient.GET(calRoute, {});
         if (error && response.status == 401) {
           const refreshErrorOccurred =
             await fetchHelpers.refreshRetryAPIroute(calRoute);
