@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import client from "@/hooks/fetch";
 import { Team } from "./team-list";
-import "@/globalFunc";
+import fetchHelpers from "@/hooks/fetchHelpers";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -57,7 +57,7 @@ export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
       onSetYourTeamsAction([data, ...teams]);
     }
     if (error) {
-      globalThis.toastDestructiveError((error as unknown as undefined));
+      fetchHelpers.toastDestructiveError(error as unknown as undefined);
     }
 
     console.log(values);

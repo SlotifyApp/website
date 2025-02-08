@@ -8,7 +8,7 @@ import { JoinableTeams } from "@/components/joinable-teams";
 import client from "@/hooks/fetch";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import "@/globalFunc";
+import fetchHelpers from "@/hooks/fetchHelpers";
 
 function LoadingDashboardTeams() {
   return (
@@ -38,6 +38,7 @@ export default function TeamsPage() {
   //TODO: Handle 401 like dashboard
 
   const handleJoinTeam = async (teamID: number) => {
+    //TODO: Refresh here, as with everywhere
     const { data, error } = await client.POST("/api/teams/{teamID}/users/me", {
       params: {
         path: { teamID: teamID },
@@ -49,7 +50,7 @@ export default function TeamsPage() {
       setJoinableTeams(joinableTeams.filter((team) => team.id !== teamID));
     }
     if (error) {
-      globalThis.toastDestructiveError(error);
+      fetchHelpers.toastDestructiveError(error);
     }
   };
 
@@ -57,12 +58,13 @@ export default function TeamsPage() {
   useEffect(() => {
     const getUserTeams = async () => {
       // This code is less ugly now and needs to be done for the refresh.
-      const teamsRoute = globalThis.stringToPairsPath("/api/teams/me");
-
+      const teamRoute = "/api/teams/me";
       const getUserTeamsData = async () => {
-        const { data, error, response } = await client.GET(teamsRoute, {});
+        //TODO: try-catch
+        const { data, error, response } = await client.GET(teamRoute, {});
         if (error && response.status == 401) {
-          const refreshErrorOccurred = await globalThis.refreshRetryAPIroute(teamsRoute);
+          const refreshErrorOccurred =
+            await fetchHelpers.refreshRetryAPIroute(teamRoute);
           return refreshErrorOccurred ? null : data;
         }
         return data;
@@ -74,18 +76,21 @@ export default function TeamsPage() {
       }
     };
     const getJoinableTeams = async () => {
+      //TODO: Refresh and try-catch
       const { data, error } = await client.GET("/api/teams/joinable/me");
       if (data) {
         setJoinableTeams(data);
       }
       if (error) {
-        globalThis.toastDestructiveError(error);
+        fetchHelpers.toastDestructiveError(error);
       }
     };
     const getTeamMembers = async () => {
       if (!selectedTeam) {
         return;
       }
+
+      //TODO: Refresh and try-catch
       const teamID = selectedTeam?.id;
       const { data, error } = await client.GET("/api/teams/{teamID}/users", {
         params: {
@@ -96,7 +101,7 @@ export default function TeamsPage() {
         setMembers(data);
       }
       if (error) {
-        globalThis.toastDestructiveError((error as unknown as undefined));
+        fetchHelpers.toastDestructiveError(error as unknown as undefined);
       }
     };
 

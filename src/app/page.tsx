@@ -1,7 +1,6 @@
 "use client";
 import { useEffect } from "react";
 import client from "@/hooks/fetch";
-import "@/globalFunc";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {

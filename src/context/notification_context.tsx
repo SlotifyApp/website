@@ -1,8 +1,8 @@
 "use client";
 import { toast } from "@/hooks/use-toast";
 import React, { useEffect, createContext, useContext, useState } from "react";
-import "@/globalFunc";
 import client from "@/hooks/fetch";
+import fetchHelpers from "@/hooks/fetchHelpers";
 
 export interface Notification {
   id: number;
@@ -30,9 +30,10 @@ export function NotificationProvider({
 
   useEffect(() => {
     const getUnreadNotifs = async () => {
+      //TODO: Refresh
       const { data, error } = await client.GET("/api/users/me/notifications");
       if (error) {
-        globalThis.toastDestructiveError(error as unknown as undefined);
+        fetchHelpers.toastDestructiveError(error as unknown as undefined);
       }
       if (data) {
         setNotifications((prev) => [...prev, ...data]);
@@ -79,7 +80,7 @@ export function NotificationProvider({
         title: data,
       });
     } else {
-      globalThis.toastDestructiveError((error as unknown as undefined));
+      fetchHelpers.toastDestructiveError(error as unknown as undefined);
     }
   }
 

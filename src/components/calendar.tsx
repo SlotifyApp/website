@@ -1,7 +1,7 @@
 "use client";
 import client from "@/hooks/fetch";
 import { useEffect, useState } from "react";
-import "@/globalFunc";
+import fetchHelpers from "@/hooks/fetchHelpers";
 
 interface CalendarInterface {
   subject?: string;
@@ -15,24 +15,25 @@ export default function DisplayCalendar() {
   useEffect(() => {
     const fetchCalendar = async () => {
       // This code is less ugly now and needs to be done for the refresh.
-      const calRoute = globalThis.stringToPairsPath("/api/calendar/me");
+      const calRoute = "/api/calendar/me";
 
       const getUserCalData = async () => {
         const { data, error, response } = await client.GET(calRoute, {});
         if (error && response.status == 401) {
-          const refreshErrorOccurred = await globalThis.refreshRetryAPIroute(calRoute);
+          const refreshErrorOccurred =
+            await fetchHelpers.refreshRetryAPIroute(calRoute);
           return refreshErrorOccurred ? null : data;
         }
         return data;
       };
-      
+
       const calData = await getUserCalData();
       if (calData) {
         setCalendar(calData);
       }
       // const { data, error, response } = await client.GET(calRoute, {},);
       /* if (error && response.status == 401) {
-        const refreshErrorOccurred = globalThis.refreshRetryAPIroute(calRoute);
+        const refreshErrorOccurred = fetchHelpers.refreshRetryAPIroute(calRoute);
         if (!refreshErrorOccurred) {
           setCalendar(data);
         }
