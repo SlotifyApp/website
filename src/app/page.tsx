@@ -1,7 +1,6 @@
 "use client";
 import { useEffect } from "react";
 import slotifyClient from "@/hooks/fetch";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 export default function Home() {
@@ -60,7 +59,7 @@ export default function Home() {
         </div>
         <div className="flex flex-row justify-center items-center max-w-2xl text-center mt-3">
           Slotify uses AI to dynamically find the best meeting time based on
-          everyone's availability—no hassle, just smart scheduling.
+          everyone&apos;s availability—no hassle, just smart scheduling.
         </div>
         <div className="flex flex-row items-center justify-center mt-10">
           <div
