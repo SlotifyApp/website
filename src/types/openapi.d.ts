@@ -69,7 +69,8 @@ export interface paths {
         /** get a user's calendar events */
         get: operations["GetAPICalendarMe"];
         put?: never;
-        post?: never;
+        /** create a new calendar event */
+        post: operations["PostAPICalendarEvent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -571,6 +572,20 @@ export interface operations {
                 };
             };
         };
+    };
+    PostAPICalendarEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarEvent"];
+            };
+        };
+        responses: never;
     };
     PostAPIRefresh: {
         parameters: {
