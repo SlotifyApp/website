@@ -39,14 +39,14 @@ export default function Home() {
         >
           <div className="ml-5 text-2xl font-semibold">Slotify</div>
           <div className="min-w-72 min-h-16 flex flex-row justify-between items-center">
-            <div className="transform transition duration-100 hover:scale-110">
+            <div className="transform transition duration-300 hover:scale-110">
               About
             </div>
-            <div className="transform transition duration-100 hover:scale-110">
+            <div className="transform transition duration-300 hover:scale-110">
               Contact
             </div>
             <div
-              className="h-10 w-20 rounded-lg bg-focusColor text-white font-semibold drop-shadow-lg flex items-center justify-center transform transition duration-100 hover:scale-110 mr-5"
+              className="h-10 w-20 rounded-lg bg-focusColor text-white font-semibold drop-shadow-lg flex items-center justify-center transform transition duration-300 hover:scale-110 mr-5"
               onClick={() => (window.location.href = "/login")}
             >
               Log in
@@ -70,7 +70,7 @@ export default function Home() {
           </div>
           <div className="flex flex-row items-center justify-center mt-10">
             <div
-              className="flex justify-center items-center h-12 w-44 rounded-lg bg-focusColor text-white font-semibold drop-shadow-lg transform transition duration-100 hover:scale-110 mr-5"
+              className="flex justify-center items-center h-12 w-44 rounded-lg bg-focusColor text-white font-semibold drop-shadow-lg transform transition duration-300 hover:scale-110 mr-5"
               onClick={() => (window.location.href = "/login")}
             >
               Get started now

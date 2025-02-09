@@ -12,7 +12,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Subscribe to notifications
+         * Subscribe to notifications eventstream.
          * @description Establishes a stream connection to receive real-time updates about rendering tasks via Server-Sent Events (SSE).
          */
         get: operations["renderEvent"];
@@ -31,7 +31,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** get user's unread notifications */
+        /** Get user's unread notifications. */
         get: operations["GetAPIUsersMeNotifications"];
         put?: never;
         post?: never;
@@ -52,10 +52,10 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        /** CORS preflight for marking a notification as read */
+        /** Satisfy CORS preflight for marking a notification as read. */
         options: operations["OptionsAPINotificationsNotificationIDRead"];
         head?: never;
-        /** mark a notification as being read */
+        /** Mark a notification as being read. */
         patch: operations["PatchAPINotificationsNotificationIDRead"];
         trace?: never;
     };
@@ -66,13 +66,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** get a user's calendar events */
+        /** Get a user's calendar events for a given time range. */
         get: operations["GetAPICalendarMe"];
         put?: never;
-        /** create a new calendar event */
-        post: operations["PostAPICalendarEvent"];
+        /** Create a new calendar event. */
+        post: operations["PostAPICalendarMe"];
         delete?: never;
-        options?: never;
+        /** CORS preflight for creating an event */
+        options: operations["OptionsAPICalendarMe"];
         head?: never;
         patch?: never;
         trace?: never;
@@ -86,7 +87,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Refresh Slotify access token and refresh token */
+        /** Refresh Slotify access token and refresh token. */
         post: operations["PostAPIRefresh"];
         delete?: never;
         options?: never;
@@ -101,7 +102,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Auth route for authorisation code flow */
+        /** Auth route for authorisation code flow. */
         get: operations["GetAPIAuthCallback"];
         put?: never;
         post?: never;
@@ -118,7 +119,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Healthcheck route */
+        /** Healthcheck route. */
         get: operations["GetAPIHealthcheck"];
         put?: never;
         post?: never;
@@ -137,7 +138,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Logout user */
+        /** Logout user. */
         post: operations["PostAPIUsersMeLogout"];
         delete?: never;
         options?: never;
@@ -152,7 +153,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the user by id passed by JWT */
+        /** Get current user's details. */
         get: operations["GetAPIUsersMe"];
         put?: never;
         post?: never;
@@ -169,10 +170,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a user by query params */
+        /** Get users by query params. */
         get: operations["GetAPIUsers"];
         put?: never;
-        /** Create a new user */
+        /** Create a new user. */
         post: operations["PostAPIUsers"];
         delete?: never;
         options?: never;
@@ -187,11 +188,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a user by id */
+        /** Get a user by id. */
         get: operations["GetAPIUsersUserID"];
         put?: never;
         post?: never;
-        /** Delete a user by id */
+        /** Delete a user by id. */
         delete: operations["DeleteAPIUsersUserID"];
         options?: never;
         head?: never;
@@ -205,7 +206,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all joinable teams for a user excluding teams they are already a part of */
+        /** Get all joinable teams for a user excluding teams they are already a part of. */
         get: operations["GetAPITeamsJoinableMe"];
         put?: never;
         post?: never;
@@ -222,7 +223,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all teams for user by id passed by JWT */
+        /** Get all teams for current user. */
         get: operations["GetAPITeamsMe"];
         put?: never;
         post?: never;
@@ -239,13 +240,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a team by query params */
+        /** Get a team by query params. */
         get: operations["GetAPITeams"];
         put?: never;
-        /** Create a new team */
+        /** Create a new team. */
         post: operations["PostAPITeams"];
         delete?: never;
-        /** CORS preflight for teams */
+        /** Satisfy CORS preflight for creatingteams. */
         options: operations["OptionsAPITeams"];
         head?: never;
         patch?: never;
@@ -258,11 +259,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a team by id */
+        /** Get a team by id. */
         get: operations["GetAPITeamsTeamID"];
         put?: never;
         post?: never;
-        /** Delete a team by id */
+        /** Delete a team by id. */
         delete: operations["DeleteAPITeamsTeamID"];
         options?: never;
         head?: never;
@@ -276,7 +277,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all members of a team */
+        /** Get all members of a team. */
         get: operations["GetAPITeamsTeamIDUsers"];
         put?: never;
         post?: never;
@@ -295,7 +296,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Add current user to a team */
+        /** Add current user to a team. */
         post: operations["PostAPITeamsTeamIDUsersMe"];
         delete?: never;
         options?: never;
@@ -312,7 +313,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Add a user to a team */
+        /** Add a user to a team. */
         post: operations["PostAPITeamsTeamIDUsersUserID"];
         delete?: never;
         options?: never;
@@ -571,9 +572,18 @@ export interface operations {
                     "application/json": string;
                 };
             };
+            /** @description Something went wrong with an external API */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
         };
     };
-    PostAPICalendarEvent: {
+    PostAPICalendarMe: {
         parameters: {
             query?: never;
             header?: never;
@@ -585,7 +595,69 @@ export interface operations {
                 "application/json": components["schemas"]["CalendarEvent"];
             };
         };
-        responses: never;
+        responses: {
+            /** @description Event successfully created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["UnauthorizedError"];
+            /** @description Something went wrong internally */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Something went wrong with an external API */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    OptionsAPICalendarMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful CORS preflight */
+            204: {
+                headers: {
+                    /** @description The allowed origin for cross-origin requests */
+                    "Access-Control-Allow-Origin"?: string;
+                    /** @description Allowed HTTP methods */
+                    "Access-Control-Allow-Methods"?: string;
+                    /** @description Allowed headers in the actual request */
+                    "Access-Control-Allow-Headers"?: string;
+                    /** @description Whether credentials (cookies, HTTP authentication) are allowed */
+                    "Access-Control-Allow-Credentials"?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
     };
     PostAPIRefresh: {
         parameters: {
