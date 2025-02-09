@@ -33,6 +33,9 @@ npm run dev # run Next.js server
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+5. To view our Swagger UI Documentation, view the following after you login:
+   [Swagger Documentation](http://localhost:3000/swagger/index.html)
+
 ## Other commands
 
 ```bash
