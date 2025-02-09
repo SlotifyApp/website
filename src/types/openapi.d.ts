@@ -33,6 +33,7 @@ export interface paths {
         };
         /** get user's unread notifications */
         get: operations["GetAPIUsersMeNotifications"];
+        get: operations["GetAPIUsersMeNotifications"];
         put?: never;
         post?: never;
         delete?: never;
@@ -56,6 +57,7 @@ export interface paths {
         options: operations["OptionsAPINotificationsNotificationIDRead"];
         head?: never;
         /** mark a notification as being read */
+        patch: operations["PatchAPINotificationsNotificationIDRead"];
         patch: operations["PatchAPINotificationsNotificationIDRead"];
         trace?: never;
     };
@@ -206,6 +208,7 @@ export interface paths {
         };
         /** Get all joinable teams for a user excluding teams they are already a part of */
         get: operations["GetAPITeamsJoinableMe"];
+        get: operations["GetAPITeamsJoinableMe"];
         put?: never;
         post?: never;
         delete?: never;
@@ -295,6 +298,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Add current user to a team */
+        post: operations["PostAPITeamsTeamIDUsersMe"];
         post: operations["PostAPITeamsTeamIDUsersMe"];
         delete?: never;
         options?: never;
@@ -421,6 +425,46 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    "text/event-stream": {
+                        data?: components["schemas"]["Notification"];
+                    };
+                };
+            };
+        };
+    };
+    GetAPIUsersMeNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successfully updated notification. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"][];
+                };
+            };
+            401: components["responses"]["UnauthorizedError"];
+            /** @description Notification not found. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Something went wrong internally */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
                     "text/event-stream": {
                         data?: components["schemas"]["Notification"];
                     };
@@ -786,6 +830,7 @@ export interface operations {
             };
             /** @description User not found */
             403: {
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -821,6 +866,41 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAPITeamsJoinableMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Got all user's teams successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["UnauthorizedError"];
             /** @description User not found */
             404: {
                 headers: {
@@ -1142,6 +1222,44 @@ export interface operations {
             };
         };
     };
+    PostAPITeamsTeamIDUsersMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ID of the team */
+                teamID: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User successfully added to the team */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["UnauthorizedError"];
+            /** @description User or team not found */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     PostAPITeamsTeamIDUsersUserID: {
         parameters: {
             query?: never;
@@ -1157,6 +1275,7 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description User successfully added to the team */
+            201: {
             201: {
                 headers: {
                     [name: string]: unknown;
