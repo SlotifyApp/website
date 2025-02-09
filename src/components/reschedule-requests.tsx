@@ -42,6 +42,7 @@ export function RescheduleRequests() {
   const [requests, setRequests] = useState(initialRequests)
 
   const handleAction = (id: number, action: "accept" | "ignore") => {
+    console.log(`Action: ${action} for request with ID: ${id}`)
     setRequests(requests.filter((request) => request.id !== id))
   }
 
