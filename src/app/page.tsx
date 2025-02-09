@@ -192,9 +192,9 @@ export default function Home() {
                       <CardContent className="pt-6">
                         <blockquote className="space-y-2">
                           <p className="text-sm">
-                            "Slotify has transformed how we schedule council
+                          &quot;Slotify has transformed how we schedule council
                             meetings. What used to take hours now takes
-                            minutes."
+                            minutes.&quot;
                           </p>
                           <footer className="text-sm text-muted-foreground">
                             - Sarah Thompson, Council Secretary
@@ -206,9 +206,9 @@ export default function Home() {
                       <CardContent className="pt-6">
                         <blockquote className="space-y-2">
                           <p className="text-sm">
-                            "The automated scheduling has saved our
+                          &quot;The automated scheduling has saved our
                             administrative team countless hours. Highly
-                            recommended."
+                            recommended.&quot;
                           </p>
                           <footer className="text-sm text-muted-foreground">
                             - James Wilson, Council Leader
