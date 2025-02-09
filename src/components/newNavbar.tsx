@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Home, Icon, LogOut, Settings, Users, Video } from "lucide-react";
+import { Calendar, Home, LogOut, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import path from "path";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import slotifyClient from "@/hooks/fetch";
