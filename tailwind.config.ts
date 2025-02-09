@@ -1,11 +1,12 @@
 import type { Config } from "tailwindcss";
 
 export default {
-    darkMode: ["class"],
-    content: [
+  darkMode: ["class"],
+  content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/mina-scheduler/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
   	extend: {
@@ -58,6 +59,7 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		}
   	}
+>>>>>>> main
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;

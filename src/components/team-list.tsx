@@ -1,9 +1,6 @@
 import { Button } from "@/components/ui/button";
-
-export interface Team {
-  id: number;
-  name: string;
-}
+import { components } from "@/types/openapi";
+export type Team = components["schemas"]["Team"];
 
 interface TeamListProps {
   teams: Team[];
