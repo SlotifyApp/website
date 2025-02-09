@@ -3,6 +3,9 @@ import { useEffect } from "react";
 import slotifyClient from "@/hooks/fetch";
 import Image from "next/image";
 import BackgroundPaths from "@/components/BackgroundPaths"; // Import background component
+import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, CheckCircle, Clock, Users } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   useEffect(() => {
@@ -23,12 +26,12 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center overflow-hidden bg-white dark:bg-neutral-950">
+    <div className="relative min-h-screen min-w-screen flex flex-col items-center overflow-hidden bg-white dark:bg-neutral-950">
       {/* Background Animation */}
       <BackgroundPaths />
 
       {/* Page Content */}
-      <div className="relative z-10 flex flex-col items-center w-full">
+      <div className="relative h-full z-10 flex flex-col items-center w-full">
         {/* Header */}
         <div
           id="header"
@@ -51,17 +54,19 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Body */}
+        {/* 1st Body */}
         <div
-          id="body"
-          className="flex flex-col justify-center min-h-[95vh] min-w-72"
+          id="body1"
+          className="flex flex-col justify-center min-h-[95vh] w-full"
         >
           <div className="flex flex-row justify-center items-center text-4xl font-semibold mt-32 drop-shadow-lg">
             One tap to book your next meeting
           </div>
-          <div className="flex flex-row justify-center items-center max-w-2xl text-center mt-3">
-            Slotify uses AI to dynamically find the best meeting time based on
-            everyone&apos;s availability—no hassle, just smart scheduling.
+          <div className="flex flex-row justify-center items-center text-center mt-3">
+            <div className="max-w-2xl">
+              Slotify uses AI to dynamically find the best meeting time based on
+              everyone&apos;s availability—no hassle, just smart scheduling.
+            </div>
           </div>
           <div className="flex flex-row items-center justify-center mt-10">
             <div
@@ -87,7 +92,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-row justify-center items-center mt-16">
+          <div className="flex flex-row justify-center items-center mt-14">
             <div className="-lg flex size-10 animate-bounce items-center justify-center rounded-full bg-white p-2 ring-1 ring-gray-900/5 dark:bg-white/5 dark:ring-white/20">
               <svg
                 className="size-6 text-violet-500"
@@ -104,10 +109,144 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Footer */}
-        <div id="footer" className="text-xs text-gray-500 mt-10">
-          © 2025 Slotify. All rights reserved.
+        {/* 2nd Body */}
+        <div
+          id="body2"
+          className="w-full flex flex-col justify-between items-center"
+        >
+          <section className="border-t bg-muted/90 w-full">
+
+            <div className="flex flex-row justify-center mt-20">
+            <div className="flex flex-row w-[70vw] justify-between items-center">
+                <Card className="w-[20vw]">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center space-y-4 text-center">
+                  <Calendar className="h-12 w-12 text-focusColor" />
+                  <h3 className="font-bold">Easy Scheduling</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Create and manage meetings with just a few clicks.
+                    Automatically find the best time for everyone.
+                  </p>
+                  </div>
+                </CardContent>
+                </Card>
+
+              <Card className="w-[20vw]">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center space-y-4 text-center">
+                    <Clock className="h-12 w-12 text-focusColor" />
+                    <h3 className="font-bold">Time Zone Friendly</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Schedule meetings across different time zones without
+                      hassle. Perfect for regional councils.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="w-[20vw]">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center space-y-4 text-center">
+                    <Users className="h-12 w-12 text-focusColor" />
+                    <h3 className="font-bold">Team Collaboration</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Invite team members and collaborate seamlessly. Keep
+                      everyone in sync.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            </div>
+
+            <div className="container py-12 md:py-24 lg:py-32">
+              <div className="mx-auto max-w-5xl">
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="flex flex-col justify-center space-y-4">
+                    <div className="space-y-2">
+                      <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-focusColor">
+                        Trusted by Councils Across the UK
+                      </h2>
+                      <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                        Join hundreds of local government organizations already
+                        using Slotify to streamline their meeting scheduling.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <span className="font-medium">GDPR Compliant</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <span className="font-medium">ISO 27001 Certified</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <span className="font-medium">UK Data Centers</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <blockquote className="space-y-2">
+                          <p className="text-sm">
+                            "Slotify has transformed how we schedule council
+                            meetings. What used to take hours now takes
+                            minutes."
+                          </p>
+                          <footer className="text-sm text-muted-foreground">
+                            - Sarah Thompson, Council Secretary
+                          </footer>
+                        </blockquote>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <blockquote className="space-y-2">
+                          <p className="text-sm">
+                            "The automated scheduling has saved our
+                            administrative team countless hours. Highly
+                            recommended."
+                          </p>
+                          <footer className="text-sm text-muted-foreground">
+                            - James Wilson, Council Leader
+                          </footer>
+                        </blockquote>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
+
+        {/* Footer */}
+        <footer className="border-t w-full bg-muted/90">
+          <div className="container flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-2 ml-32">
+              <Link href="/" className="flex items-center space-x-2">
+                <span className="text-lg font-bold">Slotify</span>
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                © 2025 Slotify. All rights reserved.
+              </p>
+            </div>
+            <nav className="flex gap-4">
+              <Link href="/privacy" className="text-sm hover:underline">
+                Privacy
+              </Link>
+              <Link href="/terms" className="text-sm hover:underline">
+                Terms
+              </Link>
+              <Link href="/contact" className="text-sm hover:underline">
+                Contact
+              </Link>
+            </nav>
+          </div>
+        </footer>
       </div>
     </div>
   );
