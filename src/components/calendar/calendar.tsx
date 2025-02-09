@@ -141,10 +141,10 @@ export function DisplayCalendar() {
     <>
       <CalendarHeader
         currentMonth={currentMonth}
-        onPreviousMonth={handlePreviousMonth}
-        onNextMonth={handleNextMonth}
-        onToday={handleToday}
-        onCreateEvent={() => setIsCreateEventDialogOpen(true)}
+        onPreviousMonthAction={handlePreviousMonth}
+        onNextMonthAction={handleNextMonth}
+        onTodayAction={handleToday}
+        onCreateEventAction={() => setIsCreateEventDialogOpen(true)}
       />
       <AnimatePresence mode="wait">
         <motion.div

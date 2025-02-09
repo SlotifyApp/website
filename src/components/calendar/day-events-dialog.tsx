@@ -10,12 +10,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/components/calendar/calendar";
+import Link from "next/link";
 import {
   Clock,
   MapPin,
   User,
   Users,
-  Link,
   Calendar,
   ChevronLeft,
 } from "lucide-react";
@@ -122,28 +122,27 @@ export function DayEventsDialog({
       )}
       <div className="mt-4 space-y-2">
         {event.joinURL && (
-          <Button rel="noopener noreferrer" className="w-full">
+          <Button asChild>
             <Link
-              className="mr-2 h-4 w-4"
               href={event.joinURL}
               target="_blank"
-            />
-            Join Meeting
+              rel="noopener noreferrer"
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Join Meeting
+            </Link>
           </Button>
         )}
         {event.webLink && (
-          <Button
-            rel="noopener noreferrer"
-            className="w-full"
-            variant="outline"
-          >
+          <Button asChild>
             <Link
-              className="mr-2 h-4 w-4"
               href={event.webLink}
               target="_blank"
-            />
-            <Calendar className="mr-2 h-4 w-4" />
-            View in Calendar
+              rel="noopener noreferrer"
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              View in Calendar
+            </Link>
           </Button>
         )}
       </div>

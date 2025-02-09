@@ -13,7 +13,7 @@
   "paths": {
     "/api/events": {
       "get": {
-        "summary": "Subscribe to notifications",
+        "summary": "Subscribe to notifications eventstream.",
         "description": "Establishes a stream connection to receive real-time updates about rendering tasks via Server-Sent Events (SSE).",
         "operationId": "renderEvent",
         "responses": {
@@ -58,7 +58,7 @@
     "/api/users/me/notifications": {
       "get": {
         "operationId": "GetAPIUsersMeNotifications",
-        "summary": "get user's unread notifications",
+        "summary": "Get user's unread notifications.",
         "responses": {
           "200": {
             "description": "Successfully updated notification.",
@@ -95,7 +95,7 @@
     "/api/notifications/{notificationID}/read": {
       "options": {
         "operationId": "OptionsAPINotificationsNotificationIDRead",
-        "summary": "CORS preflight for marking a notification as read",
+        "summary": "Satisfy CORS preflight for marking a notification as read.",
         "parameters": [
           {
             "in": "path",
@@ -144,7 +144,7 @@
         }
       },
       "patch": {
-        "summary": "mark a notification as being read",
+        "summary": "Mark a notification as being read.",
         "operationId": "PatchAPINotificationsNotificationIDRead",
         "parameters": [
           {
@@ -190,7 +190,7 @@
     "/api/calendar/me": {
       "get": {
         "operationId": "GetAPICalendarMe",
-        "summary": "get a user's calendar events",
+        "summary": "Get a user's calendar events for a given time range.",
         "parameters": [
           {
             "in": "query",
@@ -240,12 +240,22 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "operationId": "PostAPICalendarEvent",
-        "summary": "create a new calendar event",
+        "operationId": "PostAPICalendarMe",
+        "summary": "Create a new calendar event.",
         "requestBody": {
           "required": true,
           "content": {
@@ -254,8 +264,9 @@
                 "$ref": "#/components/schemas/CalendarEvent"
               }
             }
-          },
-          "responses": null,
+          }
+        },
+        "responses": {
           "201": {
             "description": "Event successfully created",
             "content": {
@@ -281,6 +292,55 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "OptionsAPICalendarMe",
+        "summary": "CORS preflight for creating an event",
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
           }
         }
       }
@@ -288,7 +348,7 @@
     "/api/refresh": {
       "post": {
         "operationId": "PostAPIRefresh",
-        "summary": "Refresh Slotify access token and refresh token",
+        "summary": "Refresh Slotify access token and refresh token.",
         "responses": {
           "201": {
             "description": "Successfully refreshed access token",
@@ -309,7 +369,7 @@
     "/api/auth/callback": {
       "get": {
         "operationId": "GetAPIAuthCallback",
-        "summary": "Auth route for authorisation code flow",
+        "summary": "Auth route for authorisation code flow.",
         "parameters": [
           {
             "in": "query",
@@ -347,7 +407,7 @@
     "/api/healthcheck": {
       "get": {
         "operationId": "GetAPIHealthcheck",
-        "summary": "Healthcheck route",
+        "summary": "Healthcheck route.",
         "responses": {
           "200": {
             "description": "Healthcheck successful",
@@ -365,7 +425,7 @@
     "/api/users/me/logout": {
       "post": {
         "operationId": "PostAPIUsersMeLogout",
-        "summary": "Logout user",
+        "summary": "Logout user.",
         "responses": {
           "200": {
             "description": "Successfully logged out on backend",
@@ -383,7 +443,7 @@
     "/api/users/me": {
       "get": {
         "operationId": "GetAPIUsersMe",
-        "summary": "Get the user by id passed by JWT",
+        "summary": "Get current user's details.",
         "responses": {
           "200": {
             "description": "Got user successfully",
@@ -410,7 +470,7 @@
     "/api/users": {
       "get": {
         "operationId": "GetAPIUsers",
-        "summary": "Get a user by query params",
+        "summary": "Get users by query params.",
         "parameters": [
           {
             "in": "query",
@@ -459,7 +519,7 @@
       },
       "post": {
         "operationId": "PostAPIUsers",
-        "summary": "Create a new user",
+        "summary": "Create a new user.",
         "requestBody": {
           "required": true,
           "content": {
@@ -490,7 +550,7 @@
     "/api/users/{userID}": {
       "get": {
         "operationId": "GetAPIUsersUserID",
-        "summary": "Get a user by id",
+        "summary": "Get a user by id.",
         "parameters": [
           {
             "in": "path",
@@ -524,7 +584,7 @@
       },
       "delete": {
         "operationId": "DeleteAPIUsersUserID",
-        "summary": "Delete a user by id",
+        "summary": "Delete a user by id.",
         "parameters": [
           {
             "in": "path",
@@ -560,7 +620,7 @@
     "/api/teams/joinable/me": {
       "get": {
         "operationId": "GetAPITeamsJoinableMe",
-        "summary": "Get all joinable teams for a user excluding teams they are already a part of",
+        "summary": "Get all joinable teams for a user excluding teams they are already a part of.",
         "responses": {
           "200": {
             "description": "Got all user's teams successfully",
@@ -590,7 +650,7 @@
     "/api/teams/me": {
       "get": {
         "operationId": "GetAPITeamsMe",
-        "summary": "Get all teams for user by id passed by JWT",
+        "summary": "Get all teams for current user.",
         "responses": {
           "200": {
             "description": "Got all user's teams successfully",
@@ -620,7 +680,7 @@
     "/api/teams": {
       "get": {
         "operationId": "GetAPITeams",
-        "summary": "Get a team by query params",
+        "summary": "Get a team by query params.",
         "parameters": [
           {
             "in": "query",
@@ -652,7 +712,7 @@
       },
       "options": {
         "operationId": "OptionsAPITeams",
-        "summary": "CORS preflight for teams",
+        "summary": "Satisfy CORS preflight for creatingteams.",
         "responses": {
           "204": {
             "description": "Successful CORS preflight",
@@ -691,7 +751,7 @@
       },
       "post": {
         "operationId": "PostAPITeams",
-        "summary": "Create a new team",
+        "summary": "Create a new team.",
         "requestBody": {
           "required": true,
           "content": {
@@ -729,7 +789,7 @@
     "/api/teams/{teamID}": {
       "delete": {
         "operationId": "DeleteAPITeamsTeamID",
-        "summary": "Delete a team by id",
+        "summary": "Delete a team by id.",
         "parameters": [
           {
             "in": "path",
@@ -763,7 +823,7 @@
       },
       "get": {
         "operationId": "GetAPITeamsTeamID",
-        "summary": "Get a team by id",
+        "summary": "Get a team by id.",
         "parameters": [
           {
             "in": "path",
@@ -798,7 +858,7 @@
     },
     "/api/teams/{teamID}/users": {
       "get": {
-        "summary": "Get all members of a team",
+        "summary": "Get all members of a team.",
         "operationId": "GetAPITeamsTeamIDUsers",
         "parameters": [
           {
@@ -852,7 +912,7 @@
     "/api/teams/{teamID}/users/me": {
       "post": {
         "operationId": "PostAPITeamsTeamIDUsersMe",
-        "summary": "Add current user to a team",
+        "summary": "Add current user to a team.",
         "parameters": [
           {
             "in": "path",
@@ -891,7 +951,7 @@
     "/api/teams/{teamID}/users/{userID}": {
       "post": {
         "operationId": "PostAPITeamsTeamIDUsersUserID",
-        "summary": "Add a user to a team",
+        "summary": "Add a user to a team.",
         "parameters": [
           {
             "in": "path",
