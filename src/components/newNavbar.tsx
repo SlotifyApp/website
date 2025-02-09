@@ -44,7 +44,7 @@ export default function NewNavbar() {
   };
 
   return (
-    <div className="flex flex-row justify-between items-center h-[10vh] min-w-screen">
+    <div className="flex flex-row justify-between items-center h-[10vh] min-w-screen border-b">
       <div className="flex flex-col justify-center ml-5 text-2xl font-semibold h-[10vh]">
         Slotify
       </div>
@@ -108,7 +108,7 @@ export default function NewNavbar() {
             <MenuItem>
               <a
                 href="#"
-                className="flex flex-row justify-center items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden hover:bg-gray-300/40"
+                className="flex flex-row justify-center items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden hover:bg-gray-300/40 hover:font-semibold hover:text-focusColor duration-300 scale-100"
               >
                 View Profile
               </a>
@@ -116,13 +116,13 @@ export default function NewNavbar() {
             <MenuItem>
               <a
                 href="#"
-                className="flex flex-row justify-center items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden hover:bg-gray-300/40"
+                className="flex flex-row justify-center items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden hover:bg-gray-300/40 hover:font-semibold hover:text-focusColor duration-300 scale-100"
               >
                 Settings
               </a>
             </MenuItem>
             <MenuItem>
-              <div className="flex flex-row justify-center items-center hover:bg-gray-300/40 hover:font-semibold hover:text-red-700 duration-300 scale-100" onClick={handleLogout}>
+              <div className="flex flex-row justify-center items-center hover:bg-gray-300/40 hover:font-semibold hover:text-red-500 duration-300 scale-100" onClick={handleLogout}>
                 <LogOut className="h-5 w-5" /> {/* Logout Icon */}
                 <a
                   href="#"
