@@ -323,10 +323,36 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Attendee: {
+            /** Format: email */
+            email?: string;
+            /** @enum {string} */
+            type?: "required" | "optional" | "resource";
+            /** @enum {string} */
+            responseStatus?: "none" | "organizer" | "entativelyAccepted" | "accepted" | "declined" | "notResponded";
+        };
         CalendarEvent: {
-            subject?: string;
-            startTime?: string;
+            id?: string;
+            attendees?: components["schemas"]["Attendee"][];
+            body?: string;
+            /** Format: date-time */
+            created?: string;
             endTime?: string;
+            isCancelled?: boolean;
+            joinURL?: string;
+            locations?: components["schemas"]["Location"][];
+            /** Format: email */
+            organizer?: string;
+            startTime?: string;
+            subject?: string;
+            webLink?: string;
+        };
+        Location: {
+            id?: string;
+            name?: string;
+            /** @enum {string} */
+            roomType?: "default" | "conferenceRoom" | "homeAddress" | "businessAddress" | "geoCoordinates" | "streetAddress" | "hotel" | "restaurant" | "localBusiness" | "postalAddress";
+            street?: string;
         };
         Notification: {
             /** Format: uint32 */
@@ -508,7 +534,10 @@ export interface operations {
     };
     GetAPICalendarMe: {
         parameters: {
-            query?: never;
+            query: {
+                start: string;
+                end: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
