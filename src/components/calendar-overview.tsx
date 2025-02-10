@@ -136,7 +136,7 @@ export function CalendarOverview() {
 
     fetchCalendar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentWeek]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -340,7 +340,7 @@ export function CalendarOverview() {
                           rel="noopener noreferrer"
                         >
                           <Calendar className="mr-2 h-4 w-4" />
-                          View In Calendar
+                          View In Outlook
                         </Link>
                       </Button>
                     )}

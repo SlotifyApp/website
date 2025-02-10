@@ -107,7 +107,7 @@ export const RenderEventDetails = ({
         <Button asChild>
           <Link href={event.webLink} target="_blank" rel="noopener noreferrer">
             <Calendar className="mr-2 h-4 w-4" />
-            View In Calendar
+            View In Outlook
           </Link>
         </Button>
       )}
