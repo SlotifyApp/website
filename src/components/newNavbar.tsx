@@ -4,9 +4,13 @@ import { usePathname } from "next/navigation";
 import { Calendar, LogOut, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import slotifyClient from "@/hooks/fetch";
 import Link from "next/link";
+import { useNotifications } from "@/context/notification_context";
+import { Badge } from "@/components/ui/badge";
+import NotificationButton from "./notification-bell";
+import { useState } from "react";
 
 const items = [
   // {
@@ -32,6 +36,9 @@ const items = [
 ];
 
 export default function NewNavbar() {
+  const { notifications } = useNotifications();
+  const [isNotifsOpen, setIsNotifsOpen] = useState<boolean>(false);
+
   const pathname = usePathname();
   const handleLogout = async () => {
     const { error } = await slotifyClient.POST("/api/users/me/logout", {});
@@ -102,12 +109,35 @@ export default function NewNavbar() {
                 <AvatarImage src="https://github.com/shadcn.png" />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
+              {notifications.length > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-2 -right-2 px-2 py-1 text-xs"
+                >
+                  {notifications.length}
+                </Badge>
+              )}
             </MenuButton>
           </div>
           <MenuItems
             transition
             className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
           >
+            <MenuItem>
+              <NotificationButton
+                open={isNotifsOpen}
+                onOpenChangeAction={setIsNotifsOpen}
+                notifications={notifications}
+                trigger={
+                  <a
+                    href="#"
+                    className="flex flex-row justify-center items-center px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden hover:bg-gray-300/40 hover:font-semibold hover:text-focusColor duration-300 scale-100"
+                  >
+                    Notifications
+                  </a>
+                }
+              />
+            </MenuItem>
             <MenuItem>
               <a
                 href="#"
