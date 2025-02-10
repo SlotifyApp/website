@@ -344,6 +344,8 @@ export function CalendarOverview() {
                         </Link>
                       </Button>
                     )}
+
+                    <Button variant="destructive">Reschedule</Button>
                   </div>
                 </div>
               </>
