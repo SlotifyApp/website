@@ -115,48 +115,47 @@ export default function Home() {
           className="w-full flex flex-col justify-between items-center"
         >
           <section className="border-t bg-muted/90 w-full">
-
             <div className="flex flex-row justify-center mt-20">
-            <div className="flex flex-row w-[70vw] justify-between items-center">
+              <div className="flex flex-row w-[70vw] justify-between items-center">
                 <Card className="w-[20vw]">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center space-y-4 text-center">
-                  <Calendar className="h-12 w-12 text-focusColor" />
-                  <h3 className="font-bold">Easy Scheduling</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Create and manage meetings with just a few clicks.
-                    Automatically find the best time for everyone.
-                  </p>
-                  </div>
-                </CardContent>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center space-y-4 text-center">
+                      <Calendar className="h-12 w-12 text-focusColor" />
+                      <h3 className="font-bold">Easy Scheduling</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Create and manage meetings with just a few clicks.
+                        Automatically find the best time for everyone.
+                      </p>
+                    </div>
+                  </CardContent>
                 </Card>
 
-              <Card className="w-[20vw]">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center space-y-4 text-center">
-                    <Clock className="h-12 w-12 text-focusColor" />
-                    <h3 className="font-bold">Time Zone Friendly</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Schedule meetings across different time zones without
-                      hassle. Perfect for regional councils.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                <Card className="w-[20vw]">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center space-y-4 text-center">
+                      <Clock className="h-12 w-12 text-focusColor" />
+                      <h3 className="font-bold">Time Zone Friendly</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Schedule meetings across different time zones without
+                        hassle. Perfect for regional councils.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              <Card className="w-[20vw]">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center space-y-4 text-center">
-                    <Users className="h-12 w-12 text-focusColor" />
-                    <h3 className="font-bold">Team Collaboration</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Invite team members and collaborate seamlessly. Keep
-                      everyone in sync.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                <Card className="w-[20vw]">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center space-y-4 text-center">
+                      <Users className="h-12 w-12 text-focusColor" />
+                      <h3 className="font-bold">Team Collaboration</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Invite team members and collaborate seamlessly. Keep
+                        everyone in sync.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
             <div className="container py-12 md:py-24 lg:py-32">
@@ -192,8 +191,8 @@ export default function Home() {
                       <CardContent className="pt-6">
                         <blockquote className="space-y-2">
                           <p className="text-sm">
-                          &quot;Slotify has transformed how we schedule council
-                            meetings. What used to take hours now takes
+                            &quot;Slotify has transformed how we schedule
+                            council meetings. What used to take hours now takes
                             minutes.&quot;
                           </p>
                           <footer className="text-sm text-muted-foreground">
@@ -206,7 +205,7 @@ export default function Home() {
                       <CardContent className="pt-6">
                         <blockquote className="space-y-2">
                           <p className="text-sm">
-                          &quot;The automated scheduling has saved our
+                            &quot;The automated scheduling has saved our
                             administrative team countless hours. Highly
                             recommended.&quot;
                           </p>

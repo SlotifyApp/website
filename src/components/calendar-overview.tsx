@@ -27,7 +27,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import slotifyClient from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import { CalendarEvent } from "@/components/calendar/calendar";
-import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { ScrollArea } from "./ui/scroll-area";
 import Link from "next/link";
 
@@ -129,7 +135,8 @@ export function CalendarOverview() {
     };
 
     fetchCalendar();
-  }, [weekStart, weekEnd]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -259,82 +266,87 @@ export function CalendarOverview() {
         <DialogContent className="max-w-3xl">
           <ScrollArea className="h-[500px] mt-4">
             {selectedEvent && (
-              <div className="space-y-4">
-                <DialogTitle>{selectedEvent.subject}</DialogTitle>
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm">
-                    <Clock className="mr-2 h-4 w-4" />
-                    {selectedEvent.startTime && selectedEvent.endTime && (
-                      <>
-                        {format(parseISO(selectedEvent.startTime), "HH:mm")} -{" "}
-                        {format(parseISO(selectedEvent.endTime), "HH:mm")}
-                      </>
+              <>
+                <div className="space-y-4">
+                  <DialogHeader>
+                    <DialogTitle>{selectedEvent.subject}</DialogTitle>
+                    {selectedEvent.body && (
+                      <DialogDescription>
+                        {selectedEvent.body}
+                      </DialogDescription>
                     )}
-                  </div>
-                  {selectedEvent.locations &&
-                    selectedEvent.locations.map((loc) => (
-                      <div key={loc.id} className="flex items-center text-sm">
-                        <MapPin className="mr-2 h-4 w-4" />
-                        {loc.name}
-                      </div>
-                    ))}
-                  {selectedEvent.organizer && (
+                  </DialogHeader>
+                  <div className="space-y-2">
                     <div className="flex items-center text-sm">
-                      <User className="mr-2 h-4 w-4" />
-                      Organizer: {selectedEvent.organizer}
+                      <Clock className="mr-2 h-4 w-4" />
+                      {selectedEvent.startTime && selectedEvent.endTime && (
+                        <>
+                          {format(parseISO(selectedEvent.startTime), "HH:mm")} -{" "}
+                          {format(parseISO(selectedEvent.endTime), "HH:mm")}
+                        </>
+                      )}
                     </div>
-                  )}
-                  {selectedEvent.attendees &&
-                    selectedEvent.attendees.length > 0 && (
-                      <div className="flex items-start text-sm">
-                        <Users className="mr-2 h-4 w-4 mt-1" />
-                        <div>
-                          <div>Attendees:</div>
-                          <ul className="list-disc list-inside pl-4">
-                            {selectedEvent.attendees.map((attendee, index) => (
-                              <li key={index}>
-                                {attendee.email || attendee.type} (
-                                {attendee.responseStatus})
-                              </li>
-                            ))}
-                          </ul>
+                    {selectedEvent.locations &&
+                      selectedEvent.locations.map((loc) => (
+                        <div key={loc.id} className="flex items-center text-sm">
+                          <MapPin className="mr-2 h-4 w-4" />
+                          {loc.name}
                         </div>
+                      ))}
+                    {selectedEvent.organizer && (
+                      <div className="flex items-center text-sm">
+                        <User className="mr-2 h-4 w-4" />
+                        Organizer: {selectedEvent.organizer}
                       </div>
                     )}
-                </div>
-                {selectedEvent.body && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-semibold mb-2">Description:</h4>
-                    <p className="text-sm">{selectedEvent.body}</p>
+                    {selectedEvent.attendees &&
+                      selectedEvent.attendees.length > 0 && (
+                        <div className="flex items-start text-sm">
+                          <Users className="mr-2 h-4 w-4 mt-1" />
+                          <div>
+                            <div>Attendees:</div>
+                            <ul className="list-disc list-inside pl-4">
+                              {selectedEvent.attendees.map(
+                                (attendee, index) => (
+                                  <li key={index}>
+                                    {attendee.email || attendee.type} (
+                                    {attendee.responseStatus})
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
                   </div>
-                )}
-                <div className="mt-4 space-y-2">
-                  {selectedEvent.joinURL && (
-                    <Button asChild>
-                      <Link
-                        href={selectedEvent.joinURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Join Meeting
-                      </Link>
-                    </Button>
-                  )}
-                  {selectedEvent.webLink && (
-                    <Button asChild>
-                      <Link
-                        href={selectedEvent.webLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        View In Calendar
-                      </Link>
-                    </Button>
-                  )}
+                  <div className="mt-4 space-y-2">
+                    {selectedEvent.joinURL && (
+                      <Button asChild>
+                        <Link
+                          href={selectedEvent.joinURL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Join Meeting
+                        </Link>
+                      </Button>
+                    )}
+                    {selectedEvent.webLink && (
+                      <Button asChild>
+                        <Link
+                          href={selectedEvent.webLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          View In Calendar
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </ScrollArea>
         </DialogContent>
