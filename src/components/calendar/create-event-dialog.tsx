@@ -49,6 +49,9 @@ export function CreateEventDialog({
   const [members, setMembers] = useState<User[]>([]);
   const [selectedParticipants, setSelectedParticipants] = useState<User[]>([]);
 
+  const [startTime, setStartTime] = useState<string | null>(null);
+  const [endTime, setEndTime] = useState<string | null>(null);
+
   const createEvent = async (
     eventTitle: string,
     startTime: string,
@@ -252,37 +255,31 @@ export function CreateEventDialog({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start-time">Start Time</Label>
-                    <Select>
-                      <SelectTrigger id="start-time">
-                        <SelectValue placeholder="Select start time" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 24 }).map((_, i) => (
-                          <SelectItem key={i} value={`${i}:00`}>
-                            {`${i}:00`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select onValueChange={(value) => setStartTime(value)}>
+                    <SelectTrigger id="start-time">
+                      <SelectValue placeholder="Select start time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }).map((_, i) => (
+                        <SelectItem key={i} value={`${i}:00`}>
+                          {`${i}:00`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="end-time">End Time</Label>
-                    <Select>
-                      <SelectTrigger id="end-time">
-                        <SelectValue placeholder="Select end time" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 24 }).map((_, i) => (
-                          <SelectItem key={i} value={`${i}:00`}>
-                            {`${i}:00`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select onValueChange={(value) => setEndTime(value)}>
+                    <SelectTrigger id="end-time">
+                      <SelectValue placeholder="Select end time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }).map((_, i) => (
+                        <SelectItem key={i} value={`${i}:00`}>
+                          {`${i}:00`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </ScrollArea>
@@ -299,14 +296,35 @@ export function CreateEventDialog({
                   const eventTitle = (
                     document.getElementById("subject") as HTMLInputElement
                   )?.value;
-                  const startTime = date
-                    ? new Date(date).toISOString()
-                    : new Date().toISOString(); // Default to current date-time if none selected
-                  const endTime = new Date(
-                    new Date(startTime).getTime() + 60 * 60 * 1000,
-                  ).toISOString(); // Default to 1 hour after start time
 
-                  createEvent(eventTitle, startTime, endTime);
+                  if (!date || !startTime || !endTime) {
+                    toast({
+                      title: "Error",
+                      description:
+                        "Please select a date, start time, and end time.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  const startDateTime = new Date(date);
+                  const [startHour, startMinutes] = startTime
+                    .split(":")
+                    .map(Number);
+
+                  const endDateTime = new Date(date);
+                  const [endHour, endMinutes] = endTime.split(":").map(Number);
+
+                  if (startHour && endHour) {
+                    startDateTime.setHours(startHour, startMinutes, 0);
+                    endDateTime.setHours(endHour, endMinutes, 0);
+
+                    createEvent(
+                      eventTitle,
+                      startDateTime.toISOString(),
+                      endDateTime.toISOString(),
+                    );
+                  }
                 }}
               >
                 Submit
