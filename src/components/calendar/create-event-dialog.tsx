@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,10 +24,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { Team, TeamList } from "../team-list";
+import { Team } from "../team-list";
 import slotifyClient from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import { Attendee } from "@/components/calendar/calendar";
+import { Check, ChevronDown, Search, User } from "lucide-react";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -229,18 +231,11 @@ export function CreateEventDialog({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="space-y-2">
-                    <Label htmlFor="team">Team</Label>
-                    <Select>
-                      <SelectTrigger id="team">
-                        <SelectValue placeholder="Select team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <TeamList
-                          teams={yourTeams}
-                          onSelectTeam={setSelectedTeam}
-                        />
-                      </SelectContent>
-                    </Select>
+                    <TeamSelect
+                      selectedTeam={selectedTeam}
+                      setSelectedTeamAction={setSelectedTeam}
+                      teams={yourTeams}
+                    />
                   </div>
                   <Label htmlFor="subject">Subject</Label>
                   <Input id="subject" placeholder="Enter event subject" />
@@ -321,5 +316,111 @@ export function CreateEventDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+interface TeamSelectProps {
+  selectedTeam: Team | null;
+  setSelectedTeamAction: (team: Team | null) => void;
+  teams: Team[];
+}
+
+export default function TeamSelect({
+  selectedTeam,
+  setSelectedTeamAction,
+  teams,
+}: TeamSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const filteredTeams = teams.filter((team) =>
+    team.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="relative w-64" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        {selectedTeam ? selectedTeam.name : "Select a team"}
+        <ChevronDown
+          className="w-5 h-5 ml-2 -mr-1 text-gray-400"
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg">
+          <div className="px-3 py-2">
+            <div className="flex items-center">
+              <Search className="w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                className="w-full px-2 py-1 ml-2 text-sm focus:outline-none"
+                placeholder="Search teams..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <ul
+            className="py-1 overflow-auto text-base rounded-md max-h-60 focus:outline-none sm:text-sm"
+            tabIndex={-1}
+            role="listbox"
+          >
+            {filteredTeams.map((team) => (
+              <li
+                key={team.id}
+                className={`${
+                  selectedTeam === team
+                    ? "text-white bg-indigo-600"
+                    : "text-gray-900"
+                } cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-indigo-100`}
+                role="option"
+                aria-selected={selectedTeam === team}
+                onClick={() => {
+                  setSelectedTeamAction(team);
+                  setIsOpen(false);
+                  setSearchTerm("");
+                }}
+              >
+                <span className="block truncate">{team.name}</span>
+                {selectedTeam === team && (
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-4">
+                    <Check className="w-5 h-5" aria-hidden="true" />
+                  </span>
+                )}
+              </li>
+            ))}
+            {filteredTeams.length === 0 && (
+              <li className="px-3 py-2 text-sm text-gray-900">
+                No teams found
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
