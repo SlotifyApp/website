@@ -9,6 +9,8 @@ import {
   endOfMonth,
   eachDayOfInterval,
   isSameMonth,
+  startOfWeek,
+  endOfWeek,
   isToday,
   isSameDay,
   isValid,
@@ -110,13 +112,12 @@ export function DisplayCalendar() {
     fetchCalendar();
   }, [currentMonth]);
 
-  const monthStart = isValid(currentMonth)
-    ? startOfMonth(currentMonth)
-    : startOfMonth(new Date());
-  const monthEnd = isValid(currentMonth)
-    ? endOfMonth(currentMonth)
-    : endOfMonth(new Date());
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const startDate = startOfWeek(monthStart);
+  const endDate = endOfWeek(monthEnd);
+
+  const days = eachDayOfInterval({ start: startDate, end: endDate });
 
   const getEventsForDay = (date: Date) => {
     return calendar.filter(
@@ -138,7 +139,7 @@ export function DisplayCalendar() {
   const handleToday = () => setCurrentMonth(new Date());
 
   return (
-    <>
+    <div className="px-10">
       <CalendarHeader
         currentMonth={currentMonth}
         onPreviousMonthAction={handlePreviousMonth}
@@ -237,6 +238,6 @@ export function DisplayCalendar() {
         selectedEvent={selectedEvent}
         onEventSelectAction={setSelectedEvent}
       />
-    </>
+    </div>
   );
 }

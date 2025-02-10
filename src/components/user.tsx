@@ -4,6 +4,8 @@ import slotifyClient from "@/hooks/fetch";
 import { Member } from "@/components/team-members";
 import { toast } from "@/hooks/use-toast";
 
+import { User as LucideUserIcon } from "lucide-react";
+
 export default function User() {
   const [user, setUser] = useState<Member | null>(null);
   // const [loading, setLoading] = useState<boolean>(true);
@@ -57,12 +59,11 @@ export default function User() {
   if (!user) return "No user";
 
   return (
-    <div>
-      <h1>
-        Welcome, {user.firstName} {user.lastName}!
-      </h1>
-      <p>Email: {user.email}</p>
-      <p>User ID: {user.id}</p>
+    <div className="flex flex-row w-screen ml-20">
+      <LucideUserIcon className="h-10 w-10" />
+      <div className="flex flex-row justify-center items-center ml-5 font-semibold text-2xl">
+        Welcome {user.firstName}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { User } from "lucide-react";
-// import { Skeleton } from "@/components/ui/skeleton";
+import User from "@/components/user";
 import { CalendarOverview } from "@/components/calendar-overview";
 import { RescheduleRequests } from "@/components/reschedule-requests";
 
@@ -19,14 +18,7 @@ import { RescheduleRequests } from "@/components/reschedule-requests";
 export default function Dashboard() {
   return (
     <div className="flex flex-col justify-start items-center mt-10 h-[90vh] w-screen overflow-x-hidden">
-      {/* Welcome message */}
-      <div className="flex flex-row w-screen ml-20">
-        <User className="h-10 w-10" />
-        <div className="flex flex-row justify-center items-center ml-5 font-semibold text-2xl">
-          Welcome Aevin
-        </div>
-      </div>
-
+      <User />
       <div className="flex flex-row justify-start ml-[10vw] w-screen gap-6 mt-10">
         <div className="w-[60vw]">
           <CalendarOverview />

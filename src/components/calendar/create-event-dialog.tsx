@@ -53,7 +53,7 @@ export function CreateEventDialog({
     endTime: string,
     description?: string,
   ) => {
-    let attendees: Attendee[] = [];
+    const attendees: Attendee[] = [];
     selectedParticipants.forEach((participant) => {
       const attendee: Attendee = {
         email: participant.email,

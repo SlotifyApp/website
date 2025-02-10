@@ -1,18 +1,19 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Calendar, Home, LogOut, Users, Video } from "lucide-react";
+import { Calendar, LogOut, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import slotifyClient from "@/hooks/fetch";
+import Link from "next/link";
 
 const items = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: Home,
-  },
+  // {
+  //   title: "Dashboard",
+  //   href: "/dashboard",
+  //   icon: Home,
+  // },
   {
     title: "Teams",
     href: "/dashboard/teams",
@@ -45,9 +46,11 @@ export default function NewNavbar() {
 
   return (
     <div className="flex flex-row justify-between items-center h-[10vh] min-w-screen border-b">
-      <div className="flex flex-col justify-center ml-5 text-2xl font-semibold h-[10vh]">
-        Slotify
-      </div>
+      <Link href="/dashboard">
+        <div className="flex flex-col justify-center ml-5 text-2xl font-semibold h-[10vh]">
+          Slotify
+        </div>
+      </Link>
       <div className="flex flex-row items-center">
         <nav className="h-[10vh] flex items-center justify-around w-[40vw]">
           {items.map(
@@ -75,7 +78,7 @@ export default function NewNavbar() {
                   <item.icon className="h-4 w-4" />
                   {item.title}
                 </div>
-              )
+              ),
 
             // <Button
             //   key={item.href}
@@ -122,7 +125,10 @@ export default function NewNavbar() {
               </a>
             </MenuItem>
             <MenuItem>
-              <div className="flex flex-row justify-center items-center hover:bg-gray-300/40 hover:font-semibold hover:text-red-500 duration-300 scale-100" onClick={handleLogout}>
+              <div
+                className="flex flex-row justify-center items-center hover:bg-gray-300/40 hover:font-semibold hover:text-red-500 duration-300 scale-100"
+                onClick={handleLogout}
+              >
                 <LogOut className="h-5 w-5" /> {/* Logout Icon */}
                 <a
                   href="#"
