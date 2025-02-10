@@ -18,7 +18,6 @@ function LoadingDashboardCalendar() {
 export default function Calendar() {
   return (
     <div>
-      <h1 className="text-lg">These are your calendar events.</h1>
       <Suspense fallback={<LoadingDashboardCalendar />}>
         <DisplayCalendar />
       </Suspense>

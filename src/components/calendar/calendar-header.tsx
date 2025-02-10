@@ -6,18 +6,18 @@ import { format, isValid } from "date-fns";
 
 interface CalendarHeaderProps {
   currentMonth: Date;
-  onPreviousMonth: () => void;
-  onNextMonth: () => void;
-  onToday: () => void;
-  onCreateEvent: () => void;
+  onPreviousMonthAction: () => void;
+  onNextMonthAction: () => void;
+  onTodayAction: () => void;
+  onCreateEventAction: () => void;
 }
 
 export function CalendarHeader({
   currentMonth,
-  onPreviousMonth,
-  onNextMonth,
-  onToday,
-  onCreateEvent,
+  onPreviousMonthAction: onPreviousMonth,
+  onNextMonthAction: onNextMonth,
+  onTodayAction: onToday,
+  onCreateEventAction: onCreateEvent,
 }: CalendarHeaderProps) {
   const formattedMonth = isValid(currentMonth)
     ? format(currentMonth, "MMMM yyyy")
