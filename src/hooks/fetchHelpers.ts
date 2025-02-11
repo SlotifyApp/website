@@ -3,6 +3,7 @@ import { toast } from "@/hooks/use-toast";
 import type { paths } from "@/types/openapi";
 import type { PathsWithMethod } from "openapi-typescript-helpers";
 import slotifyClient from "@/hooks/fetch";
+import { FetchOptions } from "openapi-fetch";
 
 class FetchHelpers {
   testGlobalFunc(param: string): string {
@@ -12,15 +13,33 @@ class FetchHelpers {
 
   async getAPIrouteData<T>(
     route: PathsWithMethod<paths, "get">,
+    params: any
   ): Promise<T | null | undefined> {
-    // unfortunately, this long type is necessary because this won't compile without it
-    // NOTE: I tried to make this a generic helper function but couldn't get the return type to work. 
-    // For example, the Teams and Calendar data have different fields, and different numbers of fields.
+    // UPDATE: This is now a generic method for GET routes.
     try {
-      const { data, error, response } = await slotifyClient.GET(route, {});
+      const { data, error, response } = await slotifyClient.GET(route, params);
         if (error && (response as Response).status == 401) {
           const refreshErrorOccurred =
             await this.refreshRetryGetAPIroute(route);
+          return refreshErrorOccurred ? null : data;
+        }
+        return data;
+    } catch (error) {
+      this.toastDestructiveError(error as undefined);
+      return null;
+    }
+  }
+
+  async postAPIrouteData<T>(
+    route: PathsWithMethod<paths, "post">,
+    params: any
+  ): Promise<T | null | undefined> {
+    // UPDATE: This is now a generic method for POST routes.
+    try {
+      const { data, error, response } = await slotifyClient.POST(route, params);
+        if (error && (response as Response).status == 401) {
+          const refreshErrorOccurred =
+            await this.refreshRetryPostAPIroute(route);
           return refreshErrorOccurred ? null : data;
         }
         return data;

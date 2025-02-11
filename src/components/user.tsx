@@ -12,7 +12,6 @@ export default function User() {
       // This code is less ugly now and needs to be done for the refresh.
       // TODO: dont we already have the refresh in fetchHelpers? 
       // UPDATE: Rewrote code structure to use fetchHelpers structure
-      const userRoute = "/api/users/me"
       
 /*       const getUserCalData = async () => {
         try {
@@ -45,7 +44,8 @@ export default function User() {
         );
       }
 
-      const userData = await fetchHelpers.getAPIrouteData(userRoute);
+      const userRoute = "/api/users/me"
+      const userData = await fetchHelpers.getAPIrouteData(userRoute, {});
       if (isMember(userData)) {
         setUser(userData);
       }

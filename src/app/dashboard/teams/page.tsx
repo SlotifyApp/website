@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
 import { JoinableTeams } from "@/components/joinable-teams";
-import slotifyClient from "@/hooks/fetch";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
@@ -60,6 +59,12 @@ export default function TeamsPage() {
         return null;
       }
     }
+    
+    const da2a = await fetchHelpers.postAPIrouteData(userTeamsRoute, {
+      params: {
+        path: { teamID: teamID },
+      },
+    });
     
     const data = await getJoinTeamData();
     if (data) {

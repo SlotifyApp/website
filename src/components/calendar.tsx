@@ -30,7 +30,7 @@ export default function DisplayCalendar() {
           return null;
         }
       }; */
-      const calData = await fetchHelpers.getAPIrouteData(calRoute); //getUserCalData();
+      const calData = await fetchHelpers.getAPIrouteData(calRoute, {}); //getUserCalData();
       //const calData = await getUserCalData();
       if (calData && Array.isArray(calData)) {
         setCalendar(calData);
