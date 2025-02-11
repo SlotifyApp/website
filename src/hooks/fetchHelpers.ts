@@ -10,9 +10,9 @@ class FetchHelpers {
     return "a";
   }
 
-  async getAPIrouteData(
+  async getAPIrouteData<T>(
     route: PathsWithMethod<paths, "get">,
-  ): Promise<{subject?: string; startTime?: string; endTime?: string;}[] | null | undefined> {
+  ): Promise<T | null | undefined> {
     // unfortunately, this long type is necessary because this won't compile without it
     // NOTE: I tried to make this a generic helper function but couldn't get the return type to work. 
     // For example, the Teams and Calendar data have different fields, and different numbers of fields.

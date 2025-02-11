@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
 interface CalendarInterface {
-  subject?: string;
-  startTime?: string;
-  endTime?: string;
+    subject?: string;
+    startTime?: string;
+    endTime?: string;
 }
 
 export default function DisplayCalendar() {
@@ -16,6 +16,7 @@ export default function DisplayCalendar() {
     const fetchCalendar = async () => {
       // This code is less ugly now and needs to be done for the refresh.
       const calRoute = "/api/calendar/me";
+      
       const getUserCalData = async () => {
         try {
           const { data, error, response } = await slotifyClient.GET(calRoute, {});
@@ -30,9 +31,9 @@ export default function DisplayCalendar() {
           return null;
         }
       };
-
-      const calData = await getUserCalData();
-      if (calData) {
+      const calData = await fetchHelpers.getAPIrouteData(calRoute); //getUserCalData();
+      //const calData = await getUserCalData();
+      if (calData && Array.isArray(calData)) {
         setCalendar(calData);
       }
       // const { data, error, response } = await client.GET(calRoute, {},);

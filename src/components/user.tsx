@@ -14,7 +14,8 @@ export default function User() {
       // TODO: dont we already have the refresh in fetchHelpers? 
       // UPDATE: Rewrote code structure to use fetchHelpers structure
       const userRoute = "/api/users/me"
-      const getUserCalData = async () => {
+      
+/*       const getUserCalData = async () => {
         try {
           const { data, error, response } = await slotifyClient.GET(userRoute, {});
           console.log("User Data: ", JSON.stringify(data));
@@ -29,10 +30,16 @@ export default function User() {
           fetchHelpers.toastDestructiveError(error as undefined);
           return null;
         }
-      };
+      }; */
 
-      const userData = await getUserCalData();
-      if (userData) {
+      // Type Guard to check if userData is of interface type "Member"
+      function isMember(data: any): data is Member {
+        return (data && typeof data === "object" && ("id" in data ||
+          "email" in data || "firstName" in data || "lastName" in data));
+      }
+
+      const userData = await fetchHelpers.getAPIrouteData(userRoute);
+      if (isMember(userData)) {
         setUser(userData);
       }
       /* OLD CODE, REMOVE ONCE CONFIRMED TO BE CORRECT
