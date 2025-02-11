@@ -12,7 +12,6 @@ class FetchHelpers {
     return "a";
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   async getAPIrouteData<T>(route: PathsWithMethod<paths, "get">, params: any): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for GET routes.
     try {
@@ -29,7 +28,6 @@ class FetchHelpers {
     }
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   async postAPIrouteData<T>(route: PathsWithMethod<paths, "post">, params: any): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for POST routes.
     try {
@@ -58,17 +56,11 @@ class FetchHelpers {
         this.logOutUser();
       } else if (response.status == 201) {
         // retry the specified route
-        try {
-          const { data, response } = await client.GET(route, {});
-          console.log(data);
-          if (response.status == 401) {
-            // MSAL client may no longer have user in cache, no other option other than to log out
-            this.logOutUser();
-          }
-        } catch (error) {
-          errorOcurred = true;
-          this.toastDestructiveError(error as undefined);
-          return errorOcurred;
+        const { data, response } = await client.GET(route, {});
+        console.log(data);
+        if (response.status == 401) {
+          // MSAL client may no longer have user in cache, no other option other than to log out
+          this.logOutUser();
         }
       }
       return errorOcurred;
@@ -88,17 +80,11 @@ class FetchHelpers {
       if (response.status == 401) {
         this.logOutUser();
       } else if (response.status == 201) {
-        try {
-          const { data, response } = await client.POST(route, {});
-          console.log(data);
-          if (response.status == 401) {
-            this.logOutUser();
-          }
-        } catch (error) {
-          errorOcurred = true;
-          this.toastDestructiveError(error as undefined);
-          return errorOcurred;
-        }
+        const { data, response } = await client.POST(route, {});
+        console.log(data);
+        if (response.status == 401) {
+          this.logOutUser();
+        }        
       }
       return errorOcurred;
     } catch (error) {
@@ -114,9 +100,10 @@ class FetchHelpers {
   }
 
   toastDestructiveError(error: undefined): void {
+
     toast({
       title: "Error",
-      description: error,
+      description: JSON.stringify(error),
       variant: "destructive",
     });
   }
