@@ -9,7 +9,6 @@ import slotifyClient from "@/hooks/fetch";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
-import { error } from "console";
 
 function LoadingDashboardTeams() {
   return (

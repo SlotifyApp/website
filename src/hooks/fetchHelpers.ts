@@ -2,7 +2,6 @@ import client from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import type { paths } from "@/types/openapi";
 import type { PathsWithMethod } from "openapi-typescript-helpers";
-import slotifyClient from "@/hooks/fetch";
 
 class FetchHelpers {
   testGlobalFunc(param: string): string {
