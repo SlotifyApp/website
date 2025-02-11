@@ -70,33 +70,45 @@ function NotificationList({
           No new notifications
         </li>
       ) : (
-        notifications.map((notification) => (
-          <li
-            key={notification.id}
-            className="bg-secondary p-4 rounded-lg flex justify-between items-start"
+        <>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const copyNotifs = notifications;
+              copyNotifs.forEach((notif) => handleMarkAsRead(notif.id));
+            }}
           >
-            <div>
-              <h3 className="font-semibold">{notification.message}</h3>
-              <p className="text-xs text-muted-foreground mt-2">
-                {formatDistanceToNow(parseISO(notification.created), {
-                  addSuffix: true,
-                })}
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => handleMarkAsRead(notification.id)}
-              disabled={loadingStates[notification.id]}
+            Mark all as read
+          </Button>
+          {notifications.map((notification) => (
+            <li
+              key={notification.id}
+              className="bg-secondary p-4 rounded-lg flex justify-between items-start"
             >
-              {loadingStates[notification.id] ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Mark as Read"
-              )}
-            </Button>
-          </li>
-        ))
+              <div>
+                <h3 className="font-semibold">{notification.message}</h3>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {formatDistanceToNow(parseISO(notification.created), {
+                    addSuffix: true,
+                  })}
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleMarkAsRead(notification.id)}
+                disabled={loadingStates[notification.id]}
+              >
+                {loadingStates[notification.id] ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Mark as Read"
+                )}
+              </Button>
+            </li>
+          ))}
+        </>
       )}
     </ul>
   );
