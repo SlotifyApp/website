@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, use } from "react";
 import { Input } from "@/components/ui/input";
 import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
@@ -8,7 +8,6 @@ import { JoinableTeams } from "@/components/joinable-teams";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
-import slotifyClient from "@/hooks/fetch";
 
 function LoadingDashboardTeams() {
   return (
@@ -39,8 +38,7 @@ export default function TeamsPage() {
 
   const handleJoinTeam = async (teamID: number) => {
     // UPDATE: Added /refresh route from fetchHelpers here.
-    const userTeamsRoute = "/api/teams/{teamID}/users/me";
-    const getJoinTeamData = async () => {
+    /* const getJoinTeamData = async () => {
       try {
         const { data, error, response } = await slotifyClient.POST(userTeamsRoute,
           {
@@ -59,10 +57,26 @@ export default function TeamsPage() {
         fetchHelpers.toastDestructiveError(error as undefined);
         return null;
       }
+    } */
+    // Type Guard to check if userData is of interface type "Team"
+    function isTeam(data: unknown): data is Team {
+      if (typeof data != "object" || data == null) {
+        return false;
+      }
+      const obj = data as Record<string, unknown>;
+      return (
+        "id" in obj && typeof obj.id === "number" &&
+        "name" in obj && typeof obj.email === "string"
+      );
     }
 
-    const data = await getJoinTeamData();
-    if (data) {
+    const userTeamsRoute = "/api/teams/{teamID}/users/me";
+    const data = await fetchHelpers.postAPIrouteData(userTeamsRoute, {
+      params: {
+        path: { teamID: teamID },
+      },
+    });
+    if (isTeam(data)) {
       console.log(`Joined team with id: ${teamID}`);
       setYourTeams([...yourTeams, data]);
       setJoinableTeams(joinableTeams.filter((team) => team.id !== teamID));
@@ -73,8 +87,7 @@ export default function TeamsPage() {
   useEffect(() => {
     const getUserTeams = async () => {
       // This code is less ugly now and needs to be done for the refresh.
-      const teamRoute = "/api/teams/me";
-      const getUserTeamsData = async () => {
+      /* const getUserTeamsData = async () => {
         try {
           const { data, error, response } = await slotifyClient.GET(teamRoute, {},);
           if (error && response.status == 401) {
@@ -87,17 +100,16 @@ export default function TeamsPage() {
           fetchHelpers.toastDestructiveError(error as undefined);
           return null;
         }
-      };
-
-      const teamsData = await getUserTeamsData();
-      if (teamsData) {
+      }; */
+      const teamRoute = "/api/teams/me";
+      const teamsData = await fetchHelpers.getAPIrouteData(teamRoute, {})
+      if (Array.isArray(teamsData)) {
         setYourTeams(teamsData);
       }
     };
 
     const getJoinableTeams = async () => {
-      const joinableTeamsRoute = "/api/teams/joinable/me";
-      const getJoinableTeamsData = async () => {
+      /* const getJoinableTeamsData = async () => {
         try {
           const { data, error, response } = await slotifyClient.GET(joinableTeamsRoute, {},);
           if (error && response.status == 401) {
@@ -110,10 +122,10 @@ export default function TeamsPage() {
           fetchHelpers.toastDestructiveError(error as undefined);
           return null;
         }
-      };
-
-      const joinableTeamsData = await getJoinableTeamsData();
-      if (joinableTeamsData) {
+      }; */
+      const joinableTeamsRoute = "/api/teams/joinable/me";
+      const joinableTeamsData = await fetchHelpers.getAPIrouteData(joinableTeamsRoute, {});
+      if (Array.isArray(joinableTeamsData)) {
         setJoinableTeams(joinableTeamsData);
       }
       /* const { data, error } = await slotifyClient.GET("/api/teams/joinable/me");
@@ -129,10 +141,8 @@ export default function TeamsPage() {
       if (!selectedTeam) {
         return;
       }
-      //TODO: Refresh and try-catch
-      const teamID = selectedTeam?.id;
-      const teamMembersRoute = "/api/teams/{teamID}/users";
-      const getTeamMembersData = async () => {
+      //TODO: Refresh and try-catch  
+      /*const getTeamMembersData = async () => {
         try {
           const { data, error, response } = await slotifyClient.GET(teamMembersRoute,
             {
@@ -151,10 +161,15 @@ export default function TeamsPage() {
           fetchHelpers.toastDestructiveError(error as undefined);
           return null;
         }
-      };
-
-      const teamMemberData = await getTeamMembersData();
-      if (teamMemberData) {
+      }; */
+      const teamID = selectedTeam?.id;
+      const teamMembersRoute = "/api/teams/{teamID}/users";
+      const teamMemberData = await fetchHelpers.getAPIrouteData(teamMembersRoute, {
+        params: {
+          path: { teamID: teamID },
+        },
+      });
+      if (Array.isArray(teamMemberData)) {
         setMembers(teamMemberData);
       }
     };
