@@ -8,6 +8,7 @@ import { JoinableTeams } from "@/components/joinable-teams";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
+import slotifyClient from "@/hooks/fetch";
 
 function LoadingDashboardTeams() {
   return (
@@ -59,13 +60,7 @@ export default function TeamsPage() {
         return null;
       }
     }
-    
-    const da2a = await fetchHelpers.postAPIrouteData(userTeamsRoute, {
-      params: {
-        path: { teamID: teamID },
-      },
-    });
-    
+
     const data = await getJoinTeamData();
     if (data) {
       console.log(`Joined team with id: ${teamID}`);

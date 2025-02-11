@@ -3,7 +3,6 @@ import { toast } from "@/hooks/use-toast";
 import type { paths } from "@/types/openapi";
 import type { PathsWithMethod } from "openapi-typescript-helpers";
 import slotifyClient from "@/hooks/fetch";
-import { FetchOptions } from "openapi-fetch";
 
 class FetchHelpers {
   testGlobalFunc(param: string): string {
@@ -11,10 +10,8 @@ class FetchHelpers {
     return "a";
   }
 
-  async getAPIrouteData<T>(
-    route: PathsWithMethod<paths, "get">,
-    params: any
-  ): Promise<T | null | undefined> {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  async getAPIrouteData<T>(route: PathsWithMethod<paths, "get">, params: any): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for GET routes.
     try {
       const { data, error, response } = await slotifyClient.GET(route, params);
@@ -30,10 +27,8 @@ class FetchHelpers {
     }
   }
 
-  async postAPIrouteData<T>(
-    route: PathsWithMethod<paths, "post">,
-    params: any
-  ): Promise<T | null | undefined> {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  async postAPIrouteData<T>(route: PathsWithMethod<paths, "post">, params: any): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for POST routes.
     try {
       const { data, error, response } = await slotifyClient.POST(route, params);
