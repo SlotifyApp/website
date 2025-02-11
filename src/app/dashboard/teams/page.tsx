@@ -9,6 +9,7 @@ import slotifyClient from "@/hooks/fetch";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
+import { error } from "console";
 
 function LoadingDashboardTeams() {
   return (
@@ -62,17 +63,18 @@ export default function TeamsPage() {
       // This code is less ugly now and needs to be done for the refresh.
       const teamRoute = "/api/teams/me";
       const getUserTeamsData = async () => {
-        //TODO: try-catch
-        const { data, error, response } = await slotifyClient.GET(
-          teamRoute,
-          {},
-        );
-        if (error && response.status == 401) {
-          const refreshErrorOccurred =
-            await fetchHelpers.refreshRetryAPIroute(teamRoute);
-          return refreshErrorOccurred ? null : data;
+        try {
+          const { data, error, response } = await slotifyClient.GET(teamRoute, {},);
+          if (error && response.status == 401) {
+            const refreshErrorOccurred =
+              await fetchHelpers.refreshRetryAPIroute(teamRoute);
+            return refreshErrorOccurred ? null : data;
+          }
+          return data;
+        } catch (error) {
+          fetchHelpers.toastDestructiveError(error as undefined);
+          return null;
         }
-        return data;
       };
 
       const teamsData = await getUserTeamsData();

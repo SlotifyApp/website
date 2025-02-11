@@ -2,12 +2,34 @@ import client from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import type { paths } from "@/types/openapi";
 import type { PathsWithMethod } from "openapi-typescript-helpers";
+import slotifyClient from "@/hooks/fetch";
 
 class FetchHelpers {
   testGlobalFunc(param: string): string {
     console.log("Global Function Called with:", param);
     return "a";
   }
+
+/*   async getAPIrouteData(
+    route: PathsWithMethod<paths, "get">,
+  ): Promise<{subject?: string; startTime?: string; endTime?: string;}[] | null | undefined> {
+    // unfortunately, this long type is necessary because this won't compile without it
+    // NOTE: I tried to make this a generic helper function but couldn't get the return type to work. 
+    // For example, the Teams and Calendar data have different fields, and different numbers of fields.
+    try {
+      const { data, error, response } = await slotifyClient.GET(route, {});
+        if (error && (response as Response).status == 401) {
+          const refreshErrorOccurred =
+            await this.refreshRetryAPIroute(route);
+          return refreshErrorOccurred ? null : data;
+        }
+        return data;
+    } catch (error) {
+      this.toastDestructiveError(error as undefined);
+      return null;
+    }
+  } */
+
   async refreshRetryAPIroute(
     route: PathsWithMethod<paths, "get">,
   ): Promise<boolean> {
@@ -21,12 +43,18 @@ class FetchHelpers {
         window.location.href = "/login";
       } else if (response.status == 201) {
         // retry the specified route
-        const { data, response } = await client.GET(route, {});
-        console.log(data);
-        if (response.status == 401) {
-          // MSAL client may no longer have user in cache, no other option other than to log out
-          await client.POST("/api/users/me/logout", {});
-          window.location.href = "/login";
+        try {
+          const { data, response } = await client.GET(route, {});
+          console.log(data);
+          if (response.status == 401) {
+            // MSAL client may no longer have user in cache, no other option other than to log out
+            await client.POST("/api/users/me/logout", {});
+            window.location.href = "/login";
+          }
+        } catch (error) {
+          errorOcurred = true;
+          this.toastDestructiveError(error as undefined);
+          return errorOcurred;
         }
       }
       return errorOcurred;

@@ -16,15 +16,19 @@ export default function DisplayCalendar() {
     const fetchCalendar = async () => {
       // This code is less ugly now and needs to be done for the refresh.
       const calRoute = "/api/calendar/me";
-
       const getUserCalData = async () => {
-        const { data, error, response } = await slotifyClient.GET(calRoute, {});
-        if (error && response.status == 401) {
-          const refreshErrorOccurred =
-            await fetchHelpers.refreshRetryAPIroute(calRoute);
-          return refreshErrorOccurred ? null : data;
+        try {
+          const { data, error, response } = await slotifyClient.GET(calRoute, {});
+          if (error && response.status == 401) {
+            const refreshErrorOccurred =
+              await fetchHelpers.refreshRetryAPIroute(calRoute);
+            return refreshErrorOccurred ? null : data;
+          }
+          return data;
+        } catch (error) {
+          fetchHelpers.toastDestructiveError(error as undefined);
+          return null;
         }
-        return data;
       };
 
       const calData = await getUserCalData();

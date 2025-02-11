@@ -9,34 +9,44 @@ export default function User() {
   // const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const refreshUser = async () => {
-      const { response } = await slotifyClient.POST("/api/refresh", {});
-      return response.status != 401;
-    };
-
     const fetchUser = async () => {
       // This code is less ugly now and needs to be done for the refresh.
-      // I moved everything into 1 big try/catch block as it looks nicer than individual error handling
+      // TODO: dont we already have the refresh in fetchHelpers? 
+      // UPDATE: Rewrote code structure to use fetchHelpers structure
+      const userRoute = "/api/users/me"
+      const getUserCalData = async () => {
+        try {
+          const { data, error, response } = await slotifyClient.GET(userRoute, {});
+          console.log("User Data: ", JSON.stringify(data));
+          console.log("Response: ", JSON.stringify(response));
+          if (error && response.status == 401) {
+            const refreshErrorOccurred =
+              await fetchHelpers.refreshRetryAPIroute(userRoute);
+            return refreshErrorOccurred ? null : data;
+          }
+          return data;
+        } catch (error) {
+          fetchHelpers.toastDestructiveError(error as undefined);
+          return null;
+        }
+      };
+
+      const userData = await getUserCalData();
+      if (userData) {
+        setUser(userData);
+      }
+      /* OLD CODE, REMOVE ONCE CONFIRMED TO BE CORRECT
       try {
-        const { data: userData, response } = await slotifyClient.GET(
-          "/api/users/me",
-          {},
-        );
+        const { data: userData, response } = await slotifyClient.GET(userRoute, {},);
         console.log("User Data: ", JSON.stringify(userData));
         console.log("Response: ", JSON.stringify(response));
         // Switch case replaces if/else blocks
-        // TODO: dont we already have the refresh in fetchHelpers?
         switch (response.status) {
           case 200: // Success
             if (userData) setUser(userData);
             break;
           case 401: // user was unauthorised. Therefore, /refresh.
-            const refreshSuccessful = await refreshUser();
-            if (!refreshSuccessful) {
-              //If refresh fails due to unauthorized user, log the user out
-              await slotifyClient.POST("/api/users/me/logout", {});
-              window.location.href = "/login";
-            }
+            fetchHelpers.refreshRetryAPIroute(userRoute);
             break;
           case 201:
             const { data: retryData } = await slotifyClient.GET(
@@ -48,7 +58,7 @@ export default function User() {
         }
       } catch (error) {
         fetchHelpers.toastDestructiveError(error as undefined);
-      }
+      } */
     };
     fetchUser();
   }, []);
