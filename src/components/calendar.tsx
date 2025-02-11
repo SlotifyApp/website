@@ -1,5 +1,4 @@
 "use client";
-import slotifyClient from "@/hooks/fetch";
 import { useEffect, useState } from "react";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
