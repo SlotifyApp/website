@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import slotifyClient from "@/hooks/fetch";
 import { Member } from "@/components/team-members";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
@@ -33,9 +32,17 @@ export default function User() {
       }; */
 
       // Type Guard to check if userData is of interface type "Member"
-      function isMember(data: any): data is Member {
-        return (data && typeof data === "object" && ("id" in data ||
-          "email" in data || "firstName" in data || "lastName" in data));
+      function isMember(data: unknown): data is Member {
+        if (typeof data != "object" || data == null) {
+          return false;
+        }
+        const obj = data as Record<string, unknown>;
+        return (
+          "id" in obj && typeof obj.id === "number" &&
+          "email" in obj && typeof obj.email === "string" &&
+          "firstName" in obj && typeof obj.firstName === "string" &&
+          "lastName" in obj && typeof obj.lastName === "string"
+        );
       }
 
       const userData = await fetchHelpers.getAPIrouteData(userRoute);
