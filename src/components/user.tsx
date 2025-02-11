@@ -21,7 +21,7 @@ export default function User() {
           console.log("Response: ", JSON.stringify(response));
           if (error && response.status == 401) {
             const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryAPIroute(userRoute);
+              await fetchHelpers.refreshRetryGetAPIroute(userRoute);
             return refreshErrorOccurred ? null : data;
           }
           return data;

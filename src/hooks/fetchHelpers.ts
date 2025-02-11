@@ -2,6 +2,7 @@ import client from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import type { paths } from "@/types/openapi";
 import type { PathsWithMethod } from "openapi-typescript-helpers";
+import slotifyClient from "@/hooks/fetch";
 
 class FetchHelpers {
   testGlobalFunc(param: string): string {
@@ -9,7 +10,7 @@ class FetchHelpers {
     return "a";
   }
 
-/*   async getAPIrouteData(
+  async getAPIrouteData(
     route: PathsWithMethod<paths, "get">,
   ): Promise<{subject?: string; startTime?: string; endTime?: string;}[] | null | undefined> {
     // unfortunately, this long type is necessary because this won't compile without it
@@ -19,7 +20,7 @@ class FetchHelpers {
       const { data, error, response } = await slotifyClient.GET(route, {});
         if (error && (response as Response).status == 401) {
           const refreshErrorOccurred =
-            await this.refreshRetryAPIroute(route);
+            await this.refreshRetryGetAPIroute(route);
           return refreshErrorOccurred ? null : data;
         }
         return data;
@@ -27,9 +28,9 @@ class FetchHelpers {
       this.toastDestructiveError(error as undefined);
       return null;
     }
-  } */
+  }
 
-  async refreshRetryAPIroute(
+  async refreshRetryGetAPIroute(
     route: PathsWithMethod<paths, "get">,
   ): Promise<boolean> {
     let errorOcurred = false;
@@ -38,8 +39,7 @@ class FetchHelpers {
       if (response.status == 401) {
         // The refresh token was invalid, could not refresh so back to login.
         // This has to be done for every fetch
-        await client.POST("/api/users/me/logout", {});
-        window.location.href = "/login";
+        this.logOutUser();
       } else if (response.status == 201) {
         // retry the specified route
         try {
@@ -47,8 +47,7 @@ class FetchHelpers {
           console.log(data);
           if (response.status == 401) {
             // MSAL client may no longer have user in cache, no other option other than to log out
-            await client.POST("/api/users/me/logout", {});
-            window.location.href = "/login";
+            this.logOutUser();
           }
         } catch (error) {
           errorOcurred = true;
@@ -62,6 +61,40 @@ class FetchHelpers {
       this.toastDestructiveError(error as undefined);
       return errorOcurred;
     }
+  }
+
+  async refreshRetryPostAPIroute(
+    route: PathsWithMethod<paths, "post">,
+  ): Promise<boolean> {
+    let errorOcurred = false;
+    try {
+      const { response } = await client.POST("/api/refresh", {});
+      if (response.status == 401) {
+        this.logOutUser();
+      } else if (response.status == 201) {
+        try {
+          const { data, response } = await client.POST(route, {});
+          console.log(data);
+          if (response.status == 401) {
+            this.logOutUser();
+          }
+        } catch (error) {
+          errorOcurred = true;
+          this.toastDestructiveError(error as undefined);
+          return errorOcurred;
+        }
+      }
+      return errorOcurred;
+    } catch (error) {
+      errorOcurred = true;
+      this.toastDestructiveError(error as undefined);
+      return errorOcurred;
+    }
+  }
+
+  async logOutUser(): Promise<void> {
+    await client.POST("/api/users/me/logout", {});
+    window.location.href = "/login";
   }
 
   toastDestructiveError(error: undefined): void {

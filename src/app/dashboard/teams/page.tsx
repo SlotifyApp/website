@@ -38,21 +38,34 @@ export default function TeamsPage() {
   //TODO: Handle 401 like dashboard
 
   const handleJoinTeam = async (teamID: number) => {
-    const { data, error } = await slotifyClient.POST(
-      "/api/teams/{teamID}/users/me",
-      {
-        params: {
-          path: { teamID: teamID },
-        },
-      },
-    );
-    console.log(`Joined team with id: ${teamID}`);
+    // UPDATE: Added /refresh route from fetchHelpers here.
+    const userTeamsRoute = "/api/teams/{teamID}/users/me";
+    const getJoinTeamData = async () => {
+      try {
+        const { data, error, response } = await slotifyClient.POST(userTeamsRoute,
+          {
+            params: {
+              path: { teamID: teamID },
+            },
+          },
+        );
+        if (error && response.status == 401) {
+          const refreshErrorOccurred =
+            await fetchHelpers.refreshRetryPostAPIroute(userTeamsRoute);
+          return refreshErrorOccurred ? null : data;
+        }
+        return data;
+      } catch (error) {
+        fetchHelpers.toastDestructiveError(error as undefined);
+        return null;
+      }
+    }
+    
+    const data = await getJoinTeamData();
     if (data) {
+      console.log(`Joined team with id: ${teamID}`);
       setYourTeams([...yourTeams, data]);
       setJoinableTeams(joinableTeams.filter((team) => team.id !== teamID));
-    }
-    if (error) {
-      fetchHelpers.toastDestructiveError(error);
     }
   };
 
@@ -66,7 +79,7 @@ export default function TeamsPage() {
           const { data, error, response } = await slotifyClient.GET(teamRoute, {},);
           if (error && response.status == 401) {
             const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryAPIroute(teamRoute);
+              await fetchHelpers.refreshRetryGetAPIroute(teamRoute);
             return refreshErrorOccurred ? null : data;
           }
           return data;
@@ -81,35 +94,68 @@ export default function TeamsPage() {
         setYourTeams(teamsData);
       }
     };
+
     const getJoinableTeams = async () => {
-      const { data, error } = await slotifyClient.GET("/api/teams/joinable/me");
+      const joinableTeamsRoute = "/api/teams/joinable/me";
+      const getJoinableTeamsData = async () => {
+        try {
+          const { data, error, response } = await slotifyClient.GET(joinableTeamsRoute, {},);
+          if (error && response.status == 401) {
+            const refreshErrorOccurred =
+              await fetchHelpers.refreshRetryGetAPIroute(joinableTeamsRoute);
+            return refreshErrorOccurred ? null : data;
+          }
+          return data;
+        } catch (error) {
+          fetchHelpers.toastDestructiveError(error as undefined);
+          return null;
+        }
+      };
+
+      const joinableTeamsData = await getJoinableTeamsData();
+      if (joinableTeamsData) {
+        setJoinableTeams(joinableTeamsData);
+      }
+      /* const { data, error } = await slotifyClient.GET("/api/teams/joinable/me");
       if (data) {
         setJoinableTeams(data);
       }
       if (error) {
         fetchHelpers.toastDestructiveError(error);
-      }
+      } */
     };
+
     const getTeamMembers = async () => {
       if (!selectedTeam) {
         return;
       }
-
       //TODO: Refresh and try-catch
       const teamID = selectedTeam?.id;
-      const { data, error } = await slotifyClient.GET(
-        "/api/teams/{teamID}/users",
-        {
-          params: {
-            path: { teamID: teamID },
-          },
-        },
-      );
-      if (data) {
-        setMembers(data);
-      }
-      if (error) {
-        fetchHelpers.toastDestructiveError(error as unknown as undefined);
+      const teamMembersRoute = "/api/teams/{teamID}/users";
+      const getTeamMembersData = async () => {
+        try {
+          const { data, error, response } = await slotifyClient.GET(teamMembersRoute,
+            {
+              params: {
+                path: { teamID: teamID },
+              },
+            },
+          );
+          if (error && response.status == 401) {
+            const refreshErrorOccurred =
+              await fetchHelpers.refreshRetryGetAPIroute(teamMembersRoute);
+            return refreshErrorOccurred ? null : data;
+          }
+          return data;
+        } catch (error) {
+          fetchHelpers.toastDestructiveError(error as undefined);
+          return null;
+        }
+      };
+
+      const teamMemberData = await getTeamMembersData();
+      if (teamMemberData) {
+        setMembers(teamMemberData);
       }
     };
 

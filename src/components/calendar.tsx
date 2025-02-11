@@ -21,7 +21,7 @@ export default function DisplayCalendar() {
           const { data, error, response } = await slotifyClient.GET(calRoute, {});
           if (error && response.status == 401) {
             const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryAPIroute(calRoute);
+              await fetchHelpers.refreshRetryGetAPIroute(calRoute);
             return refreshErrorOccurred ? null : data;
           }
           return data;
