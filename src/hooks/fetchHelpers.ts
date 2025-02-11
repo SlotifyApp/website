@@ -1,3 +1,5 @@
+/* eslint no-explicit-any: 0 */
+
 import client from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import type { paths } from "@/types/openapi";
