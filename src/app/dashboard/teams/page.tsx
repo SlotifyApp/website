@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, use } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { TeamList, Team } from "@/components/team-list";
 import { TeamMembers, Member } from "@/components/team-members";
