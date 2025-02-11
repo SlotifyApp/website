@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Bell, Loader2 } from "lucide-react";
+import { ReactNode, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import {
@@ -11,30 +11,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { useNotifications, Notification } from "@/context/notification_context";
 import { DialogDescription } from "@radix-ui/react-dialog";
 
-export default function NotificationButton() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { notifications } = useNotifications();
-
+interface NotificationButtonProps {
+  trigger: ReactNode;
+  open: boolean;
+  onOpenChangeAction: (open: boolean) => void;
+  notifications: Notification[];
+}
+export default function NotificationButton({
+  notifications,
+  trigger,
+  open,
+  onOpenChangeAction,
+}: NotificationButtonProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          {notifications.length > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-2 -right-2 px-2 py-1 text-xs"
-            >
-              {notifications.length}
-            </Badge>
-          )}
-          <span className="sr-only">Open notifications</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChangeAction}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[90vw] sm:h-[90vh] sm:max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Notifications</DialogTitle>
@@ -76,33 +70,45 @@ function NotificationList({
           No new notifications
         </li>
       ) : (
-        notifications.map((notification) => (
-          <li
-            key={notification.id}
-            className="bg-secondary p-4 rounded-lg flex justify-between items-start"
+        <>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const copyNotifs = notifications;
+              copyNotifs.forEach((notif) => handleMarkAsRead(notif.id));
+            }}
           >
-            <div>
-              <h3 className="font-semibold">{notification.message}</h3>
-              <p className="text-xs text-muted-foreground mt-2">
-                {formatDistanceToNow(parseISO(notification.created), {
-                  addSuffix: true,
-                })}
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => handleMarkAsRead(notification.id)}
-              disabled={loadingStates[notification.id]}
+            Mark all as read
+          </Button>
+          {notifications.map((notification) => (
+            <li
+              key={notification.id}
+              className="bg-secondary p-4 rounded-lg flex justify-between items-start"
             >
-              {loadingStates[notification.id] ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Mark as Read"
-              )}
-            </Button>
-          </li>
-        ))
+              <div>
+                <h3 className="font-semibold">{notification.message}</h3>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {formatDistanceToNow(parseISO(notification.created), {
+                    addSuffix: true,
+                  })}
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleMarkAsRead(notification.id)}
+                disabled={loadingStates[notification.id]}
+              >
+                {loadingStates[notification.id] ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Mark as Read"
+                )}
+              </Button>
+            </li>
+          ))}
+        </>
       )}
     </ul>
   );

@@ -1,7 +1,9 @@
-import DisplayCalendar from "@/components/calendar";
+import { DisplayCalendar } from "@/components/calendar/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 
+//TODO: Make this larger to look as through the calendar is loading
+// right now its much smaller than the calendar
 function LoadingDashboardCalendar() {
   return (
     <div className="flex flex-col space-y-3">
@@ -16,7 +18,6 @@ function LoadingDashboardCalendar() {
 export default function Calendar() {
   return (
     <div>
-      <h1 className="text-lg">These are your calendar events.</h1>
       <Suspense fallback={<LoadingDashboardCalendar />}>
         <DisplayCalendar />
       </Suspense>

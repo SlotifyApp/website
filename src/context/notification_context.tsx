@@ -52,8 +52,7 @@ export function NotificationProvider({
       const newNotification: Notification = JSON.parse(event.data);
       setNotifications((prev) => [newNotification, ...prev]);
       toast({
-        title: "New Notification",
-        description: newNotification.message,
+        title: newNotification.message,
       });
       const audio = new Audio(
         "https://www.soundjay.com/buttons/sounds/button-14.mp3",
