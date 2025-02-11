@@ -1,4 +1,4 @@
-/* eslint no-explicit-any: 0 */
+/* eslint @typescript-eslint/no-explicit-any: 0 */
 
 import client from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
