@@ -63,21 +63,17 @@ export function NotificationProvider({
 
   async function markAsRead(notification_id: number): Promise<void> {
     console.log(`postNotificationRead, notificationID: ${notification_id}`);
-    const { data, error } = await slotifyClient.PATCH(
-      "/api/notifications/{notificationID}/read",
-      {
-        params: {
-          path: { notificationID: notification_id },
-        },
+    const readnotifRoute = "/api/notifications/{notificationID}/read";
+    const readnotifData = await fetchHelpers.patchAPIrouteData(readnotifRoute, {
+      params: {
+        path: { notificationID: notification_id },
       },
-    );
-    if (data) {
+    });
+    if (readnotifData) {
       setNotifications(notifications.filter((n) => n.id !== notification_id));
       toast({
-        title: data,
+        title: JSON.stringify(readnotifData),
       });
-    } else {
-      fetchHelpers.toastDestructiveError(error as unknown as undefined);
     }
   }
 

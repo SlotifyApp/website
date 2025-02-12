@@ -48,6 +48,24 @@ class FetchHelpers {
     }
   }
 
+  async patchAPIrouteData<T>(
+    route: PathsWithMethod<paths, "patch">,
+    params: any,
+  ): Promise<T | null | undefined> {
+    // UPDATE: This is now a generic method for PATCH routes.
+    try {
+      const { data, error, response } = await slotifyClient.PATCH(route, params);
+      if (error && (response as Response).status == 401) {
+        const refreshErrorOccurred = await this.refreshRetryPatchAPIroute(route, params);
+        return refreshErrorOccurred ? null : data;
+      }
+      return data;
+    } catch (error) {
+      this.toastDestructiveError(error as undefined);
+      return null;
+    }
+  }
+
   async refreshRetryGetAPIroute(
     route: PathsWithMethod<paths, "get">,
     params: any
@@ -88,6 +106,30 @@ class FetchHelpers {
         this.logOutUser();
       } else if (response.status == 201) {
         const { data, response } = await client.POST(route, params);
+        console.log(data);
+        if (response.status == 401) {
+          this.logOutUser();
+        }
+      }
+      return errorOcurred;
+    } catch (error) {
+      errorOcurred = true;
+      this.toastDestructiveError(error as undefined);
+      return errorOcurred;
+    }
+  }
+
+  async refreshRetryPatchAPIroute(
+    route: PathsWithMethod<paths, "patch">,
+    params: any
+  ): Promise<boolean> {
+    let errorOcurred = false;
+    try {
+      const { response } = await client.POST("/api/refresh", {});
+      if (response.status == 401) {
+        this.logOutUser();
+      } else if (response.status == 201) {
+        const { data, response } = await client.PATCH(route, params);
         console.log(data);
         if (response.status == 401) {
           this.logOutUser();
