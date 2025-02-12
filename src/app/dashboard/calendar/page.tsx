@@ -1,24 +1,23 @@
 "use client";
 
 import { DisplayCalendar } from "@/components/calendar/calendar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarOverview } from "@/components/calendar-overview";
 
 //TODO: Make this larger to look as through the calendar is loading
 // right now its much smaller than the calendar
-function LoadingDashboardCalendar() {
-  return (
-    <div className="flex flex-col space-y-3">
-      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[200px]" />
-      </div>
-    </div>
-  );
-}
+// function LoadingDashboardCalendar() {
+//   return (
+//     <div className="flex flex-col space-y-3">
+//       <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+//       <div className="space-y-2">
+//         <Skeleton className="h-4 w-[250px]" />
+//         <Skeleton className="h-4 w-[200px]" />
+//       </div>
+//     </div>
+//   );
+// }
 export default function Calendar() {
   const [view, setView] = useState<"weekly" | "monthly">("weekly");
 
