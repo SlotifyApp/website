@@ -38,26 +38,6 @@ export default function TeamsPage() {
 
   const handleJoinTeam = async (teamID: number) => {
     // UPDATE: Added /refresh route from fetchHelpers here.
-    /* const getJoinTeamData = async () => {
-      try {
-        const { data, error, response } = await slotifyClient.POST(userTeamsRoute,
-          {
-            params: {
-              path: { teamID: teamID },
-            },
-          },
-        );
-        if (error && response.status == 401) {
-          const refreshErrorOccurred =
-            await fetchHelpers.refreshRetryPostAPIroute(userTeamsRoute);
-          return refreshErrorOccurred ? null : data;
-        }
-        return data;
-      } catch (error) {
-        fetchHelpers.toastDestructiveError(error as undefined);
-        return null;
-      }
-    } */
     // Type Guard to check if userData is of interface type "Team"
     function isTeam(data: unknown): data is Team {
       if (typeof data != "object" || data == null) {
@@ -86,21 +66,6 @@ export default function TeamsPage() {
   // On every page refresh, set yourTeams and joinableTeams
   useEffect(() => {
     const getUserTeams = async () => {
-      // This code is less ugly now and needs to be done for the refresh.
-      /* const getUserTeamsData = async () => {
-        try {
-          const { data, error, response } = await slotifyClient.GET(teamRoute, {},);
-          if (error && response.status == 401) {
-            const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryGetAPIroute(teamRoute);
-            return refreshErrorOccurred ? null : data;
-          }
-          return data;
-        } catch (error) {
-          fetchHelpers.toastDestructiveError(error as undefined);
-          return null;
-        }
-      }; */
       const teamRoute = "/api/teams/me";
       const teamsData = await fetchHelpers.getAPIrouteData(teamRoute, {})
       if (Array.isArray(teamsData)) {
@@ -109,59 +74,17 @@ export default function TeamsPage() {
     };
 
     const getJoinableTeams = async () => {
-      /* const getJoinableTeamsData = async () => {
-        try {
-          const { data, error, response } = await slotifyClient.GET(joinableTeamsRoute, {},);
-          if (error && response.status == 401) {
-            const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryGetAPIroute(joinableTeamsRoute);
-            return refreshErrorOccurred ? null : data;
-          }
-          return data;
-        } catch (error) {
-          fetchHelpers.toastDestructiveError(error as undefined);
-          return null;
-        }
-      }; */
       const joinableTeamsRoute = "/api/teams/joinable/me";
       const joinableTeamsData = await fetchHelpers.getAPIrouteData(joinableTeamsRoute, {});
       if (Array.isArray(joinableTeamsData)) {
         setJoinableTeams(joinableTeamsData);
       }
-      /* const { data, error } = await slotifyClient.GET("/api/teams/joinable/me");
-      if (data) {
-        setJoinableTeams(data);
-      }
-      if (error) {
-        fetchHelpers.toastDestructiveError(error);
-      } */
     };
 
     const getTeamMembers = async () => {
       if (!selectedTeam) {
         return;
       }
-      //TODO: Refresh and try-catch  
-      /*const getTeamMembersData = async () => {
-        try {
-          const { data, error, response } = await slotifyClient.GET(teamMembersRoute,
-            {
-              params: {
-                path: { teamID: teamID },
-              },
-            },
-          );
-          if (error && response.status == 401) {
-            const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryGetAPIroute(teamMembersRoute);
-            return refreshErrorOccurred ? null : data;
-          }
-          return data;
-        } catch (error) {
-          fetchHelpers.toastDestructiveError(error as undefined);
-          return null;
-        }
-      }; */
       const teamID = selectedTeam?.id;
       const teamMembersRoute = "/api/teams/{teamID}/users";
       const teamMemberData = await fetchHelpers.getAPIrouteData(teamMembersRoute, {

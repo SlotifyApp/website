@@ -20,7 +20,7 @@ class FetchHelpers {
     try {
       const { data, error, response } = await slotifyClient.GET(route, params);
       if (error && (response as Response).status == 401) {
-        const refreshErrorOccurred = await this.refreshRetryGetAPIroute(route);
+        const refreshErrorOccurred = await this.refreshRetryGetAPIroute(route, params);
         return refreshErrorOccurred ? null : data;
       }
       return data;
@@ -38,7 +38,7 @@ class FetchHelpers {
     try {
       const { data, error, response } = await slotifyClient.POST(route, params);
       if (error && (response as Response).status == 401) {
-        const refreshErrorOccurred = await this.refreshRetryPostAPIroute(route);
+        const refreshErrorOccurred = await this.refreshRetryPostAPIroute(route, params);
         return refreshErrorOccurred ? null : data;
       }
       return data;
@@ -50,7 +50,9 @@ class FetchHelpers {
 
   async refreshRetryGetAPIroute(
     route: PathsWithMethod<paths, "get">,
+    params: any
   ): Promise<boolean> {
+    // UPDATE: Now properly handles retrying a route with params if necessary. Same for POST refresh method.
     let errorOcurred = false;
     try {
       const { response } = await client.POST("/api/refresh", {});
@@ -60,7 +62,7 @@ class FetchHelpers {
         this.logOutUser();
       } else if (response.status == 201) {
         // retry the specified route
-        const { data, response } = await client.GET(route, {});
+        const { data, response } = await client.GET(route, params);
         console.log(data);
         if (response.status == 401) {
           // MSAL client may no longer have user in cache, no other option other than to log out
@@ -77,6 +79,7 @@ class FetchHelpers {
 
   async refreshRetryPostAPIroute(
     route: PathsWithMethod<paths, "post">,
+    params: any
   ): Promise<boolean> {
     let errorOcurred = false;
     try {
@@ -84,7 +87,7 @@ class FetchHelpers {
       if (response.status == 401) {
         this.logOutUser();
       } else if (response.status == 201) {
-        const { data, response } = await client.POST(route, {});
+        const { data, response } = await client.POST(route, params);
         console.log(data);
         if (response.status == 401) {
           this.logOutUser();

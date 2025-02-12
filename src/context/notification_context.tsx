@@ -31,14 +31,10 @@ export function NotificationProvider({
 
   useEffect(() => {
     const getUnreadNotifs = async () => {
-      const { data, error } = await slotifyClient.GET(
-        "/api/users/me/notifications",
-      );
-      if (error) {
-        fetchHelpers.toastDestructiveError(error as unknown as undefined);
-      }
-      if (data) {
-        setNotifications((prev) => [...prev, ...data]);
+      const notifRoute = "/api/users/me/notifications";
+      const notifData = await fetchHelpers.getAPIrouteData(notifRoute, {});
+      if (Array.isArray(notifData)) {
+        setNotifications((prev) => [...prev, ...notifData]);
       }
     };
     getUnreadNotifs();

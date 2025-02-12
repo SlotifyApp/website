@@ -12,26 +12,6 @@ export default function User() {
   useEffect(() => {
     const fetchUser = async () => {
       // This code is less ugly now and needs to be done for the refresh.
-      // TODO: dont we already have the refresh in fetchHelpers? 
-      // UPDATE: Rewrote code structure to use fetchHelpers structure
-      
-/*       const getUserCalData = async () => {
-        try {
-          const { data, error, response } = await slotifyClient.GET(userRoute, {});
-          console.log("User Data: ", JSON.stringify(data));
-          console.log("Response: ", JSON.stringify(response));
-          if (error && response.status == 401) {
-            const refreshErrorOccurred =
-              await fetchHelpers.refreshRetryGetAPIroute(userRoute);
-            return refreshErrorOccurred ? null : data;
-          }
-          return data;
-        } catch (error) {
-          fetchHelpers.toastDestructiveError(error as undefined);
-          return null;
-        }
-      }; */
-
       // Type Guard to check if userData is of interface type "Member"
       function isMember(data: unknown): data is Member {
         if (typeof data != "object" || data == null) {
@@ -51,30 +31,6 @@ export default function User() {
       if (isMember(userData)) {
         setUser(userData);
       }
-      /* OLD CODE, REMOVE ONCE CONFIRMED TO BE CORRECT
-      try {
-        const { data: userData, response } = await slotifyClient.GET(userRoute, {},);
-        console.log("User Data: ", JSON.stringify(userData));
-        console.log("Response: ", JSON.stringify(response));
-        // Switch case replaces if/else blocks
-        switch (response.status) {
-          case 200: // Success
-            if (userData) setUser(userData);
-            break;
-          case 401: // user was unauthorised. Therefore, /refresh.
-            fetchHelpers.refreshRetryAPIroute(userRoute);
-            break;
-          case 201:
-            const { data: retryData } = await slotifyClient.GET(
-              "/api/users/me",
-              {},
-            );
-            if (retryData) setUser(retryData);
-            break;
-        }
-      } catch (error) {
-        fetchHelpers.toastDestructiveError(error as undefined);
-      } */
     };
     fetchUser();
   }, []);
