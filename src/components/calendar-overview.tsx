@@ -43,7 +43,7 @@ export function CalendarOverview() {
   const [calendar, setCalendar] = useState<Array<CalendarEvent>>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
+    null,
   );
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Start week on Monday
@@ -81,13 +81,13 @@ export function CalendarOverview() {
               end: endFormatted,
             },
           },
-        }
+        },
       );
 
       if (error && response.status == 401) {
         const { error, response } = await slotifyClient.POST(
           "/api/refresh",
-          {}
+          {},
         );
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
@@ -104,7 +104,7 @@ export function CalendarOverview() {
                   end: endFormatted,
                 },
               },
-            }
+            },
           );
           if (response.status == 401) {
             //MSAL client may no longer have user in cache, no other option other than
@@ -207,7 +207,7 @@ export function CalendarOverview() {
                         className={cn(
                           "text-sm mt-1",
                           isSameDay(day, new Date()) &&
-                            "rounded-full bg-focusColor text-primary-foreground w-6 h-6 mx-auto flex items-center justify-center"
+                            "rounded-full bg-focusColor text-primary-foreground w-6 h-6 mx-auto flex items-center justify-center",
                         )}
                       >
                         {format(day, "d")}
@@ -319,7 +319,7 @@ export function CalendarOverview() {
                                     {attendee.email || attendee.type} (
                                     {attendee.responseStatus})
                                   </li>
-                                )
+                                ),
                               )}
                             </ul>
                           </div>
