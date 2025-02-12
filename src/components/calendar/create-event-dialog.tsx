@@ -25,12 +25,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Team } from "../team-list";
-import slotifyClient from "@/hooks/fetch";
 import { toast } from "@/hooks/use-toast";
 import { Attendee } from "@/components/calendar/calendar";
 import { Check, ChevronDown, Search, User } from "lucide-react";
 import fetchHelpers from "@/hooks/fetchHelpers";
-import { Member } from "../team-members";
 
 interface CreateEventDialogProps {
   open: boolean;

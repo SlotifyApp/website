@@ -1,0 +1,1209 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Slotify API",
+    "version": "1.0.0",
+    "description": "API to communicate and schedule meetings with Microsoft."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/api/events": {
+      "get": {
+        "summary": "Subscribe to notifications eventstream.",
+        "description": "Establishes a stream connection to receive real-time updates about rendering tasks via Server-Sent Events (SSE).",
+        "operationId": "renderEvent",
+        "responses": {
+          "200": {
+            "description": "A continuous stream of server-sent events.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Notification"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "No caching is allowed for this stream."
+              },
+              "Connection": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Advises the client to keep the connection open."
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The MIME type of this stream is text/event-stream."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me/notifications": {
+      "get": {
+        "operationId": "GetAPIUsersMeNotifications",
+        "summary": "Get user's unread notifications.",
+        "responses": {
+          "200": {
+            "description": "Successfully updated notification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Notification"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Notification not found."
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications/{notificationID}/read": {
+      "options": {
+        "operationId": "OptionsAPINotificationsNotificationIDRead",
+        "summary": "Satisfy CORS preflight for marking a notification as read.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notificationID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, PATCH, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Mark a notification as being read.",
+        "operationId": "PatchAPINotificationsNotificationIDRead",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notificationID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated notification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Notification not found."
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/me": {
+      "get": {
+        "operationId": "GetAPICalendarMe",
+        "summary": "Get a user's calendar events for a given time range.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "start",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got user calendar events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostAPICalendarMe",
+        "summary": "Create a new calendar event.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "OptionsAPICalendarMe",
+        "summary": "CORS preflight for creating an event",
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/refresh": {
+      "post": {
+        "operationId": "PostAPIRefresh",
+        "summary": "Refresh Slotify access token and refresh token.",
+        "responses": {
+          "201": {
+            "description": "Successfully refreshed access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/api/auth/callback": {
+      "get": {
+        "operationId": "GetAPIAuthCallback",
+        "summary": "Auth route for authorisation code flow.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Successful auth",
+            "headers": {
+              "Location": {
+                "description": "The URL to redirect to after successful authentication",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000/dashboard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/healthcheck": {
+      "get": {
+        "operationId": "GetAPIHealthcheck",
+        "summary": "Healthcheck route.",
+        "responses": {
+          "200": {
+            "description": "Healthcheck successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me/logout": {
+      "post": {
+        "operationId": "PostAPIUsersMeLogout",
+        "summary": "Logout user.",
+        "responses": {
+          "200": {
+            "description": "Successfully logged out on backend",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "GetAPIUsersMe",
+        "summary": "Get current user's details.",
+        "responses": {
+          "200": {
+            "description": "Got user successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team ID)"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "GetAPIUsers",
+        "summary": "Get users by query params.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email of user"
+          },
+          {
+            "in": "query",
+            "name": "firstName",
+            "schema": {
+              "type": "string"
+            },
+            "description": "First name of user"
+          },
+          {
+            "in": "query",
+            "name": "lastName",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Last name of user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users matching the query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team ID)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostAPIUsers",
+        "summary": "Create a new user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team ID)"
+          }
+        }
+      }
+    },
+    "/api/users/{userID}": {
+      "get": {
+        "operationId": "GetAPIUsersUserID",
+        "summary": "Get a user by id.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the user to get"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Got user successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team ID)"
+          },
+          "403": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteAPIUsersUserID",
+        "summary": "Delete a user by id.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the user to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted user successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid user ID)"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/teams/joinable/me": {
+      "get": {
+        "operationId": "GetAPITeamsJoinableMe",
+        "summary": "Get all joinable teams for a user excluding teams they are already a part of.",
+        "responses": {
+          "200": {
+            "description": "Got all user's teams successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Team"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/teams/me": {
+      "get": {
+        "operationId": "GetAPITeamsMe",
+        "summary": "Get all teams for current user.",
+        "responses": {
+          "200": {
+            "description": "Got all user's teams successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Team"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/teams": {
+      "get": {
+        "operationId": "GetAPITeams",
+        "summary": "Get a team by query params.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Team name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams matching the query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Team"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team name)"
+          }
+        }
+      },
+      "options": {
+        "operationId": "OptionsAPITeams",
+        "summary": "Satisfy CORS preflight for creatingteams.",
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, PATCH, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostAPITeams",
+        "summary": "Create a new team.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Team created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team name)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teams/{teamID}": {
+      "delete": {
+        "operationId": "DeleteAPITeamsTeamID",
+        "summary": "Delete a team by id.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the team to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted team successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid team id)"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetAPITeamsTeamID",
+        "summary": "Get a team by id.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the team to get"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Got team successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Team not found"
+          },
+          "500": {
+            "description": "Something went wrong internally"
+          }
+        }
+      }
+    },
+    "/api/teams/{teamID}/users": {
+      "get": {
+        "summary": "Get all members of a team.",
+        "operationId": "GetAPITeamsTeamIDUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "description": "ID of the team"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users successfully found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Bad request, team id is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teams/{teamID}/users/me": {
+      "post": {
+        "operationId": "PostAPITeamsTeamIDUsersMe",
+        "summary": "Add current user to a team.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "description": "ID of the team"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User successfully added to the team",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "User or team not found"
+          }
+        }
+      }
+    },
+    "/api/teams/{teamID}/users/{userID}": {
+      "post": {
+        "operationId": "PostAPITeamsTeamIDUsersUserID",
+        "summary": "Add a user to a team.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "description": "ID of the user"
+          },
+          {
+            "in": "path",
+            "name": "teamID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "description": "ID of the team"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User successfully added to the team",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Team"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "User or team not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid"
+      }
+    },
+    "schemas": {
+      "Attendee": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "resource"
+            ]
+          },
+          "responseStatus": {
+            "type": "string",
+            "enum": [
+              "none",
+              "organizer",
+              "entativelyAccepted",
+              "accepted",
+              "declined",
+              "notResponded"
+            ]
+          }
+        }
+      },
+      "CalendarEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "attendees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attendee"
+            }
+          },
+          "body": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string"
+          },
+          "isCancelled": {
+            "type": "boolean"
+          },
+          "joinURL": {
+            "type": "string"
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            }
+          },
+          "organizer": {
+            "type": "string",
+            "format": "email"
+          },
+          "startTime": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "webLink": {
+            "type": "string"
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "roomType": {
+            "type": "string",
+            "enum": [
+              "default",
+              "conferenceRoom",
+              "homeAddress",
+              "businessAddress",
+              "geoCoordinates",
+              "streetAddress",
+              "hotel",
+              "restaurant",
+              "localBusiness",
+              "postalAddress"
+            ]
+          },
+          "street": {
+            "type": "string"
+          }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "message",
+          "created"
+        ]
+      },
+      "UserCreate": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "firstName",
+          "lastName"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName"
+        ]
+      },
+      "TeamCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Team": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    }
+  }
+}
