@@ -174,6 +174,7 @@ export function CalendarOverview() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
+          <ScrollArea className="h-[66vh]">
           <div className="grid grid-cols-[auto_1fr] divide-x border-t">
             {/* Time column */}
             <div className="w-20 divide-y">
@@ -256,6 +257,7 @@ export function CalendarOverview() {
               ))}
             </div>
           </div>
+          </ScrollArea>
         </CardContent>
       </Card>
 
