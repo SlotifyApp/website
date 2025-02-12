@@ -12,32 +12,36 @@ class FetchHelpers {
     return "a";
   }
 
-  async getAPIrouteData<T>(route: PathsWithMethod<paths, "get">, params: any): Promise<T | null | undefined> {
+  async getAPIrouteData<T>(
+    route: PathsWithMethod<paths, "get">,
+    params: any,
+  ): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for GET routes.
     try {
       const { data, error, response } = await slotifyClient.GET(route, params);
-        if (error && (response as Response).status == 401) {
-          const refreshErrorOccurred =
-            await this.refreshRetryGetAPIroute(route);
-          return refreshErrorOccurred ? null : data;
-        }
-        return data;
+      if (error && (response as Response).status == 401) {
+        const refreshErrorOccurred = await this.refreshRetryGetAPIroute(route);
+        return refreshErrorOccurred ? null : data;
+      }
+      return data;
     } catch (error) {
       this.toastDestructiveError(error as undefined);
       return null;
     }
   }
 
-  async postAPIrouteData<T>(route: PathsWithMethod<paths, "post">, params: any): Promise<T | null | undefined> {
+  async postAPIrouteData<T>(
+    route: PathsWithMethod<paths, "post">,
+    params: any,
+  ): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for POST routes.
     try {
       const { data, error, response } = await slotifyClient.POST(route, params);
-        if (error && (response as Response).status == 401) {
-          const refreshErrorOccurred =
-            await this.refreshRetryPostAPIroute(route);
-          return refreshErrorOccurred ? null : data;
-        }
-        return data;
+      if (error && (response as Response).status == 401) {
+        const refreshErrorOccurred = await this.refreshRetryPostAPIroute(route);
+        return refreshErrorOccurred ? null : data;
+      }
+      return data;
     } catch (error) {
       this.toastDestructiveError(error as undefined);
       return null;
@@ -84,7 +88,7 @@ class FetchHelpers {
         console.log(data);
         if (response.status == 401) {
           this.logOutUser();
-        }        
+        }
       }
       return errorOcurred;
     } catch (error) {
@@ -100,7 +104,6 @@ class FetchHelpers {
   }
 
   toastDestructiveError(error: undefined): void {
-
     toast({
       title: "Error",
       description: JSON.stringify(error),
