@@ -3,8 +3,6 @@ import { toast } from "@/hooks/use-toast";
 import React, { useEffect, createContext, useContext, useState } from "react";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
-import slotifyClient from "@/hooks/fetch";
-
 export interface Notification {
   id: number;
   message: string;
