@@ -2,11 +2,10 @@
 
 import User from "@/components/user";
 import { RescheduleRequests } from "@/components/reschedule-requests";
-import slotifyClient from "@/hooks/fetch";
 import { useEffect, useState } from "react";
 import { CalendarEvent } from "@/components/calendar/calendar";
-import { toast } from "@/hooks/use-toast";
 import { EventsForToday } from "@/components/events-today";
+import fetchHelpers from "@/hooks/fetchHelpers";
 
 // function LoadingDashboard() {
 //   return (
@@ -31,64 +30,16 @@ export default function Dashboard() {
 
       const startFormatted = now.toISOString().slice(0, 19) + "Z";
       const endFormatted = endOfDay.toISOString().slice(0, 19) + "Z";
-
-      const { data, error, response } = await slotifyClient.GET(
-        "/api/calendar/me",
-        {
-          params: {
-            query: {
-              start: startFormatted,
-              end: endFormatted,
-            },
+      const calendarRoute = "/api/calendar/me";
+      const data = await fetchHelpers.getAPIrouteData(calendarRoute, {
+        params: {
+          query: {
+            start: startFormatted,
+            end: endFormatted,
           },
         },
-      );
-
-      if (error && response.status == 401) {
-        const { error, response } = await slotifyClient.POST(
-          "/api/refresh",
-          {},
-        );
-        if (response.status == 401) {
-          // The refresh token was invalid, could not refresh
-          // so back to login. This has to be done for every fetch
-          await slotifyClient.POST("/api/users/me/logout", {});
-          window.location.href = "/";
-        } else if (response.status == 201) {
-          const { data, error, response } = await slotifyClient.GET(
-            "/api/calendar/me",
-            {
-              params: {
-                query: {
-                  start: startFormatted.toString(),
-                  end: endFormatted.toString(),
-                },
-              },
-            },
-          );
-          if (response.status == 401) {
-            //MSAL client may no longer have user in cache, no other option other than
-            //to log out
-            await slotifyClient.POST("/api/users/me/logout", {});
-            window.location.href = "/";
-          }
-          if (error) {
-            toast({
-              title: "Error",
-              description: error,
-              variant: "destructive",
-            });
-          } else if (data) {
-            setCalendar(data);
-          }
-        } else if (error) {
-          toast({
-            title: "Error",
-            description: error,
-            variant: "destructive",
-          });
-        }
-      } else if (data) {
+      });
+      if (Array.isArray(data)) {
         setCalendar(data);
       }
     };

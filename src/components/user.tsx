@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import slotifyClient from "@/hooks/fetch";
 import { Member } from "@/components/team-members";
-import { toast } from "@/hooks/use-toast";
+import fetchHelpers from "@/hooks/fetchHelpers";
 
 import { User as LucideUserIcon } from "lucide-react";
+import { z } from "zod";
 
 export default function User() {
   const [user, setUser] = useState<Member | null>(null);
@@ -12,47 +12,22 @@ export default function User() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
-      // setLoading(true);
-      const { data, response } = await slotifyClient.GET("/api/users/me", {});
-      console.log(JSON.stringify(data));
-      console.log(JSON.stringify(response));
-      if (data) {
-        // setLoading(false);
-        setUser(data);
-        return;
-      }
-      if (response.status == 401) {
-        //unauthorized, hit /refresh
-        const { response } = await slotifyClient.POST("/api/refresh", {});
-        if (response.status == 401) {
-          // refresh failed, just log user out
-          await slotifyClient.POST("/api/users/me/logout", {});
-          // setLoading(false);
-          window.location.href = "/";
-          return;
-        }
+      // This code is less ugly now and needs to be done for the refresh.
+      const userRoute = "/api/users/me";
+      const data = await fetchHelpers.getAPIrouteData(userRoute, {});
 
-        if (response.status == 201) {
-          // retry the user route
-          const { data, error } = await slotifyClient.GET("/api/users/me", {});
-          // setLoading(false);
-          if (error) {
-            toast({
-              title: "Error",
-              description: error,
-              variant: "destructive",
-            });
-          }
-          if (data) {
-            setUser(data);
-            return;
-          }
-        }
+      const member = z.object({
+        id: z.number(),
+        email: z.string(),
+        firstName: z.string(),
+        lastName: z.string()
+      });
+      const userData = member.parse(data);
+
+      if (userData) {
+        setUser(userData);
       }
     };
-
     fetchUser();
   }, []);
 
