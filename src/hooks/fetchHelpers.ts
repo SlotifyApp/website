@@ -28,7 +28,7 @@ class FetchHelpers {
       }
       return data;
     } catch (error) {
-      this.toastDestructiveError(error as undefined);
+      this.toastDestructiveError(error);
       return null;
     }
   }
@@ -49,7 +49,7 @@ class FetchHelpers {
       }
       return data;
     } catch (error) {
-      this.toastDestructiveError(error as undefined);
+      this.toastDestructiveError(error);
       return null;
     }
   }
@@ -73,7 +73,7 @@ class FetchHelpers {
       }
       return data;
     } catch (error) {
-      this.toastDestructiveError(error as undefined);
+      this.toastDestructiveError(error);
       return null;
     }
   }
@@ -102,7 +102,7 @@ class FetchHelpers {
       return errorOcurred;
     } catch (error) {
       errorOcurred = true;
-      this.toastDestructiveError(error as undefined);
+      this.toastDestructiveError(error);
       return errorOcurred;
     }
   }
@@ -126,7 +126,7 @@ class FetchHelpers {
       return errorOcurred;
     } catch (error) {
       errorOcurred = true;
-      this.toastDestructiveError(error as undefined);
+      this.toastDestructiveError(error);
       return errorOcurred;
     }
   }
@@ -150,7 +150,7 @@ class FetchHelpers {
       return errorOcurred;
     } catch (error) {
       errorOcurred = true;
-      this.toastDestructiveError(error as undefined);
+      this.toastDestructiveError(error);
       return errorOcurred;
     }
   }
