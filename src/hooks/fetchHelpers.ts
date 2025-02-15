@@ -160,7 +160,7 @@ class FetchHelpers {
     window.location.href = "/";
   }
 
-  toastDestructiveError(error: undefined): void {
+  toastDestructiveError(error: any): void {
     toast({
       title: "Error",
       description: JSON.stringify(error),
