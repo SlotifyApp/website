@@ -414,6 +414,12 @@ export default function LandingPage() {
             </p>
           </div>
           <nav className="flex gap-4">
+            <Link
+              href="/swagger/index.html"
+              className="text-sm hover:underline"
+            >
+              Slotify API Docs
+            </Link>
             <Link href="/privacy" className="text-sm hover:underline">
               Privacy
             </Link>
