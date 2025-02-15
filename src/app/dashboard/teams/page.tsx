@@ -8,6 +8,7 @@ import { JoinableTeams } from "@/components/joinable-teams";
 import { ProfileForm } from "@/components/team-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchHelpers from "@/hooks/fetchHelpers";
+import { z } from "zod";
 
 function LoadingDashboardTeams() {
   return (
@@ -38,29 +39,22 @@ export default function TeamsPage() {
 
   const handleJoinTeam = async (teamID: number) => {
     // UPDATE: Added /refresh route from fetchHelpers here.
-    // Type Guard to check if userData is of interface type "Team"
-    function isTeam(data: unknown): data is Team {
-      if (typeof data != "object" || data == null) {
-        return false;
-      }
-      const obj = data as Record<string, unknown>;
-      return (
-        "id" in obj &&
-        typeof obj.id === "number" &&
-        "name" in obj &&
-        typeof obj.email === "string"
-      );
-    }
-
     const userTeamsRoute = "/api/teams/{teamID}/users/me";
     const data = await fetchHelpers.postAPIrouteData(userTeamsRoute, {
       params: {
         path: { teamID: teamID },
       },
     });
-    if (isTeam(data)) {
+
+    const team = z.object({
+      id: z.number(),
+      name: z.string(),
+    });
+    const teamData = team.parse(data);
+
+    if (teamData) {
       console.log(`Joined team with id: ${teamID}`);
-      setYourTeams([...yourTeams, data]);
+      setYourTeams([...yourTeams, teamData]);
       setJoinableTeams(joinableTeams.filter((team) => team.id !== teamID));
     }
   };

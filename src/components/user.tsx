@@ -4,6 +4,7 @@ import { Member } from "@/components/team-members";
 import fetchHelpers from "@/hooks/fetchHelpers";
 
 import { User as LucideUserIcon } from "lucide-react";
+import { z } from "zod";
 
 export default function User() {
   const [user, setUser] = useState<Member | null>(null);
@@ -12,27 +13,18 @@ export default function User() {
   useEffect(() => {
     const fetchUser = async () => {
       // This code is less ugly now and needs to be done for the refresh.
-      // Type Guard to check if userData is of interface type "Member"
-      function isMember(data: unknown): data is Member {
-        if (typeof data != "object" || data == null) {
-          return false;
-        }
-        const obj = data as Record<string, unknown>;
-        return (
-          "id" in obj &&
-          typeof obj.id === "number" &&
-          "email" in obj &&
-          typeof obj.email === "string" &&
-          "firstName" in obj &&
-          typeof obj.firstName === "string" &&
-          "lastName" in obj &&
-          typeof obj.lastName === "string"
-        );
-      }
-
       const userRoute = "/api/users/me";
-      const userData = await fetchHelpers.getAPIrouteData(userRoute, {});
-      if (isMember(userData)) {
+      const data = await fetchHelpers.getAPIrouteData(userRoute, {});
+
+      const member = z.object({
+        id: z.number(),
+        email: z.string(),
+        firstName: z.string(),
+        lastName: z.string()
+      });
+      const userData = member.parse(data);
+
+      if (userData) {
         setUser(userData);
       }
     };

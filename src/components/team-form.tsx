@@ -48,19 +48,15 @@ export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const teamsRoute = "/api/teams";
-    const teamPostData = await fetchHelpers.postAPIrouteData(teamsRoute, { body: { name: values.name } });
-    // Type Guard to check if calendar Data is of interface type "CalendarEvent"
-    function isValidData(data: unknown): data is { id : number, name : string } {
-      if (typeof data != "object" || data == null) {
-        return false;
-      }
-      const obj = data as Record<string, unknown>;
-      return (
-        "id" in obj && typeof obj.id === "number" &&
-        "name" in obj && typeof obj.name == "string"
-      );
-    }
-    if (isValidData(teamPostData)) {
+    const data = await fetchHelpers.postAPIrouteData(teamsRoute, { body: { name: values.name } });
+
+    const teamPost = z.object({
+      id: z.number(),
+      name: z.string(),
+    });
+    const teamPostData = teamPost.parse(data);
+
+    if (teamPostData) {
       onSetYourTeamsAction([teamPostData, ...teams]);
     }
     console.log(values);
