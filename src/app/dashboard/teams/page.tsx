@@ -45,8 +45,10 @@ export default function TeamsPage() {
       }
       const obj = data as Record<string, unknown>;
       return (
-        "id" in obj && typeof obj.id === "number" &&
-        "name" in obj && typeof obj.email === "string"
+        "id" in obj &&
+        typeof obj.id === "number" &&
+        "name" in obj &&
+        typeof obj.email === "string"
       );
     }
 
@@ -67,7 +69,7 @@ export default function TeamsPage() {
   useEffect(() => {
     const getUserTeams = async () => {
       const teamRoute = "/api/teams/me";
-      const teamsData = await fetchHelpers.getAPIrouteData(teamRoute, {})
+      const teamsData = await fetchHelpers.getAPIrouteData(teamRoute, {});
       if (Array.isArray(teamsData)) {
         setYourTeams(teamsData);
       }
@@ -75,7 +77,10 @@ export default function TeamsPage() {
 
     const getJoinableTeams = async () => {
       const joinableTeamsRoute = "/api/teams/joinable/me";
-      const joinableTeamsData = await fetchHelpers.getAPIrouteData(joinableTeamsRoute, {});
+      const joinableTeamsData = await fetchHelpers.getAPIrouteData(
+        joinableTeamsRoute,
+        {},
+      );
       if (Array.isArray(joinableTeamsData)) {
         setJoinableTeams(joinableTeamsData);
       }
@@ -87,11 +92,14 @@ export default function TeamsPage() {
       }
       const teamID = selectedTeam?.id;
       const teamMembersRoute = "/api/teams/{teamID}/users";
-      const teamMemberData = await fetchHelpers.getAPIrouteData(teamMembersRoute, {
-        params: {
-          path: { teamID: teamID },
+      const teamMemberData = await fetchHelpers.getAPIrouteData(
+        teamMembersRoute,
+        {
+          params: {
+            path: { teamID: teamID },
+          },
         },
-      });
+      );
       if (Array.isArray(teamMemberData)) {
         setMembers(teamMemberData);
       }

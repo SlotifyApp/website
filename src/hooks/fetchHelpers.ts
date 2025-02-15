@@ -20,7 +20,10 @@ class FetchHelpers {
     try {
       const { data, error, response } = await slotifyClient.GET(route, params);
       if (error && (response as Response).status == 401) {
-        const refreshErrorOccurred = await this.refreshRetryGetAPIroute(route, params);
+        const refreshErrorOccurred = await this.refreshRetryGetAPIroute(
+          route,
+          params,
+        );
         return refreshErrorOccurred ? null : data;
       }
       return data;
@@ -38,7 +41,10 @@ class FetchHelpers {
     try {
       const { data, error, response } = await slotifyClient.POST(route, params);
       if (error && (response as Response).status == 401) {
-        const refreshErrorOccurred = await this.refreshRetryPostAPIroute(route, params);
+        const refreshErrorOccurred = await this.refreshRetryPostAPIroute(
+          route,
+          params,
+        );
         return refreshErrorOccurred ? null : data;
       }
       return data;
@@ -54,9 +60,15 @@ class FetchHelpers {
   ): Promise<T | null | undefined> {
     // UPDATE: This is now a generic method for PATCH routes.
     try {
-      const { data, error, response } = await slotifyClient.PATCH(route, params);
+      const { data, error, response } = await slotifyClient.PATCH(
+        route,
+        params,
+      );
       if (error && (response as Response).status == 401) {
-        const refreshErrorOccurred = await this.refreshRetryPatchAPIroute(route, params);
+        const refreshErrorOccurred = await this.refreshRetryPatchAPIroute(
+          route,
+          params,
+        );
         return refreshErrorOccurred ? null : data;
       }
       return data;
@@ -68,7 +80,7 @@ class FetchHelpers {
 
   async refreshRetryGetAPIroute(
     route: PathsWithMethod<paths, "get">,
-    params: any
+    params: any,
   ): Promise<boolean> {
     // UPDATE: Now properly handles retrying a route with params if necessary. Same for POST refresh method.
     let errorOcurred = false;
@@ -97,7 +109,7 @@ class FetchHelpers {
 
   async refreshRetryPostAPIroute(
     route: PathsWithMethod<paths, "post">,
-    params: any
+    params: any,
   ): Promise<boolean> {
     let errorOcurred = false;
     try {
@@ -121,7 +133,7 @@ class FetchHelpers {
 
   async refreshRetryPatchAPIroute(
     route: PathsWithMethod<paths, "patch">,
-    params: any
+    params: any,
   ): Promise<boolean> {
     let errorOcurred = false;
     try {
@@ -145,7 +157,7 @@ class FetchHelpers {
 
   async logOutUser(): Promise<void> {
     await client.POST("/api/users/me/logout", {});
-    window.location.href = "/login";
+    window.location.href = "/";
   }
 
   toastDestructiveError(error: undefined): void {

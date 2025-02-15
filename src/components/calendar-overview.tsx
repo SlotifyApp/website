@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Clock,
   MapPin,
+  Plus,
   User,
   Users,
 } from "lucide-react";
@@ -95,7 +96,7 @@ export function CalendarOverview() {
   return (
     <>
       <Card>
-        <CardHeader className="p-4">
+        <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">
@@ -106,7 +107,11 @@ export function CalendarOverview() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleToday}>
+              <Button disabled className="bg-focusColor hover:bg-focusColor/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Event
+              </Button>
+              <Button variant="outline" onClick={handleToday}>
                 Today
               </Button>
               <Button
@@ -123,88 +128,90 @@ export function CalendarOverview() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid grid-cols-[auto_1fr] divide-x border-t">
-            {/* Time column */}
-            <div className="w-20 divide-y">
-              <div className="h-14" /> {/* Empty cell for header */}
-              {timeSlots.map((hour) => (
-                <div
-                  key={hour}
-                  className="h-24 p-2 text-sm text-muted-foreground"
-                >
-                  {format(new Date().setHours(hour, 0), "HH:mm")}
-                </div>
-              ))}
-            </div>
-
-            {/* Days grid */}
-            <div className="grid grid-cols-7 divide-x">
-              {/* Header row with days */}
-              <div className="col-span-7 grid grid-cols-7 divide-x">
-                {days.map((day) => (
-                  <div key={day.toString()} className="h-14 p-2 text-center">
-                    <div className="text-sm font-medium">
-                      {format(day, "EEE")}
-                    </div>
-                    <div
-                      className={cn(
-                        "text-sm mt-1",
-                        isSameDay(day, new Date()) &&
-                          "rounded-full bg-primary text-primary-foreground w-6 h-6 mx-auto flex items-center justify-center",
-                      )}
-                    >
-                      {format(day, "d")}
-                    </div>
+          <ScrollArea className="h-[66vh]">
+            <div className="grid grid-cols-[auto_1fr] divide-x border-t">
+              {/* Time column */}
+              <div className="w-20 divide-y">
+                <div className="h-14" /> {/* Empty cell for header */}
+                {timeSlots.map((hour) => (
+                  <div
+                    key={hour}
+                    className="h-24 p-2 text-sm text-muted-foreground"
+                  >
+                    {format(new Date().setHours(hour, 0), "HH:mm")}
                   </div>
                 ))}
               </div>
 
-              {/* Time slots grid */}
-              {timeSlots.map((hour) => (
-                <div
-                  key={hour}
-                  className="col-span-7 grid grid-cols-7 divide-x"
-                >
-                  {days.map((day) => {
-                    const dayEvents = getEventsForDayAndTime(day, hour);
-                    return (
-                      <div
-                        key={day.toString()}
-                        className="h-24 p-1 relative hover:bg-muted/50 transition-colors"
-                      >
-                        {dayEvents.map((dayEvent) => (
-                          <div
-                            key={dayEvent.id}
-                            className="absolute inset-x-1 rounded-md p-2 text-white bg-blue-500"
-                            style={{
-                              top: "0.25rem",
-                              minHeight: "calc(100% - 0.5rem)",
-                            }}
-                            onClick={() => handleEventClick(dayEvent)}
-                          >
-                            <div className="text-sm font-medium truncate">
-                              {dayEvent.subject}
-                            </div>
-                            <div className="text-xs font-medium truncate">
-                              {dayEvent.body}
-                            </div>
-                            <div className="text-xs truncate opacity-90">
-                              {dayEvent.locations &&
-                                dayEvent.locations.length > 0 &&
-                                dayEvent.locations[0] &&
-                                dayEvent.locations[0].name && (
-                                  <>{dayEvent.locations[0].name}</>
-                                )}
-                            </div>
-                          </div>
-                        ))}
+              {/* Days grid */}
+              <div className="grid grid-cols-7 divide-x">
+                {/* Header row with days */}
+                <div className="col-span-7 grid grid-cols-7 divide-x">
+                  {days.map((day) => (
+                    <div key={day.toString()} className="h-14 p-2 text-center">
+                      <div className="text-sm font-medium">
+                        {format(day, "EEE")}
                       </div>
-                    );
-                  })}
+                      <div
+                        className={cn(
+                          "text-sm mt-1",
+                          isSameDay(day, new Date()) &&
+                            "rounded-full bg-focusColor text-primary-foreground w-6 h-6 mx-auto flex items-center justify-center",
+                        )}
+                      >
+                        {format(day, "d")}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+
+                {/* Time slots grid */}
+                {timeSlots.map((hour) => (
+                  <div
+                    key={hour}
+                    className="col-span-7 grid grid-cols-7 divide-x"
+                  >
+                    {days.map((day) => {
+                      const dayEvents = getEventsForDayAndTime(day, hour);
+                      return (
+                        <div
+                          key={day.toString()}
+                          className="h-24 p-1 relative hover:bg-muted/50 transition-colors"
+                        >
+                          {dayEvents.map((dayEvent) => (
+                            <div
+                              key={dayEvent.id}
+                              className="absolute inset-x-1 rounded-md p-2 bg-accent"
+                              style={{
+                                top: "0.25rem",
+                                minHeight: "calc(100% - 0.5rem)",
+                              }}
+                              onClick={() => handleEventClick(dayEvent)}
+                            >
+                              <div className="text-sm font-medium truncate">
+                                {dayEvent.subject}
+                              </div>
+                              <div className="text-xs font-medium truncate">
+                                {dayEvent.body}
+                              </div>
+                              <div className="text-xs truncate opacity-90">
+                                {dayEvent.locations &&
+                                  dayEvent.locations.length > 0 &&
+                                  dayEvent.locations[0] &&
+                                  dayEvent.locations[0].name && (
+                                    <>{dayEvent.locations[0].name}</>
+                                  )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         </CardContent>
       </Card>
 

@@ -1,8 +1,12 @@
 "use client";
 
 import User from "@/components/user";
-import { CalendarOverview } from "@/components/calendar-overview";
 import { RescheduleRequests } from "@/components/reschedule-requests";
+import slotifyClient from "@/hooks/fetch";
+import { useEffect, useState } from "react";
+import { CalendarEvent } from "@/components/calendar/calendar";
+import { toast } from "@/hooks/use-toast";
+import { EventsForToday } from "@/components/events-today";
 
 // function LoadingDashboard() {
 //   return (
@@ -15,13 +19,88 @@ import { RescheduleRequests } from "@/components/reschedule-requests";
 //     </div>
 //   );
 // }
+//
 export default function Dashboard() {
+  const [calendar, setCalendar] = useState<Array<CalendarEvent>>([]);
+
+  useEffect(() => {
+    const fetchCalendar = async () => {
+      const now = new Date();
+      const endOfDay = new Date(now);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const startFormatted = now.toISOString().slice(0, 19) + "Z";
+      const endFormatted = endOfDay.toISOString().slice(0, 19) + "Z";
+
+      const { data, error, response } = await slotifyClient.GET(
+        "/api/calendar/me",
+        {
+          params: {
+            query: {
+              start: startFormatted,
+              end: endFormatted,
+            },
+          },
+        },
+      );
+
+      if (error && response.status == 401) {
+        const { error, response } = await slotifyClient.POST(
+          "/api/refresh",
+          {},
+        );
+        if (response.status == 401) {
+          // The refresh token was invalid, could not refresh
+          // so back to login. This has to be done for every fetch
+          await slotifyClient.POST("/api/users/me/logout", {});
+          window.location.href = "/";
+        } else if (response.status == 201) {
+          const { data, error, response } = await slotifyClient.GET(
+            "/api/calendar/me",
+            {
+              params: {
+                query: {
+                  start: startFormatted.toString(),
+                  end: endFormatted.toString(),
+                },
+              },
+            },
+          );
+          if (response.status == 401) {
+            //MSAL client may no longer have user in cache, no other option other than
+            //to log out
+            await slotifyClient.POST("/api/users/me/logout", {});
+            window.location.href = "/";
+          }
+          if (error) {
+            toast({
+              title: "Error",
+              description: error,
+              variant: "destructive",
+            });
+          } else if (data) {
+            setCalendar(data);
+          }
+        } else if (error) {
+          toast({
+            title: "Error",
+            description: error,
+            variant: "destructive",
+          });
+        }
+      } else if (data) {
+        setCalendar(data);
+      }
+    };
+
+    fetchCalendar();
+  }, []);
   return (
     <div className="flex flex-col justify-start items-center mt-10 h-[90vh] w-screen overflow-x-hidden">
       <User />
       <div className="flex flex-row justify-start ml-[10vw] w-screen gap-6 mt-10">
         <div className="w-[60vw]">
-          <CalendarOverview />
+          <EventsForToday events={calendar} />
         </div>
         <div className="w-[30vw]">
           <RescheduleRequests />

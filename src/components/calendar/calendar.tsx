@@ -91,7 +91,7 @@ export function DisplayCalendar() {
   const handleToday = () => setCurrentMonth(new Date());
 
   return (
-    <div className="px-10">
+    <div>
       <CalendarHeader
         currentMonth={currentMonth}
         onPreviousMonthAction={handlePreviousMonth}
@@ -137,7 +137,7 @@ export function DisplayCalendar() {
                     className={cn(
                       "ml-auto font-medium",
                       isToday(day) &&
-                        "bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center",
+                        "bg-focusColor text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center",
                     )}
                   >
                     {format(day, "d")}

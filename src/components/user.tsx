@@ -19,14 +19,18 @@ export default function User() {
         }
         const obj = data as Record<string, unknown>;
         return (
-          "id" in obj && typeof obj.id === "number" &&
-          "email" in obj && typeof obj.email === "string" &&
-          "firstName" in obj && typeof obj.firstName === "string" &&
-          "lastName" in obj && typeof obj.lastName === "string"
+          "id" in obj &&
+          typeof obj.id === "number" &&
+          "email" in obj &&
+          typeof obj.email === "string" &&
+          "firstName" in obj &&
+          typeof obj.firstName === "string" &&
+          "lastName" in obj &&
+          typeof obj.lastName === "string"
         );
       }
 
-      const userRoute = "/api/users/me"
+      const userRoute = "/api/users/me";
       const userData = await fetchHelpers.getAPIrouteData(userRoute, {});
       if (isMember(userData)) {
         setUser(userData);

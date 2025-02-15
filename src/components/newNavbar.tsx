@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Calendar, LogOut, Users, Video } from "lucide-react";
+import { Calendar, Home, LogOut, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,11 +13,11 @@ import NotificationButton from "./notification-bell";
 import { useState } from "react";
 
 const items = [
-  // {
-  //   title: "Dashboard",
-  //   href: "/dashboard",
-  //   icon: Home,
-  // },
+  {
+    title: "Home",
+    href: "/dashboard",
+    icon: Home,
+  },
   {
     title: "Teams",
     href: "/dashboard/teams",
@@ -48,13 +48,13 @@ export default function NewNavbar() {
 
     // Want to redirect the user back to the home page
     // even if logout api failed
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (
     <div className="flex flex-row justify-between items-center h-[10vh] min-w-screen border-b">
       <Link href="/dashboard">
-        <div className="flex flex-col justify-center ml-5 text-2xl font-semibold h-[10vh]">
+        <div className="flex flex-col justify-center ml-5 text-2xl font-semibold h-[10vh] duration-300 hover:scale-110 hover:text-focusColor hover:font-semibold">
           Slotify
         </div>
       </Link>
