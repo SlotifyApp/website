@@ -30,7 +30,7 @@ export default function User() {
           // refresh failed, just log user out
           await slotifyClient.POST("/api/users/me/logout", {});
           // setLoading(false);
-          window.location.href = "/login";
+          window.location.href = "/";
           return;
         }
 

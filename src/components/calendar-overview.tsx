@@ -93,7 +93,7 @@ export function CalendarOverview() {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
           await slotifyClient.POST("/api/users/me/logout", {});
-          window.location.href = "/login";
+          window.location.href = "/";
         } else if (response.status == 201) {
           const { data, error, response } = await slotifyClient.GET(
             "/api/calendar/me",
@@ -110,7 +110,7 @@ export function CalendarOverview() {
             //MSAL client may no longer have user in cache, no other option other than
             //to log out
             await slotifyClient.POST("/api/users/me/logout", {});
-            window.location.href = "/login";
+            window.location.href = "/";
           }
           if (error) {
             toast({

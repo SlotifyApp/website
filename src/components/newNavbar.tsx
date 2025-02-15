@@ -48,7 +48,7 @@ export default function NewNavbar() {
 
     // Want to redirect the user back to the home page
     // even if logout api failed
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (

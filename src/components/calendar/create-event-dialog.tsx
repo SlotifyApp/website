@@ -108,7 +108,7 @@ export function CreateEventDialog({
         if (response.status == 401) {
           // The refresh token was invalid, could not refresh
           // so back to login. This has to be done for every fetch
-          window.location.href = "/login";
+          window.location.href = "/";
         } else if (response.status == 201) {
           //retry the /user route
           const { data, error, response } = await slotifyClient.GET(
@@ -119,7 +119,7 @@ export function CreateEventDialog({
             //MSAL client may no longer have user in cache, no other option other than
             //to log out
             await slotifyClient.POST("/api/users/me/logout", {});
-            window.location.href = "/login";
+            window.location.href = "/";
           }
           if (error) {
             toast({
