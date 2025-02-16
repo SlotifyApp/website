@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import User from "@/components/user";
-import { RescheduleRequests } from "@/components/reschedule-requests";
-import { useEffect, useState } from "react";
-import { CalendarEvent } from "@/components/calendar/calendar";
-import { EventsForToday } from "@/components/events-today";
-import fetchHelpers from "@/hooks/fetchHelpers";
+import User from '@/components/user'
+import { RescheduleRequests } from '@/components/reschedule-requests'
+import { useEffect, useState } from 'react'
+import { EventsForToday } from '@/components/events-today'
+import { CalendarEvent } from '@/types/types'
+import slotifyClient from '@/hooks/fetch'
 
 // function LoadingDashboard() {
 //   return (
@@ -20,43 +20,43 @@ import fetchHelpers from "@/hooks/fetchHelpers";
 // }
 //
 export default function Dashboard() {
-  const [calendar, setCalendar] = useState<Array<CalendarEvent>>([]);
+  const [calendar, setCalendar] = useState<Array<CalendarEvent>>([])
 
   useEffect(() => {
     const fetchCalendar = async () => {
-      const now = new Date();
-      const endOfDay = new Date(now);
-      endOfDay.setHours(23, 59, 59, 999);
+      const now = new Date()
+      const endOfDay = new Date(now)
+      endOfDay.setHours(23, 59, 59, 999)
 
-      const startFormatted = now.toISOString().slice(0, 19) + "Z";
-      const endFormatted = endOfDay.toISOString().slice(0, 19) + "Z";
-      const calendarRoute = "/api/calendar/me";
-      const data = await fetchHelpers.getAPIrouteData(calendarRoute, {
-        params: {
-          query: {
+      const startFormatted = now.toISOString().slice(0, 19) + 'Z'
+      const endFormatted = endOfDay.toISOString().slice(0, 19) + 'Z'
+
+      try {
+        const data = await slotifyClient.GetAPICalendarMe({
+          queries: {
             start: startFormatted,
             end: endFormatted,
           },
-        },
-      });
-      if (Array.isArray(data)) {
-        setCalendar(data);
+        })
+        setCalendar(data)
+      } catch (error) {
+        console.log('calendar me error', error)
       }
-    };
+    }
 
-    fetchCalendar();
-  }, []);
+    fetchCalendar()
+  }, [])
   return (
-    <div className="flex flex-col justify-start items-center mt-10 h-[90vh] w-screen overflow-x-hidden">
+    <div className='flex flex-col justify-start items-center mt-10 h-[90vh] w-screen overflow-x-hidden'>
       <User />
-      <div className="flex flex-row justify-start ml-[10vw] w-screen gap-6 mt-10">
-        <div className="w-[60vw]">
+      <div className='flex flex-row justify-start ml-[10vw] w-screen gap-6 mt-10'>
+        <div className='w-[60vw]'>
           <EventsForToday events={calendar} />
         </div>
-        <div className="w-[30vw]">
+        <div className='w-[30vw]'>
           <RescheduleRequests />
         </div>
       </div>
     </div>
-  );
+  )
 }
