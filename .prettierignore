@@ -1,0 +1,6 @@
+public/swagger
+postcss.config.mjs
+eslint.config.mjs
+shared/*
+.github/*
+src/types/client.ts
