@@ -1010,7 +1010,8 @@
         "properties": {
           "email": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "nullable": true
           },
           "type": {
             "type": "string",
@@ -1018,7 +1019,8 @@
               "required",
               "optional",
               "resource"
-            ]
+            ],
+            "nullable": true
           },
           "responseStatus": {
             "type": "string",
@@ -1029,7 +1031,8 @@
               "accepted",
               "declined",
               "notResponded"
-            ]
+            ],
+            "nullable": true
           }
         }
       },
@@ -1053,13 +1056,15 @@
             "format": "date-time"
           },
           "endTime": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "isCancelled": {
             "type": "boolean"
           },
           "joinURL": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "locations": {
             "type": "array",
@@ -1072,7 +1077,8 @@
             "format": "email"
           },
           "startTime": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "subject": {
             "type": "string"
@@ -1080,7 +1086,11 @@
           "webLink": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "attendees",
+          "locations"
+        ]
       },
       "Location": {
         "type": "object",
@@ -1104,10 +1114,12 @@
               "restaurant",
               "localBusiness",
               "postalAddress"
-            ]
+            ],
+            "nullable": true
           },
           "street": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         }
       },

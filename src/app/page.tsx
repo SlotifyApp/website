@@ -1,30 +1,35 @@
-"use client";
-import { useEffect } from "react";
-import slotifyClient from "@/hooks/fetch";
-import LandingPage from "@/components/dashboard-landing";
-import fetchHelpers from "@/hooks/fetchHelpers";
+'use client'
+import { useEffect } from 'react'
+import LandingPage from '@/components/dashboard-landing'
+
+import axios from 'axios'
 
 export default function Home() {
   useEffect(() => {
     const fetchUser = async () => {
-        // Detects whether the access token or refresh token are valid.
-        // If either one is, then redirect to /dashboard.
-        try {
-          const { response } = await slotifyClient.GET("/api/users/me", {});
-          if (response.status == 200) {
-            window.location.href = "/dashboard";
-          } else if (response.status == 401) {
-            const { response } = await slotifyClient.POST("/api/refresh", {});
-            if (response.status == 201) {
-              window.location.href = "/dashboard";
-            }
-          }
+      // Detects whether the access token or refresh token are valid.
+      // If either one is, then redirect to /dashboard.
+      try {
+        await axios.get('/api/users/me', {
+          baseURL: 'http://localhost:8080/',
+          withCredentials: true,
+        })
+        window.location.href = '/dashboard'
+        return
       } catch (error) {
-        fetchHelpers.toastDestructiveError(error)
+        console.log('error', error)
+      }
+      try {
+        await axios.post('/api/refresh', {
+          baseURL: 'http://localhost:8080/',
+          withCredentials: true,
+        })
+      } catch (error) {
+        console.log('error', error)
       }
     }
-    fetchUser();
-  }, []);
+    fetchUser()
+  }, [])
 
-  return <LandingPage />;
+  return <LandingPage />
 }

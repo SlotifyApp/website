@@ -8,8 +8,9 @@
 git clone --recurse-submodules
 ```
 
-2. Copy the `.env.sample` contents into a new file named `.env.local` and fill those variables out by
-   referring to either `terraform` or the microsoft entra UI.
+2. Copy the `.env.sample` contents into a new file named `.env.local` and fill
+   those variables out by referring to either `terraform` or the microsoft entra
+   UI.
 
 3. Install `pre-commit`:
 
@@ -31,7 +32,8 @@ npm i # install dependencies
 npm run dev # run Next.js server
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the
+result.
 
 5. To view our Swagger UI Documentation, view the following after you login:
    [Swagger Documentation](http://localhost:3000/swagger/index.html)
