@@ -41,9 +41,10 @@ export default function NewNavbar() {
 
   const pathname = usePathname()
   const handleLogout = async () => {
-    const { error } = await slotifyClient.POST('/api/users/me/logout', {})
-    if (error) {
-      console.log(`error: ${JSON.stringify(error)}`)
+    try {
+      slotifyClient.PostAPIUsersMeLogout(undefined)
+    } catch (error) {
+      console.error(`error: ${JSON.stringify(error)}`)
     }
 
     // Want to redirect the user back to the home page
