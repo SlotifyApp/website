@@ -49,7 +49,7 @@ export function CalendarOverview() {
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
   // Generate time slots from 8:00 to 23:00
-  const timeSlots = Array.from({ length: 16 }, (_, i) => i + 8)
+  const timeSlots = Array.from({ length: 24 }, (_, i) => i)
 
   const handlePreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1))
   const handleNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1))
@@ -262,7 +262,7 @@ export function CalendarOverview() {
                               {selectedEvent.attendees.map(
                                 (attendee, index) => (
                                   <li key={index}>
-                                    {attendee.email || attendee.type} (
+                                    {attendee.email || attendee.attendeeType} (
                                     {attendee.responseStatus})
                                   </li>
                                 ),
