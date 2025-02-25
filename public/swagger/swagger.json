@@ -996,16 +996,349 @@
           }
         }
       }
+    },
+    "/api/scheduling/slots": {
+      "post": {
+        "operationId": "PostAPISchedulingFree",
+        "summary": "Idempotent route, just returns appropriate time slots along with their respective ratings.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulingSlotsBodySchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SchedulingSlotsSuccessResponse"
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid event data)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "responses": {
+      "SchedulingSlotsSuccessResponse": {
+        "description": "Scheduling algorithm returns the valid time slots and their respective ratings.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SchedulingSlotsSuccessResponseBody"
+            }
+          }
+        }
+      },
       "UnauthorizedError": {
         "description": "Access token is missing or invalid"
       }
     },
     "schemas": {
+      "TimeConstraint": {
+        "description": "Maps directly to [MSFT timeConstraint](https://learn.microsoft.com/en-us/graph/api/resources/timeconstraint?view=graph-rest-1.0)",
+        "type": "object",
+        "properties": {
+          "activityDomain": {
+            "type": "string"
+          },
+          "timeSlots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeetingTimeSlot"
+            }
+          }
+        },
+        "required": [
+          "timeSlots"
+        ]
+      },
+      "SchedulingSlotsBodySchema": {
+        "description": "Roughly maps to [MSFT Find Meeting Schema](https://learn.microsoft.com/en-us/graph/api/user-findmeetingtimes?view=graph-rest-1.0&tabs=http#request-body)",
+        "type": "object",
+        "properties": {
+          "attendees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendeeBase"
+            }
+          },
+          "meetingName": {
+            "description": "custom field, this is used for the AI model",
+            "type": "string"
+          },
+          "meetingDuration": {
+            "type": "string",
+            "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
+            "example": "PT2H30M"
+          },
+          "isOrganizerOptional": {
+            "type": "boolean"
+          },
+          "locationConstraint": {
+            "$ref": "#/components/schemas/LocationConstraint"
+          },
+          "minimumAttendeePercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxCandidates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "timeConstraint": {
+            "$ref": "#/components/schemas/TimeConstraint"
+          }
+        },
+        "required": [
+          "attendees",
+          "isOrganizerOptional",
+          "locationConstraint",
+          "meetingDuration",
+          "meetingName",
+          "timeConstraint"
+        ]
+      },
+      "PhysicalAddress": {
+        "description": "Maps directly to [MSFT physicalAddress](https://learn.microsoft.com/en-us/graph/api/resources/locationconstraintitem?view=graph-rest-1.0)",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "The city."
+          },
+          "countryOrRegion": {
+            "type": "string",
+            "description": "The country or region. It's a free-format string value, for example, \"United States\"."
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "The postal code."
+          },
+          "state": {
+            "type": "string",
+            "description": "The state."
+          },
+          "street": {
+            "type": "string",
+            "description": "The street."
+          }
+        }
+      },
+      "LocationConstraintItem": {
+        "description": "Maps roughly to [MSFT locationConstraintItem](https://learn.microsoft.com/en-us/graph/api/resources/locationconstraintitem?view=graph-rest-1.0)",
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "resolveAvailability": {
+            "type": "boolean"
+          },
+          "locationEmailAddress": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/PhysicalAddress"
+          }
+        },
+        "required": [
+          "displayName",
+          "resolveAvailability",
+          "address"
+        ]
+      },
+      "LocationConstraint": {
+        "description": "Maps directly to [MSFT locationConstraint](https://learn.microsoft.com/en-us/graph/api/resources/locationconstraint?view=graph-rest-1.0)",
+        "type": "object",
+        "properties": {
+          "isRequired": {
+            "type": "boolean"
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationConstraintItem"
+            }
+          },
+          "suggestLocation": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EmptySuggestionsReason": {
+        "description": "Maps directly to [MSFT emptySuggestionsReason](https://learn.microsoft.com/en-us/graph/api/resources/meetingtimesuggestionsresult?view=graph-rest-1.0)",
+        "type": "string",
+        "enum": [
+          "attendeesUnavailable",
+          "attendeesUnavailableOrUnknown",
+          "locationsUnavailable",
+          "organizerUnavailable",
+          "unknown"
+        ]
+      },
+      "FreeBusyStatus": {
+        "description": "Maps directly to [MSFT freebusyStatus](https://learn.microsoft.com/en-us/graph/api/resources/attendeeavailability?view=graph-rest-1.0)",
+        "type": "string",
+        "enum": [
+          "free",
+          "tentative",
+          "busy",
+          "oof",
+          "workingElsewhere",
+          "unknown"
+        ]
+      },
+      "AttendeeAvailability": {
+        "description": "Maps roughly to [MSFT attendeeAvailability](https://learn.microsoft.com/en-us/graph/api/resources/attendeeavailability?view=graph-rest-1.0)",
+        "properties": {
+          "availability": {
+            "$ref": "#/components/schemas/FreeBusyStatus"
+          },
+          "attendee": {
+            "$ref": "#/components/schemas/AttendeeBase"
+          }
+        },
+        "required": [
+          "availability",
+          "attendee"
+        ]
+      },
+      "MeetingTimeSlot": {
+        "description": "Maps directly to [MSFT meetingTimeSlot](https://learn.microsoft.com/en-us/graph/api/resources/timeslot?view=graph-rest-1.0)",
+        "type": "object",
+        "properties": {
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "end",
+          "start"
+        ]
+      },
+      "MeetingTimeSuggestion": {
+        "description": "Maps roughly to [MSFT meetingTimeSuggestion](https://learn.microsoft.com/en-us/graph/api/resources/meetingtimesuggestion?view=graph-rest-1.0)",
+        "type": "object",
+        "properties": {
+          "attendeeAvailability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendeeAvailability"
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            }
+          },
+          "meetingTimeSlot": {
+            "$ref": "#/components/schemas/MeetingTimeSlot"
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "organizerAvailability": {
+            "type": "string"
+          },
+          "suggestionReason": {
+            "type": "string"
+          }
+        }
+      },
+      "SchedulingSlotsSuccessResponseBody": {
+        "description": "Maps roughly to [MSFT meetingTimeSuggestionsResult](https://learn.microsoft.com/en-us/graph/api/resources/meetingtimesuggestionsresult?view=graph-rest-1.0)",
+        "type": "object",
+        "properties": {
+          "emptySuggestionsReason": {
+            "$ref": "#/components/schemas/EmptySuggestionsReason"
+          },
+          "meetingTimeSuggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeetingTimeSuggestion"
+            }
+          }
+        }
+      },
+      "AttendeeType": {
+        "description": "Maps directly to [MSFT Attendee->type](https://learn.microsoft.com/en-us/graph/api/resources/attendee?view=graph-rest-1.0)",
+        "type": "string",
+        "enum": [
+          "required",
+          "optional",
+          "resource"
+        ]
+      },
+      "EmailAddress": {
+        "type": "object",
+        "description": "directly maps to MSFT Email Address, see info here:[MSFT EmailAddress Struct Docs](https://learn.microsoft.com/en-us/graph/api/resources/emailaddress?view=graph-rest-1.0)",
+        "properties": {
+          "address": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "name"
+        ]
+      },
+      "AttendeeBase": {
+        "type": "object",
+        "description": "directly maps to [MSFT attendeeBase](https://learn.microsoft.com/en-us/graph/api/resources/attendeebase?view=graph-rest-1.0)",
+        "properties": {
+          "emailAddress": {
+            "$ref": "#/components/schemas/EmailAddress"
+          },
+          "attendeeType": {
+            "$ref": "#/components/schemas/AttendeeType"
+          }
+        },
+        "required": [
+          "emailAddress",
+          "attendeeType"
+        ]
+      },
       "Attendee": {
+        "description": "Maps roughly to [MSFT Attendee](https://learn.microsoft.com/en-us/graph/api/resources/attendee?view=graph-rest-1.0#properties)",
         "type": "object",
         "properties": {
           "email": {
@@ -1013,13 +1346,8 @@
             "format": "email",
             "nullable": true
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "required",
-              "optional",
-              "resource"
-            ],
+          "attendeeType": {
+            "$ref": "#/components/schemas/AttendeeType",
             "nullable": true
           },
           "responseStatus": {
@@ -1037,6 +1365,7 @@
         }
       },
       "CalendarEvent": {
+        "description": "Maps roughly to [MSFT event](https://learn.microsoft.com/en-us/graph/api/resources/event?view=graph-rest-1.0#properties)",
         "type": "object",
         "properties": {
           "id": {
@@ -1063,6 +1392,7 @@
             "type": "boolean"
           },
           "joinURL": {
+            "description": "Maps roughly to [MSFT OnlineMeetingInfo->joinURL](https://learn.microsoft.com/en-us/graph/api/resources/onlinemeetinginfo?view=graph-rest-1.0#json-representation)",
             "type": "string",
             "nullable": true
           },
@@ -1073,6 +1403,7 @@
             }
           },
           "organizer": {
+            "description": "Maps roughly to [MSFT Recipient->emailAddress](https://learn.microsoft.com/en-us/graph/api/resources/recipient?view=graph-rest-1.0)",
             "type": "string",
             "format": "email"
           },
@@ -1093,6 +1424,7 @@
         ]
       },
       "Location": {
+        "description": "Maps roughly to [MSFT Location](https://learn.microsoft.com/en-us/graph/api/resources/location?view=graph-rest-1.0)",
         "type": "object",
         "properties": {
           "id": {
