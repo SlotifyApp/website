@@ -22,8 +22,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Team } from './team-list'
 import slotifyClient from '@/hooks/fetch'
+import { SlotifyGroup } from '@/types/types'
 import { errorToast } from '@/hooks/use-toast'
 
 const formSchema = z.object({
@@ -33,10 +33,13 @@ const formSchema = z.object({
 })
 
 interface ProfileFormProps {
-  teams: Team[]
-  onSetYourTeamsAction: (teams: Team[]) => void
+  slotifyGroups: SlotifyGroup[]
+  onSetYourSlotifyGroupsAction: (slotifyGroups: SlotifyGroup[]) => void
 }
-export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
+export function ProfileForm({
+  slotifyGroups: slotifyGroups,
+  onSetYourSlotifyGroupsAction: onSetYourSlotifyGroupsAction,
+}: ProfileFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,10 +52,10 @@ export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const data = await slotifyClient.PostAPITeams({
+      const data = await slotifyClient.PostAPISlotifyGroups({
         name: values.name,
       })
-      onSetYourTeamsAction([data, ...teams])
+      onSetYourSlotifyGroupsAction([data, ...slotifyGroups])
     } catch (error) {
       console.error(error)
       errorToast(error)
@@ -62,13 +65,13 @@ export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant='outline' size='icon' className='relative'>
-          + Create Team
+          + Create Slotify Group
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[90vw] sm:h-[90vh] sm:max-h-[90vh] flex flex-col'>
         <DialogHeader>
-          <DialogTitle>Team Form</DialogTitle>
-          <DialogDescription>Create a new team.</DialogDescription>
+          <DialogTitle>Slotify Group Form</DialogTitle>
+          <DialogDescription>Create a new slotify group.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
@@ -77,12 +80,12 @@ export function ProfileForm({ teams, onSetYourTeamsAction }: ProfileFormProps) {
               name='name'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Team Name</FormLabel>
+                  <FormLabel>Slotify Group Name</FormLabel>
                   <FormControl>
                     <Input placeholder='AWSome' {...field} />
                   </FormControl>
                   <FormDescription>
-                    This is your public team name.
+                    This is your public slotify group name.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

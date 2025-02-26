@@ -119,6 +119,31 @@ type CalendarEvent = {
   subject?: string | undefined;
   webLink?: string | undefined;
 };
+type InvitesGroup = {
+  inviteID: number;
+  message: string;
+  status: InviteStatus;
+  expiryDate: string;
+  fromUserEmail: string;
+  fromUserFirstName: string;
+  fromUserLastName: string;
+  toUserEmail: string;
+  toUserFirstName: string;
+  toUserLastName: string;
+  createdAt: string;
+};
+type InviteStatus = "accepted" | "declined" | "expired" | "pending";
+type InvitesMe = {
+  inviteID: number;
+  message: string;
+  expiryDate: string;
+  createdAt: string;
+  status: InviteStatus;
+  fromUserEmail: string;
+  slotifyGroupName: string;
+  fromUserFirstName: string;
+  fromUserLastName: string;
+};
 
 const Notification = z
   .object({
@@ -198,8 +223,48 @@ const UserCreate = z
     lastName: z.string(),
   })
   .passthrough();
-const Team = z.object({ id: z.number().int(), name: z.string() }).passthrough();
-const TeamCreate = z.object({ name: z.string() }).passthrough();
+const InviteStatus = z.enum(["accepted", "declined", "expired", "pending"]);
+const InvitesMe: z.ZodType<InvitesMe> = z
+  .object({
+    inviteID: z.number().int(),
+    message: z.string(),
+    expiryDate: z.string(),
+    createdAt: z.string().datetime({ offset: true }),
+    status: InviteStatus,
+    fromUserEmail: z.string().email(),
+    slotifyGroupName: z.string(),
+    fromUserFirstName: z.string(),
+    fromUserLastName: z.string(),
+  })
+  .passthrough();
+const InviteCreate = z
+  .object({
+    slotifyGroupID: z.number().int(),
+    expiryDate: z.string(),
+    toUserID: z.number().int(),
+    message: z.string(),
+    createdAt: z.string().datetime({ offset: true }),
+  })
+  .passthrough();
+const InvitesGroup: z.ZodType<InvitesGroup> = z
+  .object({
+    inviteID: z.number().int(),
+    message: z.string(),
+    status: InviteStatus,
+    expiryDate: z.string(),
+    fromUserEmail: z.string().email(),
+    fromUserFirstName: z.string(),
+    fromUserLastName: z.string(),
+    toUserEmail: z.string().email(),
+    toUserFirstName: z.string(),
+    toUserLastName: z.string(),
+    createdAt: z.string().datetime({ offset: true }),
+  })
+  .passthrough();
+const SlotifyGroup = z
+  .object({ id: z.number().int(), name: z.string() })
+  .passthrough();
+const SlotifyGroupCreate = z.object({ name: z.string() }).passthrough();
 const EmailAddress: z.ZodType<EmailAddress> = z
   .object({ address: z.string().email(), name: z.string() })
   .passthrough();
@@ -303,8 +368,12 @@ export const schemas = {
   CalendarEvent,
   User,
   UserCreate,
-  Team,
-  TeamCreate,
+  InviteStatus,
+  InvitesMe,
+  InviteCreate,
+  InvitesGroup,
+  SlotifyGroup,
+  SlotifyGroupCreate,
   EmailAddress,
   AttendeeBase,
   PhysicalAddress,
@@ -447,6 +516,273 @@ const endpoints = makeApi([
     response: z.string(),
   },
   {
+    method: "post",
+    path: "/api/invites",
+    alias: "PostAPIInvites",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: InviteCreate,
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Slotify group not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "options",
+    path: "/api/invites",
+    alias: "OptionsAPIInvites",
+    requestFormat: "json",
+    response: z.void(),
+  },
+  {
+    method: "patch",
+    path: "/api/invites/:inviteID",
+    alias: "PatchAPIInvitesInviteID",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.object({ message: z.string() }).passthrough(),
+      },
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Invite not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "delete",
+    path: "/api/invites/:inviteID",
+    alias: "DeleteAPIInvitesInviteID",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Invite not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "options",
+    path: "/api/invites/:inviteID",
+    alias: "OptionsAPIInvitesInviteID",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.void(),
+  },
+  {
+    method: "patch",
+    path: "/api/invites/:inviteID/accept",
+    alias: "PatchAPIInvitesInviteIDAccept",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Invite not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "options",
+    path: "/api/invites/:inviteID/accept",
+    alias: "OptionsAPIInvitesInviteIDAccept",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.void(),
+  },
+  {
+    method: "patch",
+    path: "/api/invites/:inviteID/decline",
+    alias: "PatchAPIInvitesInviteIDDecline",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Invite not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "options",
+    path: "/api/invites/:inviteID/decline",
+    alias: "OptionsAPIInvitesInviteIDDecline",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "inviteID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.void(),
+  },
+  {
+    method: "get",
+    path: "/api/invites/me",
+    alias: "GetAPIInvitesMe",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "status",
+        type: "Query",
+        schema: z
+          .enum(["accepted", "declined", "expired", "pending"])
+          .optional(),
+      },
+    ],
+    response: z.array(InvitesMe),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `User not found`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
     method: "options",
     path: "/api/notifications/:notificationID/read",
     alias: "OptionsAPINotificationsNotificationIDRead",
@@ -537,37 +873,9 @@ const endpoints = makeApi([
     ],
   },
   {
-    method: "get",
-    path: "/api/teams",
-    alias: "GetAPITeams",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "name",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-    ],
-    response: z.array(Team),
-    errors: [
-      {
-        status: 400,
-        description: `Bad request (e.g., invalid team name)`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "options",
-    path: "/api/teams",
-    alias: "OptionsAPITeams",
-    requestFormat: "json",
-    response: z.void(),
-  },
-  {
     method: "post",
-    path: "/api/teams",
-    alias: "PostAPITeams",
+    path: "/api/slotify-groups",
+    alias: "PostAPISlotifyGroups",
     requestFormat: "json",
     parameters: [
       {
@@ -576,23 +884,23 @@ const endpoints = makeApi([
         schema: z.object({ name: z.string() }).passthrough(),
       },
     ],
-    response: Team,
+    response: SlotifyGroup,
     errors: [
       {
         status: 400,
-        description: `Bad request (e.g., invalid team name)`,
+        description: `Bad request (e.g., invalid slotifyGroup name)`,
         schema: z.string(),
       },
     ],
   },
   {
     method: "delete",
-    path: "/api/teams/:teamID",
-    alias: "DeleteAPITeamsTeamID",
+    path: "/api/slotify-groups/:slotifyGroupID",
+    alias: "DeleteAPISlotifyGroupsSlotifyGroupID",
     requestFormat: "json",
     parameters: [
       {
-        name: "teamID",
+        name: "slotifyGroupID",
         type: "Path",
         schema: z.number().int(),
       },
@@ -601,33 +909,33 @@ const endpoints = makeApi([
     errors: [
       {
         status: 400,
-        description: `Bad request (e.g., invalid team id)`,
+        description: `Bad request (e.g., invalid slotifyGroup id)`,
         schema: z.void(),
       },
       {
         status: 404,
-        description: `Team not found`,
+        description: `SlotifyGroup not found`,
         schema: z.void(),
       },
     ],
   },
   {
     method: "get",
-    path: "/api/teams/:teamID",
-    alias: "GetAPITeamsTeamID",
+    path: "/api/slotify-groups/:slotifyGroupID",
+    alias: "GetAPISlotifyGroupsSlotifyGroupID",
     requestFormat: "json",
     parameters: [
       {
-        name: "teamID",
+        name: "slotifyGroupID",
         type: "Path",
         schema: z.number().int(),
       },
     ],
-    response: Team,
+    response: SlotifyGroup,
     errors: [
       {
         status: 404,
-        description: `Team not found`,
+        description: `SlotifyGroup not found`,
         schema: z.void(),
       },
       {
@@ -639,103 +947,24 @@ const endpoints = makeApi([
   },
   {
     method: "get",
-    path: "/api/teams/:teamID/users",
-    alias: "GetAPITeamsTeamIDUsers",
+    path: "/api/slotify-groups/:slotifyGroupID/invites",
+    alias: "GetAPISlotifyGroupsSlotifyGroupIDInvites",
     requestFormat: "json",
     parameters: [
       {
-        name: "teamID",
+        name: "status",
+        type: "Query",
+        schema: z
+          .enum(["accepted", "declined", "expired", "pending"])
+          .optional(),
+      },
+      {
+        name: "slotifyGroupID",
         type: "Path",
         schema: z.number().int(),
       },
     ],
-    response: z.array(User),
-    errors: [
-      {
-        status: 403,
-        description: `Bad request, team id is invalid`,
-        schema: z.string(),
-      },
-      {
-        status: 500,
-        description: `Something went wrong`,
-        schema: z.string(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/api/teams/:teamID/users/:userID",
-    alias: "PostAPITeamsTeamIDUsersUserID",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "userID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-      {
-        name: "teamID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: Team,
-    errors: [
-      {
-        status: 400,
-        description: `Bad request`,
-        schema: z.void(),
-      },
-      {
-        status: 401,
-        description: `Access token is missing or invalid`,
-        schema: z.void(),
-      },
-      {
-        status: 403,
-        description: `User or team not found`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/api/teams/:teamID/users/me",
-    alias: "PostAPITeamsTeamIDUsersMe",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "teamID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: Team,
-    errors: [
-      {
-        status: 400,
-        description: `Bad request`,
-        schema: z.void(),
-      },
-      {
-        status: 401,
-        description: `Access token is missing or invalid`,
-        schema: z.void(),
-      },
-      {
-        status: 403,
-        description: `User or team not found`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "get",
-    path: "/api/teams/joinable/me",
-    alias: "GetAPITeamsJoinableMe",
-    requestFormat: "json",
-    response: z.array(Team),
+    response: z.array(InvitesGroup),
     errors: [
       {
         status: 400,
@@ -749,17 +978,74 @@ const endpoints = makeApi([
       },
       {
         status: 404,
-        description: `User not found`,
+        description: `Slotify group not found`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "delete",
+    path: "/api/slotify-groups/:slotifyGroupID/leave/me",
+    alias: "DeleteSlotifyGroupsSlotifyGroupIDLeaveMe",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "slotifyGroupID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Slotify group not found`,
         schema: z.void(),
       },
     ],
   },
   {
     method: "get",
-    path: "/api/teams/me",
-    alias: "GetAPITeamsMe",
+    path: "/api/slotify-groups/:slotifyGroupID/users",
+    alias: "GetAPISlotifyGroupsSlotifyGroupIDUsers",
     requestFormat: "json",
-    response: z.array(Team),
+    parameters: [
+      {
+        name: "slotifyGroupID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.array(User),
+    errors: [
+      {
+        status: 403,
+        description: `Bad request, slotifyGroup id is invalid`,
+        schema: z.string(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/slotify-groups/me",
+    alias: "GetAPISlotifyGroupsMe",
+    requestFormat: "json",
+    response: z.array(SlotifyGroup),
     errors: [
       {
         status: 400,
@@ -804,7 +1090,7 @@ const endpoints = makeApi([
     errors: [
       {
         status: 400,
-        description: `Bad request (e.g., invalid team ID)`,
+        description: `Bad request (e.g., invalid slotifyGroup ID)`,
         schema: z.void(),
       },
     ],
@@ -825,7 +1111,7 @@ const endpoints = makeApi([
     errors: [
       {
         status: 400,
-        description: `Bad request (e.g., invalid team ID)`,
+        description: `Bad request (e.g., invalid slotifyGroup ID)`,
         schema: z.void(),
       },
     ],
@@ -846,7 +1132,7 @@ const endpoints = makeApi([
     errors: [
       {
         status: 400,
-        description: `Bad request (e.g., invalid team ID)`,
+        description: `Bad request (e.g., invalid slotifyGroup ID)`,
         schema: z.void(),
       },
       {
@@ -891,7 +1177,7 @@ const endpoints = makeApi([
     errors: [
       {
         status: 400,
-        description: `Bad request (e.g., invalid team ID)`,
+        description: `Bad request (e.g., invalid slotifyGroup ID)`,
         schema: z.void(),
       },
       {

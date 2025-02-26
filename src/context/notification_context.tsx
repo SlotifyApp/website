@@ -53,6 +53,7 @@ export function NotificationProvider({
       const audio = new Audio(
         'https://www.soundjay.com/buttons/sounds/button-14.mp3',
       )
+      audio.volume = 0.5
       audio.play()
     })
 

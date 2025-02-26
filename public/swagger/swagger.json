@@ -456,7 +456,7 @@
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team ID)"
+            "description": "Bad request (e.g., invalid slotifyGroup ID)"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
@@ -513,7 +513,7 @@
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team ID)"
+            "description": "Bad request (e.g., invalid slotifyGroup ID)"
           }
         }
       },
@@ -542,7 +542,7 @@
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team ID)"
+            "description": "Bad request (e.g., invalid slotifyGroup ID)"
           }
         }
       }
@@ -575,7 +575,7 @@
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team ID)"
+            "description": "Bad request (e.g., invalid slotifyGroup ID)"
           },
           "403": {
             "description": "User not found"
@@ -617,102 +617,160 @@
         }
       }
     },
-    "/api/teams/joinable/me": {
+    "/api/invites/me": {
       "get": {
-        "operationId": "GetAPITeamsJoinableMe",
-        "summary": "Get all joinable teams for a user excluding teams they are already a part of.",
-        "responses": {
-          "200": {
-            "description": "Got all user's teams successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Team"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      }
-    },
-    "/api/teams/me": {
-      "get": {
-        "operationId": "GetAPITeamsMe",
-        "summary": "Get all teams for current user.",
-        "responses": {
-          "200": {
-            "description": "Got all user's teams successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Team"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        }
-      }
-    },
-    "/api/teams": {
-      "get": {
-        "operationId": "GetAPITeams",
-        "summary": "Get a team by query params.",
+        "operationId": "GetAPIInvitesMe",
+        "summary": "Get all invites for logged in user.",
         "parameters": [
           {
             "in": "query",
-            "name": "name",
+            "name": "status",
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/InviteStatus"
             },
-            "description": "Team name"
+            "description": "Invite status"
           }
         ],
         "responses": {
           "200": {
-            "description": "Teams matching the query parameters",
+            "description": "Got all user's invites successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Team"
+                    "$ref": "#/components/schemas/InvitesMe"
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team name)"
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/invites/{inviteID}": {
+      "patch": {
+        "operationId": "PatchAPIInvitesInviteID",
+        "summary": "update a new invite with a new message",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "message"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deleted the invite successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Invite not found"
+          },
+          "500": {
+            "description": "Something went wrong internally"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteAPIInvitesInviteID",
+        "summary": "Delete an invite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted the invite successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Invite not found"
+          },
+          "500": {
+            "description": "Something went wrong internally"
           }
         }
       },
       "options": {
-        "operationId": "OptionsAPITeams",
-        "summary": "Satisfy CORS preflight for creatingteams.",
+        "operationId": "OptionsAPIInvitesInviteID",
+        "summary": "Satisfy CORS preflight for invites.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
         "responses": {
           "204": {
             "description": "Successful CORS preflight",
@@ -748,33 +806,419 @@
             }
           }
         }
+      }
+    },
+    "/api/invites/{inviteID}/decline": {
+      "patch": {
+        "operationId": "PatchAPIInvitesInviteIDDecline",
+        "summary": "Decline an invite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Decline invite successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Invite not found"
+          },
+          "500": {
+            "description": "Something went wrong internally"
+          }
+        }
       },
+      "options": {
+        "operationId": "OptionsAPIInvitesInviteIDDecline",
+        "summary": "Satisfy CORS preflight for declining invites.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, PATCH, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invites/{inviteID}/accept": {
+      "patch": {
+        "operationId": "PatchAPIInvitesInviteIDAccept",
+        "summary": "Accept a new group invite and add member to slotify group.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Accepted invite successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Invite not found"
+          },
+          "500": {
+            "description": "Something went wrong internally"
+          }
+        }
+      },
+      "options": {
+        "operationId": "OptionsAPIInvitesInviteIDAccept",
+        "summary": "Satisfy CORS preflight for accepting invites.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "inviteID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the invite to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, PATCH, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invites": {
       "post": {
-        "operationId": "PostAPITeams",
-        "summary": "Create a new team.",
+        "operationId": "PostAPIInvites",
+        "summary": "Create a new invite",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TeamCreate"
+                "$ref": "#/components/schemas/InviteCreate"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Team created successfully",
+            "description": "Created an invite successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Team"
+                  "type": "string"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team name)",
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Slotify group not found"
+          },
+          "500": {
+            "description": "Something went wrong internally"
+          }
+        }
+      },
+      "options": {
+        "operationId": "OptionsAPIInvites",
+        "summary": "Satisfy CORS preflight for creating invites.",
+        "responses": {
+          "204": {
+            "description": "Successful CORS preflight",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "The allowed origin for cross-origin requests",
+                "schema": {
+                  "type": "string",
+                  "example": "http://localhost:3000"
+                }
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Allowed HTTP methods",
+                "schema": {
+                  "type": "string",
+                  "example": "GET, POST, PATCH, OPTIONS"
+                }
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Allowed headers in the actual request",
+                "schema": {
+                  "type": "string",
+                  "example": "Content-Type, Authorization"
+                }
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
+                "schema": {
+                  "type": "string",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slotify-groups/{slotifyGroupID}/invites": {
+      "get": {
+        "operationId": "GetAPISlotifyGroupsSlotifyGroupIDInvites",
+        "summary": "Get all invites for a slotify group",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/InviteStatus"
+            },
+            "description": "Invite status"
+          },
+          {
+            "in": "path",
+            "name": "slotifyGroupID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the slotifyGroup to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Got all a group's invites successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvitesGroup"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Slotify group not found"
+          }
+        }
+      }
+    },
+    "/api/slotify-groups/{slotifyGroupID}/leave/me": {
+      "delete": {
+        "operationId": "DeleteSlotifyGroupsSlotifyGroupIDLeaveMe",
+        "summary": "Have a member leave from a slotify group",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slotifyGroupID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the slotifyGroup to have the user leave from."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user successfully left the slotify group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Slotify group not found"
+          }
+        }
+      }
+    },
+    "/api/slotify-groups/me": {
+      "get": {
+        "operationId": "GetAPISlotifyGroupsMe",
+        "summary": "Get all slotify-groups for current user.",
+        "responses": {
+          "200": {
+            "description": "Got all user's slotify-groups successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlotifyGroup"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/slotify-groups": {
+      "post": {
+        "operationId": "PostAPISlotifyGroups",
+        "summary": "Create a new slotifyGroup.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlotifyGroupCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "SlotifyGroup created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotifyGroup"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid slotifyGroup name)",
             "content": {
               "application/json": {
                 "schema": {
@@ -786,25 +1230,25 @@
         }
       }
     },
-    "/api/teams/{teamID}": {
+    "/api/slotify-groups/{slotifyGroupID}": {
       "delete": {
-        "operationId": "DeleteAPITeamsTeamID",
-        "summary": "Delete a team by id.",
+        "operationId": "DeleteAPISlotifyGroupsSlotifyGroupID",
+        "summary": "Delete a slotifyGroup by id.",
         "parameters": [
           {
             "in": "path",
-            "name": "teamID",
+            "name": "slotifyGroupID",
             "schema": {
               "type": "integer",
               "format": "uint32"
             },
             "required": true,
-            "description": "Numeric ID of the team to delete"
+            "description": "Numeric ID of the slotifyGroup to delete"
           }
         ],
         "responses": {
           "200": {
-            "description": "Deleted team successfully",
+            "description": "Deleted slotifyGroup successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -814,41 +1258,41 @@
             }
           },
           "400": {
-            "description": "Bad request (e.g., invalid team id)"
+            "description": "Bad request (e.g., invalid slotifyGroup id)"
           },
           "404": {
-            "description": "Team not found"
+            "description": "SlotifyGroup not found"
           }
         }
       },
       "get": {
-        "operationId": "GetAPITeamsTeamID",
-        "summary": "Get a team by id.",
+        "operationId": "GetAPISlotifyGroupsSlotifyGroupID",
+        "summary": "Get a slotifyGroup by id.",
         "parameters": [
           {
             "in": "path",
-            "name": "teamID",
+            "name": "slotifyGroupID",
             "schema": {
               "type": "integer",
               "format": "uint32"
             },
             "required": true,
-            "description": "Numeric ID of the team to get"
+            "description": "Numeric ID of the slotifyGroup to get"
           }
         ],
         "responses": {
           "200": {
-            "description": "Got team successfully",
+            "description": "Got slotifyGroup successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Team"
+                  "$ref": "#/components/schemas/SlotifyGroup"
                 }
               }
             }
           },
           "404": {
-            "description": "Team not found"
+            "description": "SlotifyGroup not found"
           },
           "500": {
             "description": "Something went wrong internally"
@@ -856,20 +1300,20 @@
         }
       }
     },
-    "/api/teams/{teamID}/users": {
+    "/api/slotify-groups/{slotifyGroupID}/users": {
       "get": {
-        "summary": "Get all members of a team.",
-        "operationId": "GetAPITeamsTeamIDUsers",
+        "summary": "Get all members of a slotifyGroup.",
+        "operationId": "GetAPISlotifyGroupsSlotifyGroupIDUsers",
         "parameters": [
           {
             "in": "path",
-            "name": "teamID",
+            "name": "slotifyGroupID",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "uint32"
             },
-            "description": "ID of the team"
+            "description": "ID of the slotifyGroup"
           }
         ],
         "responses": {
@@ -887,7 +1331,7 @@
             }
           },
           "403": {
-            "description": "Bad request, team id is invalid",
+            "description": "Bad request, slotifyGroup id is invalid",
             "content": {
               "application/json": {
                 "schema": {
@@ -905,94 +1349,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/teams/{teamID}/users/me": {
-      "post": {
-        "operationId": "PostAPITeamsTeamIDUsersMe",
-        "summary": "Add current user to a team.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "teamID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "description": "ID of the team"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "User successfully added to the team",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "description": "User or team not found"
-          }
-        }
-      }
-    },
-    "/api/teams/{teamID}/users/{userID}": {
-      "post": {
-        "operationId": "PostAPITeamsTeamIDUsersUserID",
-        "summary": "Add a user to a team.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "userID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "description": "ID of the user"
-          },
-          {
-            "in": "path",
-            "name": "teamID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "description": "ID of the team"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "User successfully added to the team",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Team"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "403": {
-            "description": "User or team not found"
           }
         }
       }
@@ -1423,6 +1779,158 @@
           "locations"
         ]
       },
+      "InviteCreate": {
+        "description": "Invite create request body",
+        "type": "object",
+        "properties": {
+          "slotifyGroupID": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "toUserID": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "slotifyGroupID",
+          "toUserID",
+          "message",
+          "createdAt",
+          "expiryDate"
+        ]
+      },
+      "InviteStatus": {
+        "description": "Invite status",
+        "type": "string",
+        "enum": [
+          "accepted",
+          "declined",
+          "expired",
+          "pending"
+        ]
+      },
+      "InvitesGroup": {
+        "description": "References a Slotify Invite For a Group",
+        "type": "object",
+        "properties": {
+          "inviteID": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InviteStatus"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "fromUserEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "fromUserFirstName": {
+            "type": "string"
+          },
+          "fromUserLastName": {
+            "type": "string"
+          },
+          "toUserEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "toUserFirstName": {
+            "type": "string"
+          },
+          "toUserLastName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "expiryDate",
+          "inviteID",
+          "message",
+          "fromUserEmail",
+          "fromUserFirstName",
+          "fromUserLastName",
+          "toUserEmail",
+          "toUserFirstName",
+          "toUserLastName",
+          "status",
+          "createdAt"
+        ]
+      },
+      "InvitesMe": {
+        "description": "References a Slotify Invite",
+        "type": "object",
+        "properties": {
+          "inviteID": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "message": {
+            "description": "invite message",
+            "type": "string"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InviteStatus"
+          },
+          "fromUserEmail": {
+            "description": "from user email",
+            "type": "string",
+            "format": "email"
+          },
+          "slotifyGroupName": {
+            "description": "slotify group name",
+            "type": "string"
+          },
+          "fromUserFirstName": {
+            "description": "from user first name",
+            "type": "string"
+          },
+          "fromUserLastName": {
+            "description": "from user last name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expiryDate",
+          "inviteID",
+          "fromUserEmail",
+          "slotifyGroupName",
+          "message",
+          "fromUserFirstName",
+          "fromUserLastName",
+          "status",
+          "createdAt"
+        ]
+      },
       "Location": {
         "description": "Maps roughly to [MSFT Location](https://learn.microsoft.com/en-us/graph/api/resources/location?view=graph-rest-1.0)",
         "type": "object",
@@ -1521,7 +2029,7 @@
           "lastName"
         ]
       },
-      "TeamCreate": {
+      "SlotifyGroupCreate": {
         "type": "object",
         "properties": {
           "name": {
@@ -1532,7 +2040,7 @@
           "name"
         ]
       },
-      "Team": {
+      "SlotifyGroup": {
         "type": "object",
         "properties": {
           "id": {

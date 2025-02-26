@@ -7,11 +7,11 @@ export interface Member {
   lastName: string
 }
 
-interface TeamMembersProps {
+interface SlotifyGroupMembersProps {
   members: Member[]
 }
 
-export function TeamMembers({ members }: TeamMembersProps) {
+export function SlotifyGroupMembers({ members }: SlotifyGroupMembersProps) {
   return (
     <ul className='space-y-4'>
       {members.map(member => (
