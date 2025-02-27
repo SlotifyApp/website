@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Member } from '@/components/team-members'
+import { Member } from '@/components/slotify-group-members'
 
 import { User as LucideUserIcon } from 'lucide-react'
 import slotifyClient from '@/hooks/fetch'

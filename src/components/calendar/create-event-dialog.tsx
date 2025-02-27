@@ -23,11 +23,10 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
-import { Team } from '../team-list'
 import { errorToast, toast } from '@/hooks/use-toast'
 import { Check, ChevronDown, Search } from 'lucide-react'
 import slotifyClient from '@/hooks/fetch'
-import { Attendee, User } from '@/types/types'
+import { Attendee, SlotifyGroup, User } from '@/types/types'
 
 interface CreateEventDialogProps {
   open: boolean
@@ -41,8 +40,11 @@ export function CreateEventDialog({
   selectedDate,
 }: CreateEventDialogProps) {
   const [date, setDate] = useState<Date | undefined>(selectedDate || undefined)
-  const [yourTeams, setYourTeams] = useState<Array<Team>>([])
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
+  const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
+    Array<SlotifyGroup>
+  >([])
+  const [selectedSlotifyGroup, setSelectedGroup] =
+    useState<SlotifyGroup | null>(null)
   const [members, setMembers] = useState<User[]>([])
   const [selectedParticipants, setSelectedParticipants] = useState<User[]>([])
 
@@ -59,7 +61,7 @@ export function CreateEventDialog({
     selectedParticipants.forEach(participant => {
       const attendee: Attendee = {
         email: participant.email,
-        type: 'required', //TODO: Ask what the type is
+        attendeeType: 'required', //TODO: Ask what the type is
         responseStatus: 'notResponded',
       }
       attendees.push(attendee)
@@ -90,39 +92,40 @@ export function CreateEventDialog({
     }
   }
   useEffect(() => {
-    const getUserTeams = async () => {
+    const getUserSlotifyGroups = async () => {
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
       try {
-        const teamsData = await slotifyClient.GetAPITeamsMe()
-        setYourTeams(teamsData)
+        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe()
+        setYourSlotifyGroups(slotifyGroupsData)
       } catch (error) {
         console.error(error)
         errorToast(error)
       }
     }
-    const getTeamMembers = async () => {
-      if (!selectedTeam) {
+    const getSlotifyGroupMembers = async () => {
+      if (!selectedSlotifyGroup) {
         return
       }
-      const teamID = selectedTeam?.id
+      const slotifyGroupID = selectedSlotifyGroup?.id
       try {
-        const teamUsersData = await slotifyClient.GetAPITeamsTeamIDUsers({
-          params: {
-            teamID: teamID,
-          },
-        })
+        const slotifyGroupUsersData =
+          await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
+            params: {
+              slotifyGroupID: slotifyGroupID,
+            },
+          })
 
-        setMembers(teamUsersData)
+        setMembers(slotifyGroupUsersData)
       } catch (error) {
         console.error(error)
         errorToast(error)
       }
     }
 
-    getUserTeams()
-    getTeamMembers()
-  }, [selectedTeam])
+    getUserSlotifyGroups()
+    getSlotifyGroupMembers()
+  }, [selectedSlotifyGroup])
 
   const toggleParticipant = (participant: User) => {
     setSelectedParticipants(current =>
@@ -190,10 +193,10 @@ export function CreateEventDialog({
               <div className='space-y-4'>
                 <div className='space-y-2'>
                   <div className='space-y-2'>
-                    <TeamSelect
-                      selectedTeam={selectedTeam}
-                      setSelectedTeamAction={setSelectedTeam}
-                      teams={yourTeams}
+                    <SlotifyGroupSelect
+                      selectedSlotifyGroup={selectedSlotifyGroup}
+                      setSelectedSlotifyGroupAction={setSelectedGroup}
+                      slotifyGroups={yourSlotifyGroups}
                     />
                   </div>
                   <Label htmlFor='subject'>Subject</Label>
@@ -293,23 +296,23 @@ export function CreateEventDialog({
   )
 }
 
-interface TeamSelectProps {
-  selectedTeam: Team | null
-  setSelectedTeamAction: (team: Team | null) => void
-  teams: Team[]
+interface SlotifyGroupSelectProps {
+  selectedSlotifyGroup: SlotifyGroup | null
+  setSelectedSlotifyGroupAction: (slotifyGroup: SlotifyGroup | null) => void
+  slotifyGroups: SlotifyGroup[]
 }
 
-export default function TeamSelect({
-  selectedTeam,
-  setSelectedTeamAction,
-  teams,
-}: TeamSelectProps) {
+export default function SlotifyGroupSelect({
+  selectedSlotifyGroup: selectedSlotifyGroup,
+  setSelectedSlotifyGroupAction: setSelectedSlotifyGroupAction,
+  slotifyGroups: slotifyGroups,
+}: SlotifyGroupSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const filteredTeams = teams.filter(team =>
-    team.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredSlotifyGroups = slotifyGroups.filter(slotifyGroup =>
+    slotifyGroup.name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   useEffect(() => {
@@ -337,7 +340,9 @@ export default function TeamSelect({
         aria-haspopup='listbox'
         aria-expanded={isOpen}
       >
-        {selectedTeam ? selectedTeam.name : 'Select a team'}
+        {selectedSlotifyGroup
+          ? selectedSlotifyGroup.name
+          : 'Select a slotify group'}
         <ChevronDown
           className='w-5 h-5 ml-2 -mr-1 text-gray-400'
           aria-hidden='true'
@@ -352,7 +357,7 @@ export default function TeamSelect({
               <input
                 type='text'
                 className='w-full px-2 py-1 ml-2 text-sm focus:outline-none'
-                placeholder='Search teams...'
+                placeholder='Search slotify groups...'
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -363,31 +368,31 @@ export default function TeamSelect({
             tabIndex={-1}
             role='listbox'
           >
-            {filteredTeams.map(team => (
+            {filteredSlotifyGroups.map(team => (
               <li
                 key={team.id}
                 className={`${
-                  selectedTeam === team
+                  selectedSlotifyGroup === team
                     ? 'text-white bg-indigo-600'
                     : 'text-gray-900'
                 } cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-indigo-100`}
                 role='option'
-                aria-selected={selectedTeam === team}
+                aria-selected={selectedSlotifyGroup === team}
                 onClick={() => {
-                  setSelectedTeamAction(team)
+                  setSelectedSlotifyGroupAction(team)
                   setIsOpen(false)
                   setSearchTerm('')
                 }}
               >
                 <span className='block truncate'>{team.name}</span>
-                {selectedTeam === team && (
+                {selectedSlotifyGroup === team && (
                   <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
                     <Check className='w-5 h-5' aria-hidden='true' />
                   </span>
                 )}
               </li>
             ))}
-            {filteredTeams.length === 0 && (
+            {filteredSlotifyGroups.length === 0 && (
               <li className='px-3 py-2 text-sm text-gray-900'>
                 No teams found
               </li>

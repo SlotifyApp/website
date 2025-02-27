@@ -19,8 +19,8 @@ const items = [
     icon: Home,
   },
   {
-    title: 'Teams',
-    href: '/dashboard/teams',
+    title: 'Groups',
+    href: '/dashboard/groups',
     icon: Users,
   },
   {
