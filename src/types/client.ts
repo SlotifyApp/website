@@ -359,6 +359,16 @@ const SchedulingSlotsSuccessResponseBody: z.ZodType<SchedulingSlotsSuccessRespon
     })
     .partial()
     .passthrough();
+const MSFTGroup = z
+  .object({ id: z.number().int(), name: z.string() })
+  .passthrough();
+const MSFTGroupUser = z
+  .object({
+    email: z.string().email(),
+    firstName: z.string(),
+    lastName: z.string(),
+  })
+  .passthrough();
 
 export const schemas = {
   Notification,
@@ -387,6 +397,8 @@ export const schemas = {
   AttendeeAvailability,
   MeetingTimeSuggestion,
   SchedulingSlotsSuccessResponseBody,
+  MSFTGroup,
+  MSFTGroupUser,
 };
 
 const endpoints = makeApi([
@@ -783,6 +795,103 @@ const endpoints = makeApi([
     ],
   },
   {
+    method: "get",
+    path: "/api/msft-groups",
+    alias: "GetAPIMSFTGroups",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "name",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+    ],
+    response: z.array(MSFTGroup),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request (e.g., invalid microsoft group name)`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/msft-groups/:groupID",
+    alias: "GetAPIMSFTGroupsGroupID",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "groupID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: MSFTGroup,
+    errors: [
+      {
+        status: 404,
+        description: `Microsoft group not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/msft-groups/:groupID/users",
+    alias: "GetAPIMSFTGroupsGroupIDUsers",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "groupID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.array(MSFTGroupUser),
+    errors: [
+      {
+        status: 403,
+        description: `Bad request, Microsoft group id is invalid`,
+        schema: z.string(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/msft-groups/me",
+    alias: "GetAPIMSFTGroupsMe",
+    requestFormat: "json",
+    response: z.array(MSFTGroup),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `User not found`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
     method: "options",
     path: "/api/notifications/:notificationID/read",
     alias: "OptionsAPINotificationsNotificationIDRead",
@@ -816,7 +925,7 @@ const endpoints = makeApi([
         schema: z.void(),
       },
       {
-        status: 403,
+        status: 404,
         description: `Notification not found.`,
         schema: z.void(),
       },
@@ -1029,7 +1138,7 @@ const endpoints = makeApi([
     response: z.array(User),
     errors: [
       {
-        status: 403,
+        status: 404,
         description: `Bad request, slotifyGroup id is invalid`,
         schema: z.string(),
       },
@@ -1076,12 +1185,7 @@ const endpoints = makeApi([
         schema: z.string().email().optional(),
       },
       {
-        name: "firstName",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-      {
-        name: "lastName",
+        name: "name",
         type: "Query",
         schema: z.string().optional(),
       },
@@ -1136,7 +1240,7 @@ const endpoints = makeApi([
         schema: z.void(),
       },
       {
-        status: 403,
+        status: 404,
         description: `User not found`,
         schema: z.void(),
       },
@@ -1212,7 +1316,7 @@ const endpoints = makeApi([
         schema: z.void(),
       },
       {
-        status: 403,
+        status: 404,
         description: `Notification not found.`,
         schema: z.void(),
       },
