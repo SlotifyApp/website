@@ -199,7 +199,7 @@ export function CalendarOverview() {
                 }}
               >
                 {Array.from({ length: totalHours }, (_, i) => {
-                  // You could also display half-hour marks if desired.
+                  // Could also display half-hour marks if desired.
                   const timeLabel = format(
                     new Date(0, 0, 0, i), // any day, just hours = i
                     'HH:mm',
@@ -279,17 +279,17 @@ export function CalendarOverview() {
                           <div
                             key={event.id}
                             onClick={() => handleEventClick(event)}
-                            className='absolute p-2 rounded-md bg-accent text-accent-foreground cursor-pointer overflow-hidden w-full'
+                            className='absolute p-2 rounded-md bg-accent hover:bg-gray-200 text-accent-foreground cursor-pointer overflow-hidden w-full hover:text-focusColor font-medium duration-300 hover:font-bold hover:scale-105'
                             style={{
                               top: `${eventTop}%`,
                               height: `${eventHeight}%`,
                               zIndex: 10,
                             }}
                           >
-                            <div className='text-sm font-medium truncate'>
+                            <div className='text-sm truncate'>
                               {event.subject}
                             </div>
-                            <div className='text-xs font-medium truncate overflow-hidden'>
+                            <div className='text-xs truncate overflow-hidden'>
                               {event.body}
                             </div>
                             <div className='text-xs truncate opacity-90 overflow-hidden'>
