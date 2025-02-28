@@ -48,7 +48,7 @@ export function CalendarOverview() {
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
-  // Generate time slots from 8:00 to 23:00
+  // Create an array of 24 hours (0-23)
   const timeSlots = Array.from({ length: 24 }, (_, i) => i)
 
   const handlePreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1))
@@ -56,13 +56,30 @@ export function CalendarOverview() {
   const handleToday = () => setCurrentWeek(new Date())
 
   const getEventsForDayAndTime = (day: Date, hour: number) => {
+    // Create the time block boundaries for the given day and hour.
+    const blockStart = new Date(day)
+    blockStart.setHours(hour, 0, 0, 0)
+    
+    const blockEnd = new Date(day)
+    blockEnd.setHours(hour + 1, 0, 0, 0)
+  
+    // Filter events that overlap with the time block.
     return calendar.filter((event: CalendarEvent) => {
-      if (!event.startTime || !isValid(parseISO(event.startTime))) return false
-      const eventDate = parseISO(event.startTime)
-      const eventHour = eventDate.getHours()
-      return isSameDay(eventDate, day) && eventHour === hour
+      if (
+        !event.startTime ||
+        !event.endTime ||
+        !isValid(parseISO(event.startTime)) ||
+        !isValid(parseISO(event.endTime))
+      )
+        return false
+  
+      const eventStart = parseISO(event.startTime)
+      const eventEnd = parseISO(event.endTime)
+  
+      // Check if the event overlaps the current block.
+      return eventStart < blockEnd && eventEnd > blockStart
     })
-  }
+  }  
 
   useEffect(() => {
     const fetchCalendar = async () => {
@@ -76,6 +93,7 @@ export function CalendarOverview() {
           },
         })
         setCalendar(calenData)
+        console.log(calenData)
       } catch (error) {
         console.error(error)
         errorToast(error)
