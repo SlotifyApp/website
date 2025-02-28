@@ -250,11 +250,10 @@ export function CalendarOverview() {
                         if (!event.startTime || !event.endTime) return null
                         const eventStart = parseISO(event.startTime)
                         const eventEnd = parseISO(event.endTime)
-                        if (!isValid(eventStart) || !isValid(eventEnd)) {
+                        if (!isValid(eventStart) || !isValid(eventEnd))
                           return null
-                        }
 
-                        // Clamp the event to this day’s 00:00–23:59 if it crosses days
+                        // Clamp the event to the day
                         const dayStart = new Date(day)
                         dayStart.setHours(0, 0, 0, 0)
                         const dayEnd = new Date(day)
@@ -267,32 +266,33 @@ export function CalendarOverview() {
                           ? dayEnd
                           : eventEnd
 
-                        // Convert to row indices
+                        // Get fractional hours
                         const startHour = getHourFraction(actualStart)
                         const endHour = getHourFraction(actualEnd)
 
-                        const gridRowStart = Math.floor(startHour) + 1
-                        const gridRowEnd = Math.ceil(endHour) + 1
+                        // Calculate position
+                        const eventTop = (startHour / totalHours) * 100
+                        const eventHeight =
+                          ((endHour - startHour) / totalHours) * 100
 
                         return (
                           <div
                             key={event.id}
                             onClick={() => handleEventClick(event)}
-                            className='absolute m-1 p-2 rounded-md bg-accent text-accent-foreground cursor-pointer overflow-hidden'
+                            className='absolute p-2 rounded-md bg-accent text-accent-foreground cursor-pointer overflow-hidden w-full'
                             style={{
-                              gridRowStart,
-                              gridRowEnd,
-                              zIndex: 10, // Ensure events always render above horizontal lines
-                              position: 'relative', // Ensure positioning respects stacking order
+                              top: `${eventTop}%`,
+                              height: `${eventHeight}%`,
+                              zIndex: 10,
                             }}
                           >
                             <div className='text-sm font-medium truncate'>
                               {event.subject}
                             </div>
-                            <div className='text-xs font-medium truncate'>
+                            <div className='text-xs font-medium truncate overflow-hidden'>
                               {event.body}
                             </div>
-                            <div className='text-xs truncate opacity-90'>
+                            <div className='text-xs truncate opacity-90 overflow-hidden'>
                               {event.locations?.[0]?.name}
                             </div>
                           </div>
