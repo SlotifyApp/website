@@ -211,7 +211,7 @@ export function CalendarOverview() {
                         gridRowStart: i + 1,
                         gridRowEnd: i + 2,
                       }}
-                      className='text-xs flex justify-center items-center pt-1 pl-2'
+                      className='text-xs flex justify-center items-center pt-1 pl-2 h-20'
                     >
                       {timeLabel}
                     </div>
