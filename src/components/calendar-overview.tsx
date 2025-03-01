@@ -337,7 +337,7 @@ export function CalendarOverview() {
                   }}
                 >
                   <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className='mb-4'>
                       {selectedEvent.subject
                         ? selectedEvent.subject.charAt(0).toUpperCase() +
                           selectedEvent.subject.slice(1)
