@@ -251,6 +251,7 @@ export function CreateEventDialog({
                 Cancel
               </Button>
               <Button
+                className='bg-focusColor hover:bg-focusColor/90'
                 onClick={() => {
                   const eventTitle = (
                     document.getElementById('subject') as HTMLInputElement

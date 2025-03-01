@@ -23,6 +23,7 @@ import {
   Clock,
   MapPin,
   Plus,
+  Repeat,
   User,
   Users,
 } from 'lucide-react'
@@ -73,7 +74,6 @@ export function CalendarOverview() {
           },
         })
         setCalendar(calenData)
-        console.log(calenData)
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -293,7 +293,10 @@ export function CalendarOverview() {
                             }}
                           >
                             <div className='text-sm truncate'>
-                              {event.subject}
+                              {event.subject
+                                ? event.subject.charAt(0).toUpperCase() +
+                                  event.subject.slice(1)
+                                : ''}
                             </div>
                             <div className='text-xs truncate overflow-hidden'>
                               {event.body}
@@ -324,57 +327,75 @@ export function CalendarOverview() {
         onOpenChange={setIsDayEventsDialogOpen}
       >
         <DialogContent className='max-w-3xl'>
-          <ScrollArea className='h-[500px] mt-4'>
+          <ScrollArea className='h-[400px]'>
             {selectedEvent && (
-              <div className='space-y-4'>
-                <DialogHeader>
-                  <DialogTitle>{selectedEvent.subject}</DialogTitle>
-                  {selectedEvent.body && (
-                    <DialogDescription>{selectedEvent.body}</DialogDescription>
-                  )}
-                </DialogHeader>
-                <div className='space-y-2'>
-                  <div className='flex items-center text-sm'>
-                    <Clock className='mr-2 h-4 w-4' />
-                    {selectedEvent.startTime && selectedEvent.endTime && (
-                      <>
-                        {format(parseISO(selectedEvent.startTime), 'HH:mm')} -{' '}
-                        {format(parseISO(selectedEvent.endTime), 'HH:mm')}
-                      </>
+              <div className='min-h-[400px] flex flex-col justify-between'>
+                <div
+                  className='flex flex-col'
+                  onClick={() => {
+                    console.log(selectedEvent.body)
+                  }}
+                >
+                  <DialogHeader>
+                    <DialogTitle>
+                      {selectedEvent.subject
+                        ? selectedEvent.subject.charAt(0).toUpperCase() +
+                          selectedEvent.subject.slice(1)
+                        : ''}
+                    </DialogTitle>
+                    {selectedEvent.body && (
+                      <DialogDescription className='pb-4'>
+                        <ScrollArea className='h-[100px] pb-2 border-b'>
+                          <div className='whitespace-pre-wrap break-words'>
+                            {selectedEvent.body}
+                          </div>
+                        </ScrollArea>
+                      </DialogDescription>
                     )}
-                  </div>
-                  {selectedEvent.locations?.map(loc => (
-                    <div key={loc.id} className='flex items-center text-sm'>
-                      <MapPin className='mr-2 h-4 w-4' />
-                      {loc.name}
-                    </div>
-                  ))}
-                  {selectedEvent.organizer && (
+                  </DialogHeader>
+                  <div className='space-y-2 pb-2 border-b'>
                     <div className='flex items-center text-sm'>
-                      <User className='mr-2 h-4 w-4' />
-                      Organizer: {selectedEvent.organizer}
+                      <Clock className='mr-2 h-4 w-4 text-focusColor' />
+                      {selectedEvent.startTime && selectedEvent.endTime && (
+                        <>
+                          {format(parseISO(selectedEvent.startTime), 'HH:mm')} -{' '}
+                          {format(parseISO(selectedEvent.endTime), 'HH:mm')}
+                        </>
+                      )}
                     </div>
-                  )}
-                  {selectedEvent.attendees?.length ? (
-                    <div className='flex items-start text-sm'>
-                      <Users className='mr-2 h-4 w-4 mt-1' />
-                      <div>
-                        <div>Attendees:</div>
-                        <ul className='list-disc list-inside pl-4'>
-                          {selectedEvent.attendees.map((attendee, index) => (
-                            <li key={index}>
-                              {attendee.email || attendee.attendeeType} (
-                              {attendee.responseStatus})
-                            </li>
-                          ))}
-                        </ul>
+                    {selectedEvent.locations?.map(loc => (
+                      <div key={loc.id} className='flex items-center text-sm'>
+                        <MapPin className='mr-2 h-4 w-4 text-focusColor' />
+                        {loc.name}
                       </div>
-                    </div>
-                  ) : null}
+                    ))}
+                    {selectedEvent.organizer && (
+                      <div className='flex items-center text-sm'>
+                        <User className='mr-2 h-4 w-4 text-focusColor' />
+                        Organizer: {selectedEvent.organizer}
+                      </div>
+                    )}
+                    {selectedEvent.attendees?.length ? (
+                      <div className='flex items-start text-sm'>
+                        <Users className='mr-2 h-4 w-4 mt-1 text-focusColor' />
+                        <div>
+                          <div>Attendees:</div>
+                          <ul className='list-disc list-inside pl-4'>
+                            {selectedEvent.attendees.map((attendee, index) => (
+                              <li key={index}>
+                                {attendee.email || attendee.attendeeType} (
+                                {attendee.responseStatus})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-                <div className='mt-4 space-y-2'>
+                <div className='flex flex-row justify-between mb-5 pl-20 pr-20'>
                   {selectedEvent.joinURL && (
-                    <Button asChild>
+                    <Button asChild className='bg-focusColor hover:bg-focusColor/90'>
                       <Link
                         href={selectedEvent.joinURL}
                         target='_blank'
@@ -386,7 +407,7 @@ export function CalendarOverview() {
                     </Button>
                   )}
                   {selectedEvent.webLink && (
-                    <Button asChild>
+                    <Button asChild className='bg-focusColor hover:bg-focusColor/90'>
                       <Link
                         href={selectedEvent.webLink}
                         target='_blank'
@@ -398,7 +419,12 @@ export function CalendarOverview() {
                     </Button>
                   )}
 
-                  <Button variant='destructive'>Reschedule</Button>
+                  <Button variant='destructive'>
+                    <div className='flex justify-center items-center'>
+                      <Repeat className='mr-2 h-4 w-4' />
+                      Reschedule
+                    </div>
+                  </Button>
                 </div>
               </div>
             )}
