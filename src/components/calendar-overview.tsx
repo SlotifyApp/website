@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
 import {
   format,
   startOfWeek,
@@ -43,9 +44,11 @@ import { errorToast } from '@/hooks/use-toast'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
+  const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false)
   const [calendar, setCalendar] = useState<Array<CalendarEvent>>([])
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
@@ -124,7 +127,7 @@ export function CalendarOverview() {
   }
 
   return (
-    <>
+    <div>
       <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>
@@ -137,7 +140,10 @@ export function CalendarOverview() {
               </span>
             </div>
             <div className='flex items-center gap-2'>
-              <Button disabled className='bg-focusColor hover:bg-focusColor/90'>
+              <Button
+                onClick={() => setIsCreateEventDialogOpen(true)}
+                className='bg-focusColor hover:bg-focusColor/90'
+              >
                 <Plus className='h-4 w-4 mr-2' />
                 Create Event
               </Button>
@@ -211,7 +217,7 @@ export function CalendarOverview() {
                         gridRowStart: i + 1,
                         gridRowEnd: i + 2,
                       }}
-                      className='text-xs flex justify-center items-center pt-1 pl-2 h-20'
+                      className='text-xs flex justify-center items-start h-20'
                     >
                       {timeLabel}
                     </div>
@@ -307,6 +313,12 @@ export function CalendarOverview() {
         </CardContent>
       </Card>
 
+      <CreateEventDialog
+        open={isCreateEventDialogOpen}
+        onOpenChangeAction={setIsCreateEventDialogOpen}
+        selectedDate={selectedDate}
+      />
+
       <Dialog
         open={isDayEventsDialogOpen}
         onOpenChange={setIsDayEventsDialogOpen}
@@ -393,6 +405,6 @@ export function CalendarOverview() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }
