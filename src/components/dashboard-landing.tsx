@@ -90,7 +90,7 @@ export default function LandingPage() {
     const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID
     const tenantId = process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID
     const redirectUri = encodeURIComponent(
-      'http://localhost:8080/api/auth/callback',
+      process.env.NEXT_PUBLIC_API_URL + 'api/auth/callback',
     )
     const scopes = encodeURIComponent(
       'openid profile email User.ReadWrite Calendars.ReadBasic Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared',
