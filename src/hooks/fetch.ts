@@ -2,7 +2,7 @@ import { createApiClient } from '@/types/client'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true, // Ensure cookies are included in requests
   headers: {
     'Content-Type': 'application/json',
