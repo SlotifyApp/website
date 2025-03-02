@@ -1,5 +1,5 @@
 import { CalendarDays } from 'lucide-react'
-import { CalendarEvent } from './calendar/calendar'
+import { CalendarEvent } from '@/types/types'
 
 interface EventsForTodayProps {
   events: CalendarEvent[]

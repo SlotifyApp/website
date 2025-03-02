@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
-import { CalendarEvent } from '@/components/calendar/calendar'
+import { CalendarEvent } from '@/types/types'
 import Link from 'next/link'
 import { Clock, MapPin, User, Users, Calendar, ChevronLeft } from 'lucide-react'
 
@@ -73,7 +73,8 @@ export const RenderEventDetails = ({
             <ul className='list-disc list-inside pl-4'>
               {event.attendees.map((attendee, index) => (
                 <li key={index}>
-                  {attendee.email || attendee.type} ({attendee.responseStatus})
+                  {attendee.email || attendee.attendeeType} (
+                  {attendee.responseStatus})
                 </li>
               ))}
             </ul>

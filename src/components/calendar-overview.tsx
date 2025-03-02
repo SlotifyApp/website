@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
 import {
   format,
   startOfWeek,
@@ -22,7 +21,6 @@ import {
   ChevronRight,
   Clock,
   MapPin,
-  Plus,
   Repeat,
   User,
   Users,
@@ -45,11 +43,9 @@ import { errorToast } from '@/hooks/use-toast'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
-  const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false)
   const [calendar, setCalendar] = useState<Array<CalendarEvent>>([])
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
@@ -140,13 +136,6 @@ export function CalendarOverview() {
               </span>
             </div>
             <div className='flex items-center gap-2'>
-              <Button
-                onClick={() => setIsCreateEventDialogOpen(true)}
-                className='bg-focusColor hover:bg-focusColor/90'
-              >
-                <Plus className='h-4 w-4 mr-2' />
-                Create Event
-              </Button>
               <Button variant='outline' onClick={handleToday}>
                 Today
               </Button>
@@ -316,12 +305,6 @@ export function CalendarOverview() {
         </CardContent>
       </Card>
 
-      <CreateEventDialog
-        open={isCreateEventDialogOpen}
-        onOpenChangeAction={setIsCreateEventDialogOpen}
-        selectedDate={selectedDate}
-      />
-
       <Dialog
         open={isDayEventsDialogOpen}
         onOpenChange={setIsDayEventsDialogOpen}
@@ -395,7 +378,10 @@ export function CalendarOverview() {
                 </div>
                 <div className='flex flex-row justify-between mb-5 pl-20 pr-20'>
                   {selectedEvent.joinURL && (
-                    <Button asChild className='bg-focusColor hover:bg-focusColor/90'>
+                    <Button
+                      asChild
+                      className='bg-focusColor hover:bg-focusColor/90'
+                    >
                       <Link
                         href={selectedEvent.joinURL}
                         target='_blank'
@@ -407,7 +393,10 @@ export function CalendarOverview() {
                     </Button>
                   )}
                   {selectedEvent.webLink && (
-                    <Button asChild className='bg-focusColor hover:bg-focusColor/90'>
+                    <Button
+                      asChild
+                      className='bg-focusColor hover:bg-focusColor/90'
+                    >
                       <Link
                         href={selectedEvent.webLink}
                         target='_blank'
