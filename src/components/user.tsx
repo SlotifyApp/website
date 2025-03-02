@@ -8,11 +8,11 @@ import { errorToast } from '@/hooks/use-toast'
 
 export default function User() {
   const [user, setUser] = useState<Member | null>(null)
-  // const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        console.log('Making fetch call to /users')
         const data = await slotifyClient.GetAPIUsersMe()
         setUser(data)
       } catch (error) {

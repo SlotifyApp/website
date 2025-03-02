@@ -2,7 +2,7 @@ import { createApiClient } from '@/types/client'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL?.replace(/^\/+/, ''),
   withCredentials: true, // Ensure cookies are included in requests
   headers: {
     'Content-Type': 'application/json',
@@ -61,8 +61,11 @@ axiosInstance.interceptors.response.use(
   },
 )
 
-const slotifyClient = createApiClient('http://localhost:8080', {
-  axiosInstance,
-})
+const slotifyClient = createApiClient(
+  process.env.NEXT_PUBLIC_API_URL || 'https://localhost:8080/',
+  {
+    axiosInstance,
+  },
+)
 
 export default slotifyClient

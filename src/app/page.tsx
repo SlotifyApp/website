@@ -7,25 +7,23 @@ import axios from 'axios'
 export default function Home() {
   useEffect(() => {
     const fetchUser = async () => {
-      // Detects whether the access token or refresh token are valid.
-      // If either one is, then redirect to /dashboard.
+      // Keep this instead of using the slotifyClient.
+      // slotifyClient will cause an infinite loop here
       try {
-        await axios.get('/api/users/me', {
-          baseURL: 'http://localhost:8080/',
+        await axios.get(process.env.NEXT_PUBLIC_API_URL + 'api/users/me', {
           withCredentials: true,
         })
         window.location.href = '/dashboard'
         return
       } catch (error) {
-        console.log('error', error)
+        console.error('error', error)
       }
       try {
-        await axios.post('/api/refresh', {
-          baseURL: 'http://localhost:8080/',
+        await axios.post(process.env.NEXT_PUBLIC_API_URL + 'api/refresh', {
           withCredentials: true,
         })
       } catch (error) {
-        console.log('error', error)
+        console.error('error', error)
       }
     }
     fetchUser()

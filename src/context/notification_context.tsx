@@ -40,9 +40,12 @@ export function NotificationProvider({
     getUnreadNotifs()
     console.log('Initializing EventSource...')
 
-    const eventSource = new EventSource('http://localhost:8080/api/events', {
-      withCredentials: true,
-    })
+    const eventSource = new EventSource(
+      process.env.NEXT_PUBLIC_API_URL + 'api/events',
+      {
+        withCredentials: true,
+      },
+    )
 
     eventSource.addEventListener('calendar_notification', event => {
       const newNotification: Notification = JSON.parse(event.data)
