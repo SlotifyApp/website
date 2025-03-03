@@ -93,56 +93,6 @@
       }
     },
     "/api/notifications/{notificationID}/read": {
-      "options": {
-        "operationId": "OptionsAPINotificationsNotificationIDRead",
-        "summary": "Satisfy CORS preflight for marking a notification as read.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "notificationID",
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful CORS preflight",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "description": "The allowed origin for cross-origin requests",
-                "schema": {
-                  "type": "string",
-                  "example": "http://localhost:3000"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "description": "Allowed HTTP methods",
-                "schema": {
-                  "type": "string",
-                  "example": "GET, POST, PATCH, OPTIONS"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "description": "Allowed headers in the actual request",
-                "schema": {
-                  "type": "string",
-                  "example": "Content-Type, Authorization"
-                }
-              },
-              "Access-Control-Allow-Credentials": {
-                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
-                "schema": {
-                  "type": "string",
-                  "example": "true"
-                }
-              }
-            }
-          }
-        }
-      },
       "patch": {
         "summary": "Mark a notification as being read.",
         "operationId": "PatchAPINotificationsNotificationIDRead",
@@ -299,45 +249,6 @@
               "application/json": {
                 "schema": {
                   "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "options": {
-        "operationId": "OptionsAPICalendarMe",
-        "summary": "CORS preflight for creating an event",
-        "responses": {
-          "204": {
-            "description": "Successful CORS preflight",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "description": "The allowed origin for cross-origin requests",
-                "schema": {
-                  "type": "string",
-                  "example": "http://localhost:3000"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "description": "Allowed HTTP methods",
-                "schema": {
-                  "type": "string",
-                  "example": "GET, POST, OPTIONS"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "description": "Allowed headers in the actual request",
-                "schema": {
-                  "type": "string",
-                  "example": "Content-Type, Authorization"
-                }
-              },
-              "Access-Control-Allow-Credentials": {
-                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
-                "schema": {
-                  "type": "string",
-                  "example": "true"
                 }
               }
             }
@@ -747,57 +658,6 @@
             "description": "Something went wrong internally"
           }
         }
-      },
-      "options": {
-        "operationId": "OptionsAPIInvitesInviteID",
-        "summary": "Satisfy CORS preflight for invites.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "inviteID",
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "required": true,
-            "description": "Numeric ID of the invite to update"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful CORS preflight",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "description": "The allowed origin for cross-origin requests",
-                "schema": {
-                  "type": "string",
-                  "example": "http://localhost:3000"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "description": "Allowed HTTP methods",
-                "schema": {
-                  "type": "string",
-                  "example": "GET, POST, PATCH, OPTIONS"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "description": "Allowed headers in the actual request",
-                "schema": {
-                  "type": "string",
-                  "example": "Content-Type, Authorization"
-                }
-              },
-              "Access-Control-Allow-Credentials": {
-                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
-                "schema": {
-                  "type": "string",
-                  "example": "true"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/invites/{inviteID}/decline": {
@@ -838,57 +698,6 @@
           },
           "500": {
             "description": "Something went wrong internally"
-          }
-        }
-      },
-      "options": {
-        "operationId": "OptionsAPIInvitesInviteIDDecline",
-        "summary": "Satisfy CORS preflight for declining invites.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "inviteID",
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "required": true,
-            "description": "Numeric ID of the invite to update"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful CORS preflight",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "description": "The allowed origin for cross-origin requests",
-                "schema": {
-                  "type": "string",
-                  "example": "http://localhost:3000"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "description": "Allowed HTTP methods",
-                "schema": {
-                  "type": "string",
-                  "example": "GET, POST, PATCH, OPTIONS"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "description": "Allowed headers in the actual request",
-                "schema": {
-                  "type": "string",
-                  "example": "Content-Type, Authorization"
-                }
-              },
-              "Access-Control-Allow-Credentials": {
-                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
-                "schema": {
-                  "type": "string",
-                  "example": "true"
-                }
-              }
-            }
           }
         }
       }
@@ -933,57 +742,6 @@
             "description": "Something went wrong internally"
           }
         }
-      },
-      "options": {
-        "operationId": "OptionsAPIInvitesInviteIDAccept",
-        "summary": "Satisfy CORS preflight for accepting invites.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "inviteID",
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "required": true,
-            "description": "Numeric ID of the invite to update"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful CORS preflight",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "description": "The allowed origin for cross-origin requests",
-                "schema": {
-                  "type": "string",
-                  "example": "http://localhost:3000"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "description": "Allowed HTTP methods",
-                "schema": {
-                  "type": "string",
-                  "example": "GET, POST, PATCH, OPTIONS"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "description": "Allowed headers in the actual request",
-                "schema": {
-                  "type": "string",
-                  "example": "Content-Type, Authorization"
-                }
-              },
-              "Access-Control-Allow-Credentials": {
-                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
-                "schema": {
-                  "type": "string",
-                  "example": "true"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/invites": {
@@ -1006,7 +764,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/InvitesGroup"
                 }
               }
             }
@@ -1022,45 +780,6 @@
           },
           "500": {
             "description": "Something went wrong internally"
-          }
-        }
-      },
-      "options": {
-        "operationId": "OptionsAPIInvites",
-        "summary": "Satisfy CORS preflight for creating invites.",
-        "responses": {
-          "204": {
-            "description": "Successful CORS preflight",
-            "headers": {
-              "Access-Control-Allow-Origin": {
-                "description": "The allowed origin for cross-origin requests",
-                "schema": {
-                  "type": "string",
-                  "example": "http://localhost:3000"
-                }
-              },
-              "Access-Control-Allow-Methods": {
-                "description": "Allowed HTTP methods",
-                "schema": {
-                  "type": "string",
-                  "example": "GET, POST, PATCH, OPTIONS"
-                }
-              },
-              "Access-Control-Allow-Headers": {
-                "description": "Allowed headers in the actual request",
-                "schema": {
-                  "type": "string",
-                  "example": "Content-Type, Authorization"
-                }
-              },
-              "Access-Control-Allow-Credentials": {
-                "description": "Whether credentials (cookies, HTTP authentication) are allowed",
-                "schema": {
-                  "type": "string",
-                  "example": "true"
-                }
-              }
-            }
           }
         }
       }

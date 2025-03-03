@@ -506,13 +506,6 @@ const endpoints = makeApi([
     ],
   },
   {
-    method: "options",
-    path: "/api/calendar/me",
-    alias: "OptionsAPICalendarMe",
-    requestFormat: "json",
-    response: z.void(),
-  },
-  {
     method: "get",
     path: "/api/events",
     alias: "renderEvent",
@@ -539,7 +532,7 @@ const endpoints = makeApi([
         schema: InviteCreate,
       },
     ],
-    response: z.string(),
+    response: InvitesGroup,
     errors: [
       {
         status: 400,
@@ -562,13 +555,6 @@ const endpoints = makeApi([
         schema: z.void(),
       },
     ],
-  },
-  {
-    method: "options",
-    path: "/api/invites",
-    alias: "OptionsAPIInvites",
-    requestFormat: "json",
-    response: z.void(),
   },
   {
     method: "patch",
@@ -648,20 +634,6 @@ const endpoints = makeApi([
     ],
   },
   {
-    method: "options",
-    path: "/api/invites/:inviteID",
-    alias: "OptionsAPIInvitesInviteID",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "inviteID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: z.void(),
-  },
-  {
     method: "patch",
     path: "/api/invites/:inviteID/accept",
     alias: "PatchAPIInvitesInviteIDAccept",
@@ -698,20 +670,6 @@ const endpoints = makeApi([
     ],
   },
   {
-    method: "options",
-    path: "/api/invites/:inviteID/accept",
-    alias: "OptionsAPIInvitesInviteIDAccept",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "inviteID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: z.void(),
-  },
-  {
     method: "patch",
     path: "/api/invites/:inviteID/decline",
     alias: "PatchAPIInvitesInviteIDDecline",
@@ -746,20 +704,6 @@ const endpoints = makeApi([
         schema: z.void(),
       },
     ],
-  },
-  {
-    method: "options",
-    path: "/api/invites/:inviteID/decline",
-    alias: "OptionsAPIInvitesInviteIDDecline",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "inviteID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: z.void(),
   },
   {
     method: "get",
@@ -890,20 +834,6 @@ const endpoints = makeApi([
         schema: z.void(),
       },
     ],
-  },
-  {
-    method: "options",
-    path: "/api/notifications/:notificationID/read",
-    alias: "OptionsAPINotificationsNotificationIDRead",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "notificationID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: z.void(),
   },
   {
     method: "patch",

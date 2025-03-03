@@ -16,14 +16,14 @@ export default function Home() {
         window.location.href = '/dashboard'
         return
       } catch (error) {
-        console.error('error', error)
+        console.log('error', error)
       }
       try {
         await axios.post(process.env.NEXT_PUBLIC_API_URL + 'api/refresh', {
           withCredentials: true,
         })
       } catch (error) {
-        console.error('error', error)
+        console.log('error', error)
       }
     }
     fetchUser()
