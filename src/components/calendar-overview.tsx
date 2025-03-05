@@ -328,10 +328,8 @@ export function CalendarOverview() {
                     </DialogTitle>
                     {selectedEvent.body && (
                       <ScrollArea className='h-[100px] pb-3 border-b'>
-                        <DialogDescription className='pb-4'>
-                          <div className='whitespace-pre-wrap break-words'>
-                            {selectedEvent.body}
-                          </div>
+                        <DialogDescription className='pb-4 whitespace-pre-wrap break-words'>
+                          {selectedEvent.body}
                         </DialogDescription>
                       </ScrollArea>
                     )}
