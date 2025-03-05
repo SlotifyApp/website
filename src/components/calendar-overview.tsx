@@ -310,7 +310,7 @@ export function CalendarOverview() {
         onOpenChange={setIsDayEventsDialogOpen}
       >
         <DialogContent className='max-w-3xl'>
-          <ScrollArea className='h-[400px]'>
+          <ScrollArea className='h-[450px]'>
             {selectedEvent && (
               <div className='min-h-[400px] flex flex-col justify-between'>
                 <div
@@ -319,7 +319,7 @@ export function CalendarOverview() {
                     console.log(selectedEvent.body)
                   }}
                 >
-                  <DialogHeader>
+                  <DialogHeader className='mb-5'>
                     <DialogTitle className='mb-4'>
                       {selectedEvent.subject
                         ? selectedEvent.subject.charAt(0).toUpperCase() +
@@ -327,16 +327,16 @@ export function CalendarOverview() {
                         : ''}
                     </DialogTitle>
                     {selectedEvent.body && (
-                      <DialogDescription className='pb-4'>
-                        <ScrollArea className='h-[100px] pb-2 border-b'>
+                      <ScrollArea className='h-[100px] pb-3 border-b'>
+                        <DialogDescription className='pb-4'>
                           <div className='whitespace-pre-wrap break-words'>
                             {selectedEvent.body}
                           </div>
-                        </ScrollArea>
-                      </DialogDescription>
+                        </DialogDescription>
+                      </ScrollArea>
                     )}
                   </DialogHeader>
-                  <div className='space-y-2 pb-2 border-b'>
+                  <div className='space-y-2 pb-5 mb-10 border-b'>
                     <div className='flex items-center text-sm'>
                       <Clock className='mr-2 h-4 w-4 text-focusColor' />
                       {selectedEvent.startTime && selectedEvent.endTime && (
