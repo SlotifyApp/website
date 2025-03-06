@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Clock,
   MapPin,
+  Plus,
   Repeat,
   User,
   Users,
@@ -40,12 +41,15 @@ import { ScrollArea } from './ui/scroll-area'
 import Link from 'next/link'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
+import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
   const [calendar, setCalendar] = useState<Array<CalendarEvent>>([])
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
@@ -136,9 +140,21 @@ export function CalendarOverview() {
               </span>
             </div>
             <div className='flex items-center gap-2'>
+              <Button
+                onClick={() => {
+                  setSelectedDate(new Date())
+                  setIsCreateEventDialogOpen(true)
+                }}
+                className='bg-focusColor hover:bg-focusColor/90'
+              >
+                <Plus className='h-4 w-4 mr-2' />
+                Create Event
+              </Button>
+
               <Button variant='outline' onClick={handleToday}>
                 Today
               </Button>
+
               <Button
                 variant='outline'
                 size='icon'
@@ -305,117 +321,121 @@ export function CalendarOverview() {
         </CardContent>
       </Card>
 
+      <CreateEventDialog
+        open={isCreateEventDialogOpen}
+        onOpenChangeAction={setIsCreateEventDialogOpen}
+        selectedDate={selectedDate}
+      />
+
       <Dialog
         open={isDayEventsDialogOpen}
         onOpenChange={setIsDayEventsDialogOpen}
       >
-        <DialogContent className='max-w-3xl'>
-          <ScrollArea className='h-[450px]'>
-            {selectedEvent && (
-              <div className='min-h-[400px] flex flex-col justify-between'>
-                <div
-                  className='flex flex-col'
-                  onClick={() => {
-                    console.log(selectedEvent.body)
-                  }}
-                >
-                  <DialogHeader className='mb-5'>
-                    <DialogTitle className='mb-4'>
-                      {selectedEvent.subject
-                        ? selectedEvent.subject.charAt(0).toUpperCase() +
-                          selectedEvent.subject.slice(1)
-                        : ''}
-                    </DialogTitle>
-                    {selectedEvent.body && (
-                      <ScrollArea className='h-[100px] pb-3 border-b'>
-                        <DialogDescription className='pb-4 whitespace-pre-wrap break-words'>
-                          {selectedEvent.body}
-                        </DialogDescription>
-                      </ScrollArea>
+        <DialogContent className='max-w-3xl min-h-[400px]'>
+          {selectedEvent && (
+            <div className='flex flex-col justify-between'>
+              <div
+                className='flex flex-col'
+                onClick={() => {
+                  console.log(selectedEvent.body)
+                }}
+              >
+                <DialogHeader className='mb-5'>
+                  <DialogTitle className='mb-4'>
+                    {selectedEvent.subject
+                      ? selectedEvent.subject.charAt(0).toUpperCase() +
+                        selectedEvent.subject.slice(1)
+                      : ''}
+                  </DialogTitle>
+                  {selectedEvent.body && (
+                    <ScrollArea className='h-[100px] pb-3 border-b'>
+                      <DialogDescription className='pb-4 whitespace-pre-wrap break-words'>
+                        {selectedEvent.body}
+                      </DialogDescription>
+                    </ScrollArea>
+                  )}
+                </DialogHeader>
+                <div className='space-y-2 pb-5 mb-10 border-b'>
+                  <div className='flex items-center text-sm'>
+                    <Clock className='mr-2 h-4 w-4 text-focusColor' />
+                    {selectedEvent.startTime && selectedEvent.endTime && (
+                      <>
+                        {format(parseISO(selectedEvent.startTime), 'HH:mm')} -{' '}
+                        {format(parseISO(selectedEvent.endTime), 'HH:mm')}
+                      </>
                     )}
-                  </DialogHeader>
-                  <div className='space-y-2 pb-5 mb-10 border-b'>
-                    <div className='flex items-center text-sm'>
-                      <Clock className='mr-2 h-4 w-4 text-focusColor' />
-                      {selectedEvent.startTime && selectedEvent.endTime && (
-                        <>
-                          {format(parseISO(selectedEvent.startTime), 'HH:mm')} -{' '}
-                          {format(parseISO(selectedEvent.endTime), 'HH:mm')}
-                        </>
-                      )}
-                    </div>
-                    {selectedEvent.locations?.map(loc => (
-                      <div key={loc.id} className='flex items-center text-sm'>
-                        <MapPin className='mr-2 h-4 w-4 text-focusColor' />
-                        {loc.name}
-                      </div>
-                    ))}
-                    {selectedEvent.organizer && (
-                      <div className='flex items-center text-sm'>
-                        <User className='mr-2 h-4 w-4 text-focusColor' />
-                        Organizer: {selectedEvent.organizer}
-                      </div>
-                    )}
-                    {selectedEvent.attendees?.length ? (
-                      <div className='flex items-start text-sm'>
-                        <Users className='mr-2 h-4 w-4 mt-1 text-focusColor' />
-                        <div>
-                          <div>Attendees:</div>
-                          <ul className='list-disc list-inside pl-4'>
-                            {selectedEvent.attendees.map((attendee, index) => (
-                              <li key={index}>
-                                {attendee.email || attendee.attendeeType} (
-                                {attendee.responseStatus})
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    ) : null}
                   </div>
-                </div>
-                <div className='flex flex-row justify-between mb-5 pl-20 pr-20'>
-                  {selectedEvent.joinURL && (
-                    <Button
-                      asChild
-                      className='bg-focusColor hover:bg-focusColor/90'
-                    >
-                      <Link
-                        href={selectedEvent.joinURL}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        <Calendar className='mr-2 h-4 w-4' />
-                        Join Meeting
-                      </Link>
-                    </Button>
-                  )}
-                  {selectedEvent.webLink && (
-                    <Button
-                      asChild
-                      className='bg-focusColor hover:bg-focusColor/90'
-                    >
-                      <Link
-                        href={selectedEvent.webLink}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        <Calendar className='mr-2 h-4 w-4' />
-                        View In Outlook
-                      </Link>
-                    </Button>
-                  )}
-
-                  <Button variant='destructive'>
-                    <div className='flex justify-center items-center'>
-                      <Repeat className='mr-2 h-4 w-4' />
-                      Reschedule
+                  {selectedEvent.locations?.map(loc => (
+                    <div key={loc.id} className='flex items-center text-sm'>
+                      <MapPin className='mr-2 h-4 w-4 text-focusColor' />
+                      {loc.name}
                     </div>
-                  </Button>
+                  ))}
+                  {selectedEvent.organizer && (
+                    <div className='flex items-center text-sm'>
+                      <User className='mr-2 h-4 w-4 text-focusColor' />
+                      Organizer: {selectedEvent.organizer}
+                    </div>
+                  )}
+                  {selectedEvent.attendees?.length ? (
+                    <div className='flex items-start text-sm'>
+                      <Users className='mr-2 h-4 w-4 mt-1 text-focusColor' />
+                      <div>
+                        <div>Attendees:</div>
+                        <ul className='list-disc list-inside pl-4'>
+                          {selectedEvent.attendees.map((attendee, index) => (
+                            <li key={index}>
+                              {attendee.email || attendee.attendeeType} (
+                              {attendee.responseStatus})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
-            )}
-          </ScrollArea>
+              <div className='flex flex-row justify-between mb-5 pl-20 pr-20'>
+                {selectedEvent.joinURL && (
+                  <Button
+                    asChild
+                    className='bg-focusColor hover:bg-focusColor/90'
+                  >
+                    <Link
+                      href={selectedEvent.joinURL}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <Calendar className='mr-2 h-4 w-4' />
+                      Join Meeting
+                    </Link>
+                  </Button>
+                )}
+                {selectedEvent.webLink && (
+                  <Button
+                    asChild
+                    className='bg-focusColor hover:bg-focusColor/90'
+                  >
+                    <Link
+                      href={selectedEvent.webLink}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <Calendar className='mr-2 h-4 w-4' />
+                      View In Outlook
+                    </Link>
+                  </Button>
+                )}
+
+                <Button variant='destructive'>
+                  <div className='flex justify-center items-center'>
+                    <Repeat className='mr-2 h-4 w-4' />
+                    Reschedule
+                  </div>
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
