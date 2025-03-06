@@ -126,6 +126,16 @@ export function CalendarOverview() {
     return h + m / 60
   }
 
+  /**
+   * Extract text content from an HTML string.
+   */
+  function extractTextFromHTML(htmlString: string) {
+    if (!htmlString) return ''
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(htmlString, 'text/html')
+    return (doc.body.textContent || '').trim()
+  }
+
   return (
     <div>
       <Card>
@@ -303,12 +313,20 @@ export function CalendarOverview() {
                                   event.subject.slice(1)
                                 : ''}
                             </div>
-                            <div className='text-xs truncate overflow-hidden'>
-                              {event.body}
-                            </div>
-                            <div className='text-xs truncate opacity-90 overflow-hidden'>
-                              {event.locations?.[0]?.name}
-                            </div>
+                            {event.body ? (
+                            <div className='text-xs truncate overflow-hidden text-gray-500 font-normal'>
+                              {extractTextFromHTML(
+                                event.body?.toString() || '',
+                              )}
+                            </div>) : null}
+                            {event.locations?.length ? (
+                              <div className='flex flex-row items-center'>
+                                <MapPin className='mr-2 h-4 w-4 text-focusColor' />
+                                <div className='text-xs truncate opacity-90 overflow-hidden text-black font-normal'>
+                                  {event.locations?.[0]?.name}
+                                </div>
+                              </div>
+                            ) : null}
                           </div>
                         )
                       })}
@@ -334,12 +352,7 @@ export function CalendarOverview() {
         <DialogContent className='max-w-3xl min-h-[400px]'>
           {selectedEvent && (
             <div className='flex flex-col justify-between'>
-              <div
-                className='flex flex-col'
-                onClick={() => {
-                  console.log(selectedEvent.body)
-                }}
-              >
+              <div className='flex flex-col'>
                 <DialogHeader className='mb-5'>
                   <DialogTitle className='mb-4'>
                     {selectedEvent.subject
@@ -350,7 +363,7 @@ export function CalendarOverview() {
                   {selectedEvent.body && (
                     <ScrollArea className='h-[100px] pb-3 border-b'>
                       <DialogDescription className='pb-4 whitespace-pre-wrap break-words'>
-                        {selectedEvent.body}
+                        {extractTextFromHTML(selectedEvent.body)}
                       </DialogDescription>
                     </ScrollArea>
                   )}
