@@ -481,7 +481,7 @@ const endpoints = makeApi([
         schema: CalendarEvent,
       },
     ],
-    response: z.string(),
+    response: CalendarEvent,
     errors: [
       {
         status: 400,
