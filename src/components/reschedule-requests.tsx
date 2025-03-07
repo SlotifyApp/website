@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 const initialRequests = [
   {
     id: 1,
-    title: 'Team Sync Meeting',
+    title: 'Teams Sync Meeting',
     currentDateTime: '2024-02-09 10:00 AM',
     requestedDateTime: '2024-02-10 11:00 AM',
     participants: ['John', 'Jane', 'Bob'],

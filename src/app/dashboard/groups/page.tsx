@@ -26,14 +26,14 @@ export default function GroupsPage() {
   // for search bars
   const [yourSlotifyGroupsSearchTerm, setYourSlotifyGroupsSearchTerm] =
     useState<string>('')
-  //for teams, your current teams and joinable teams
+  //for groups, your current groups and joinable groups
   const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
     Array<SlotifyGroup>
   >([])
-  // currently selected teams
+  // currently selected groups
   const [selectedSlotifyGroup, setSelectedSlotifyGroup] =
     useState<SlotifyGroup | null>(null)
-  // members of currently selected team
+  // members of currently selected group
   const [members, setMembers] = useState<Array<Member>>([])
 
   // On every page refresh, set yourSlotifyGroups
@@ -52,13 +52,13 @@ export default function GroupsPage() {
       if (!selectedSlotifyGroup) {
         return
       }
-      const teamID = selectedSlotifyGroup?.id
+      const groupID = selectedSlotifyGroup?.id
 
       try {
         const slotifyGrouppMemberData =
           await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
             params: {
-              slotifyGroupID: teamID,
+              slotifyGroupID: groupID,
             },
           })
         setMembers(slotifyGrouppMemberData)
@@ -86,7 +86,7 @@ export default function GroupsPage() {
           <h2 className='text-xl font-semibold mb-4'>My Slotify Groups</h2>
           <Input
             type='text'
-            placeholder='Search your teams...'
+            placeholder='Search your groups...'
             value={yourSlotifyGroupsSearchTerm}
             onChange={e => setYourSlotifyGroupsSearchTerm(e.target.value)}
             className='w-full max-w-md mb-4'
@@ -105,7 +105,7 @@ export default function GroupsPage() {
             {selectedSlotifyGroup ? (
               <SlotifyGroupMembers members={members} />
             ) : (
-              <p>Select a team to view its members</p>
+              <p>Select a group to view its members</p>
             )}
           </Suspense>
         </div>
