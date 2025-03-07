@@ -27,15 +27,23 @@ export default function GroupsPage() {
   // for search bars
   const [yourSlotifyGroupsSearchTerm, setYourSlotifyGroupsSearchTerm] =
     useState<string>('')
+<<<<<<< HEAD
   //for teams, your current teams and joinable teams
   const [pagetokengroups, setPageTokenGroups] = useState<number>(0)
   const [yourSlotifyGroups, setYourSlotifyGroups] = useState<Set<SlotifyGroup>>(
     new Set(),
   )
   // currently selected teams
+=======
+  //for groups, your current groups and joinable groups
+  const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
+    Array<SlotifyGroup>
+  >([])
+  // currently selected groups
+>>>>>>> 68e79fe (refactor: make distinction between MS Team and Slotify Group clearer)
   const [selectedSlotifyGroup, setSelectedSlotifyGroup] =
     useState<SlotifyGroup | null>(null)
-  // members of currently selected team
+  // members of currently selected group
   const [members, setMembers] = useState<Array<Member>>([])
   const [pagetokengroupmembers, setPageTokenGroupMembers] = useState<number>(0)
 
@@ -76,12 +84,26 @@ export default function GroupsPage() {
   // On every page refresh, set yourSlotifyGroups
   useEffect(() => {
     const getSlotifyGroupMembers = async () => {
+<<<<<<< HEAD
       if (!selectedSlotifyGroup) return
+=======
+      if (!selectedSlotifyGroup) {
+        return
+      }
+      const groupID = selectedSlotifyGroup?.id
+
+>>>>>>> 68e79fe (refactor: make distinction between MS Team and Slotify Group clearer)
       try {
         const slotifyGroupMemberData =
           await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
+<<<<<<< HEAD
             params: { slotifyGroupID: selectedSlotifyGroup.id },
             queries: { limit: 10, pageToken: pagetokengroupmembers },
+=======
+            params: {
+              slotifyGroupID: groupID,
+            },
+>>>>>>> 68e79fe (refactor: make distinction between MS Team and Slotify Group clearer)
           })
         const { users, nextPageToken } = slotifyGroupMemberData
         setMembers(users)
@@ -110,7 +132,7 @@ export default function GroupsPage() {
           <h2 className='text-xl font-semibold mb-4'>My Slotify Groups</h2>
           <Input
             type='text'
-            placeholder='Search your teams...'
+            placeholder='Search your groups...'
             value={yourSlotifyGroupsSearchTerm}
             onChange={e => setYourSlotifyGroupsSearchTerm(e.target.value)}
             className='w-full max-w-md mb-4'
@@ -129,7 +151,7 @@ export default function GroupsPage() {
             {selectedSlotifyGroup ? (
               <SlotifyGroupMembers members={members} />
             ) : (
-              <p>Select a team to view its members</p>
+              <p>Select a group to view its members</p>
             )}
           </Suspense>
         </div>

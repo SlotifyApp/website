@@ -411,24 +411,24 @@ export default function SlotifyGroupSelect({
             role='listbox'
             onScroll={handleScroll}
           >
-            {filteredSlotifyGroups.map(team => (
+            {filteredSlotifyGroups.map(group => (
               <li
-                key={team.id}
+                key={group.id}
                 className={`${
-                  selectedSlotifyGroup === team
+                  selectedSlotifyGroup === group
                     ? 'text-white bg-indigo-600'
                     : 'text-gray-900'
                 } cursor-default select-none relative py-2 pl-3 pr-9 hover:bg-indigo-100`}
                 role='option'
-                aria-selected={selectedSlotifyGroup === team}
+                aria-selected={selectedSlotifyGroup === group}
                 onClick={() => {
-                  setSelectedSlotifyGroupAction(team)
+                  setSelectedSlotifyGroupAction(group)
                   setIsOpen(false)
                   setSearchTerm('')
                 }}
               >
-                <span className='block truncate'>{team.name}</span>
-                {selectedSlotifyGroup === team && (
+                <span className='block truncate'>{group.name}</span>
+                {selectedSlotifyGroup === group && (
                   <span className='absolute inset-y-0 right-0 flex items-center pr-4'>
                     <Check className='w-5 h-5' aria-hidden='true' />
                   </span>
@@ -437,7 +437,7 @@ export default function SlotifyGroupSelect({
             ))}
             {filteredSlotifyGroups.length === 0 && (
               <li className='px-3 py-2 text-sm text-gray-900'>
-                No teams found
+                No groups found
               </li>
             )}
             {isLoadingGroups && (

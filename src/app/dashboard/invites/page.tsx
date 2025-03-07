@@ -87,9 +87,9 @@ export default function InvitesPage() {
     <div className='container mx-auto py-10'>
       <div className='space-y-8'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Team Invites</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>Group Invites</h1>
           <p className='text-muted-foreground'>
-            Manage your pending and past team invitations.
+            Manage your pending and past group invitations.
           </p>
         </div>
         <div className='grid gap-6'>

@@ -64,7 +64,7 @@ export function ProfileForm({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='icon' className='relative'>
+        <Button variant='outline' className='relative min-w-max'>
           + Create Slotify Group
         </Button>
       </DialogTrigger>
