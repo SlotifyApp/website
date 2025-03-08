@@ -42,6 +42,7 @@ import Link from 'next/link'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
 import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
+import { CreateEvent } from '@/components/calendar/create-event'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
@@ -50,6 +51,9 @@ export function CalendarOverview() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+
+  // new create event dialogue vars
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false)
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
@@ -150,6 +154,13 @@ export function CalendarOverview() {
               </span>
             </div>
             <div className='flex items-center gap-2'>
+              <Button
+              onClick={() => {
+                setIsCreateEventOpen(!isCreateEventOpen)
+                console.log('Create super event: ', isCreateEventOpen)
+              }}
+              >Create super event</Button>
+
               <Button
                 onClick={() => {
                   setSelectedDate(new Date())
@@ -344,6 +355,11 @@ export function CalendarOverview() {
         open={isCreateEventDialogOpen}
         onOpenChangeAction={setIsCreateEventDialogOpen}
         selectedDate={selectedDate}
+      />
+
+      <CreateEvent
+        open = {isCreateEventOpen}
+        onOpenChangeAction = {setIsCreateEventOpen}
       />
 
       <Dialog
