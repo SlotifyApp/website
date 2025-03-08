@@ -42,6 +42,7 @@ import Link from 'next/link'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
 import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
+import { CreateEvent } from '@/components/calendar/create-event'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
@@ -50,6 +51,9 @@ export function CalendarOverview() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+
+  // new create event dialogue vars
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false)
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
@@ -150,6 +154,13 @@ export function CalendarOverview() {
               </span>
             </div>
             <div className='flex items-center gap-2'>
+              <Button
+              onClick={() => {
+                setIsCreateEventOpen(!isCreateEventOpen)
+                console.log('Create super event: ', isCreateEventOpen)
+              }}
+              >Create super event</Button>
+
               <Button
                 onClick={() => {
                   setSelectedDate(new Date())
@@ -314,11 +325,12 @@ export function CalendarOverview() {
                                 : ''}
                             </div>
                             {event.body ? (
-                            <div className='text-xs truncate overflow-hidden text-gray-500 font-normal'>
-                              {extractTextFromHTML(
-                                event.body?.toString() || '',
-                              )}
-                            </div>) : null}
+                              <div className='text-xs truncate overflow-hidden text-gray-500 font-normal'>
+                                {extractTextFromHTML(
+                                  event.body?.toString() || '',
+                                )}
+                              </div>
+                            ) : null}
                             {event.locations?.length ? (
                               <div className='flex flex-row items-center'>
                                 <MapPin className='mr-2 h-4 w-4 text-focusColor' />
@@ -343,6 +355,11 @@ export function CalendarOverview() {
         open={isCreateEventDialogOpen}
         onOpenChangeAction={setIsCreateEventDialogOpen}
         selectedDate={selectedDate}
+      />
+
+      <CreateEvent
+        open = {isCreateEventOpen}
+        onOpenChangeAction = {setIsCreateEventOpen}
       />
 
       <Dialog
