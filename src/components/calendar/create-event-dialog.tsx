@@ -88,7 +88,6 @@ export function CreateEventDialog({
     } catch (error) {
       console.error(error)
       errorToast(error)
-      errorToast(error)
     }
   }
   useEffect(() => {
