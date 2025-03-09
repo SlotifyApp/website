@@ -137,6 +137,83 @@
         }
       }
     },
+    "/api/calendar/{userID}": {
+      "get": {
+        "operationId": "GetAPICalendarUserID",
+        "summary": "Get a specific user's calendar events for a given time range.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "start",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userID",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": true,
+            "description": "Numeric ID of the user to get"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got user calendar events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/calendar/me": {
       "get": {
         "operationId": "GetAPICalendarMe",
@@ -1066,7 +1143,7 @@
     },
     "/api/scheduling/slots": {
       "post": {
-        "operationId": "PostAPISchedulingFree",
+        "operationId": "PostAPISchedulingSlots",
         "summary": "Idempotent route, just returns appropriate time slots along with their respective ratings.",
         "requestBody": {
           "required": true,
@@ -1232,7 +1309,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MSFTGroupUser"
+                    "$ref": "#/components/schemas/MSFTUser"
                   }
                 }
               }
@@ -1250,6 +1327,110 @@
           },
           "500": {
             "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/msft-users/search": {
+      "get": {
+        "summary": "Get users from Microsoft based on name and email",
+        "operationId": "GetAPIMSFTUsersSearch",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search parameter for Microsoft users, can be first name, surname, or email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users successfully found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MSFTUser"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Failed to get users from Microsoft"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/msft-users": {
+      "get": {
+        "summary": "Get all users from Microsoft",
+        "operationId": "GetAPIMSFTUsers",
+        "responses": {
+          "200": {
+            "description": "Users successfully found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MSFTUser"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Failed to get users from Microsoft"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
             "content": {
               "application/json": {
                 "schema": {
@@ -1936,7 +2117,7 @@
           "name"
         ]
       },
-      "MSFTGroupUser": {
+      "MSFTUser": {
         "type": "object",
         "properties": {
           "email": {

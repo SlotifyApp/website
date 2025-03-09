@@ -362,7 +362,7 @@ const SchedulingSlotsSuccessResponseBody: z.ZodType<SchedulingSlotsSuccessRespon
 const MSFTGroup = z
   .object({ id: z.number().int(), name: z.string() })
   .passthrough();
-const MSFTGroupUser = z
+const MSFTUser = z
   .object({
     email: z.string().email(),
     firstName: z.string(),
@@ -398,7 +398,7 @@ export const schemas = {
   MeetingTimeSuggestion,
   SchedulingSlotsSuccessResponseBody,
   MSFTGroup,
-  MSFTGroupUser,
+  MSFTUser,
 };
 
 const endpoints = makeApi([
@@ -425,6 +425,52 @@ const endpoints = makeApi([
         status: 302,
         description: `Successful auth`,
         schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/calendar/:userID",
+    alias: "GetAPICalendarUserID",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "start",
+        type: "Query",
+        schema: z.string().datetime({ offset: true }),
+      },
+      {
+        name: "end",
+        type: "Query",
+        schema: z.string().datetime({ offset: true }),
+      },
+      {
+        name: "userID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.array(CalendarEvent),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
       },
     ],
   },
@@ -797,7 +843,7 @@ const endpoints = makeApi([
         schema: z.number().int(),
       },
     ],
-    response: z.array(MSFTGroupUser),
+    response: z.array(MSFTUser),
     errors: [
       {
         status: 403,
@@ -832,6 +878,71 @@ const endpoints = makeApi([
         status: 404,
         description: `User not found`,
         schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/msft-users",
+    alias: "GetAPIMSFTUsers",
+    requestFormat: "json",
+    response: z.array(MSFTUser),
+    errors: [
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Failed to get users from Microsoft`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/msft-users/search",
+    alias: "GetAPIMSFTUsersSearch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "search",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+    ],
+    response: z.array(MSFTUser),
+    errors: [
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Failed to get users from Microsoft`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
       },
     ],
   },
@@ -883,7 +994,7 @@ const endpoints = makeApi([
   {
     method: "post",
     path: "/api/scheduling/slots",
-    alias: "PostAPISchedulingFree",
+    alias: "PostAPISchedulingSlots",
     requestFormat: "json",
     parameters: [
       {
