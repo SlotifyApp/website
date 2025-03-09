@@ -1,7 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,24 +21,71 @@ interface CreateEventProps {
   onOpenChangeAction: (open: boolean) => void
 }
 
+// Mapping from dropdown option to minutes
+const durationMapping: { [key: string]: number } = {
+  "30 minutes": 30,
+  "1hr": 60,
+  "2hrs": 120,
+}
+
 export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
-  const [duration, setDuration] = useState("30 minutes")
+  // Set default duration to "1hr"
+  const [duration, setDuration] = useState("1hr")
   const [participants, setParticipants] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null)
   const [availabilityData, setAvailabilityData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Fetch availability data when participants or date range changes
-  useEffect(() => {
-    const fetchAvailability = async () => {
-      if (!participants || !selectedRange) return
+  // Ref to store the last fetched range so that we only call the API if it has changed
+  const lastFetchedRangeRef = useRef<{ start: number; end: number } | null>(null)
 
+  // Use a memoized version of selectedRange to prevent unnecessary re-creations
+  const memoizedRange = useMemo(() => selectedRange, [selectedRange?.start, selectedRange?.end])
+
+  // Custom callback for updating selectedRange only when necessary
+  const handleRangeSelect = useCallback((range: { start: Date; end: Date } | null) => {
+    if (range && (
+      !selectedRange ||
+      selectedRange.start.getTime() !== range.start.getTime() ||
+      selectedRange.end.getTime() !== range.end.getTime()
+    )) {
+      console.log("Range selected (updating):", range)
+      setSelectedRange(range)
+    } else {
+      console.log("Range selected is identical or null; no update.")
+    }
+  }, [selectedRange])
+
+  // Log every render to check state changes.
+  console.log("Render CreateEvent:", { title, location, duration, participants, selectedRange, availabilityData, isLoading })
+
+  // Fetch availability data when participants, memoizedRange, title, or duration change
+  useEffect(() => {
+    console.log("useEffect triggered with values:", { participants, selectedRange: memoizedRange, title, duration })
+
+    if (!participants || !memoizedRange) {
+      console.log("Missing participants or selectedRange; aborting API call.")
+      return
+    }
+
+    // Check if this range has already been used to fetch data
+    const currentRangeKey = `${memoizedRange.start.getTime()}-${memoizedRange.end.getTime()}`
+    if (lastFetchedRangeRef.current && 
+        lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
+        lastFetchedRangeRef.current.end === memoizedRange.end.getTime()) {
+      console.log("Range unchanged from last fetch; skipping API call.")
+      return
+    }
+
+    console.log("All required values provided. Initiating fetchAvailability...")
+    lastFetchedRangeRef.current = { start: memoizedRange.start.getTime(), end: memoizedRange.end.getTime() }
+
+    const fetchAvailability = async () => {
       setIsLoading(true)
       try {
-        // Parse email addresses
         const attendees = participants.split(",").map((email) => ({
           emailAddress: {
             address: email.trim(),
@@ -40,16 +93,31 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
           },
           attendeeType: "required" as const,
         }))
+        console.log("Parsed attendees:", attendees)
+
+        // Use the mapping to convert the selected duration to minutes
+        const durationInMinutes = durationMapping[duration] || 60
+        const meetingDuration = `PT${durationInMinutes}M`
+        console.log("Converted meeting duration:", meetingDuration)
+
+        console.log("Sending API call with meeting details:", {
+          meetingName: title || "New Meeting",
+          meetingDuration,
+          timeSlot: {
+            start: memoizedRange.start.toISOString(),
+            end: memoizedRange.end.toISOString(),
+          },
+        })
 
         const response = await slotifyClient.PostAPISchedulingFree({
           attendees,
           meetingName: title || "New Meeting",
-          meetingDuration: `PT${duration.split(" ")[0]}M`, // Convert "30 minutes" to "PT30M"
+          meetingDuration,
           timeConstraint: {
             timeSlots: [
               {
-                start: selectedRange.start.toISOString(),
-                end: selectedRange.end.toISOString(),
+                start: memoizedRange.start.toISOString(),
+                end: memoizedRange.end.toISOString(),
               },
             ],
           },
@@ -60,6 +128,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
           },
         })
 
+        console.log("API response received:", response)
         setAvailabilityData(response)
       } catch (error) {
         console.error("Error fetching availability:", error)
@@ -70,14 +139,15 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
         })
       } finally {
         setIsLoading(false)
+        console.log("Finished API call for availability.")
       }
     }
 
     fetchAvailability()
-  }, [participants, selectedRange, title, duration])
+  }, [participants, memoizedRange, title, duration])
 
   const handleCreateManually = () => {
-    // Implement manual creation logic
+    console.log("Manual event creation triggered")
     toast({
       title: "Event Created",
       description: "Your event has been created manually",
@@ -90,7 +160,9 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
       <DialogContent className="max-w-6xl">
         <DialogHeader>
           <DialogTitle>New Event</DialogTitle>
-          <DialogDescription>Create a new event and find the best time for all participants</DialogDescription>
+          <DialogDescription>
+            Create a new event and find the best time for all participants
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[350px_1fr] gap-6">
@@ -102,7 +174,10 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
                 id="event-title"
                 placeholder="Example Title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  console.log("Title changed:", e.target.value)
+                  setTitle(e.target.value)
+                }}
               />
             </div>
 
@@ -112,18 +187,29 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
                 id="location"
                 placeholder="Online"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={(e) => {
+                  console.log("Location changed:", e.target.value)
+                  setLocation(e.target.value)
+                }}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="duration">Event Duration</Label>
-              <Input
+              {/* Replace the text input with a dropdown menu */}
+              <select
                 id="duration"
-                placeholder="30 minutes"
                 value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-              />
+                onChange={(e) => {
+                  console.log("Duration changed:", e.target.value)
+                  setDuration(e.target.value)
+                }}
+                className="block w-full rounded-md border border-gray-300 p-2"
+              >
+                <option value="30 minutes">30 minutes</option>
+                <option value="1hr">1hr</option>
+                <option value="2hrs">2hrs</option>
+              </select>
             </div>
 
             <div className="space-y-2">
@@ -132,7 +218,10 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
                 id="participants"
                 placeholder="user1@microsoft.com"
                 value={participants}
-                onChange={(e) => setParticipants(e.target.value)}
+                onChange={(e) => {
+                  console.log("Participants changed:", e.target.value)
+                  setParticipants(e.target.value)
+                }}
               />
             </div>
 
@@ -140,8 +229,11 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
               <Label>Event Range</Label>
               <EventRangePicker
                 selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-                onRangeSelect={setSelectedRange}
+                onDateSelect={(date) => {
+                  console.log("Date selected:", date)
+                  setSelectedDate(date)
+                }}
+                onRangeSelect={handleRangeSelect}
               />
             </div>
 
@@ -152,11 +244,14 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
           {/* Right side - Calendar view */}
           <div className="border rounded-md">
-            <WeeklyCalendar availabilityData={availabilityData} isLoading={isLoading} selectedRange={selectedRange} />
+            <WeeklyCalendar
+              availabilityData={availabilityData}
+              isLoading={isLoading}
+              selectedRange={selectedRange}
+            />
           </div>
         </div>
       </DialogContent>
     </Dialog>
   )
 }
-
