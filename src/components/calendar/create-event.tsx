@@ -32,7 +32,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
   const [duration, setDuration] = useState("1hr")
-  // States for user search & selection
+  
   const [userSearchQuery, setUserSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [selectedParticipants, setSelectedParticipants] = useState<any[]>([])
@@ -40,9 +40,24 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null)
   const [availabilityData, setAvailabilityData] = useState<any>(null)
-  // New state to hold conflict events (existing calendar events)
+
   const [conflictEvents, setConflictEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
+
+  const [currentUser, setCurrentUser] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await slotifyClient.GetAPIUsersMe()
+        console.log("Current user:", user)
+        setCurrentUser(user)
+      } catch (error) {
+        console.error("Error fetching current user:", error)
+      }
+    }
+    fetchCurrentUser()
+  }, [])
 
   // Ref to store the last fetched range (optional)
   const lastFetchedRangeRef = useRef<{ start: number; end: number } | null>(null)
@@ -68,7 +83,6 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
     [selectedRange]
   )
 
-  // Search for users as the query changes (minimum 3 characters)
   useEffect(() => {
     const searchUsers = async () => {
       if (!userSearchQuery) {
@@ -100,6 +114,14 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
   // Add a user from search results to selected participants
   const handleAddParticipant = (user: any) => {
+    if (currentUser && user.email.toLowerCase() === currentUser.email.toLowerCase()) {
+      toast({
+        title: "Invalid Participant",
+        description: "You cannot add yourself as a participant.",
+        variant: "destructive",
+      })
+      return
+    }
     if (!selectedParticipants.find(u => u.id === user.id)) {
       setSelectedParticipants([...selectedParticipants, user])
     }
