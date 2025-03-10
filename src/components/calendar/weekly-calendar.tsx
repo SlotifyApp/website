@@ -21,6 +21,7 @@ import * as ScrollArea from "@radix-ui/react-scroll-area"
 interface WeeklyCalendarProps {
   availabilityData: any
   conflictEvents: any[]
+  myEvents: any[] // <-- New prop for user's own events
   isLoading: boolean
   selectedRange: { start: Date; end: Date } | null
 }
@@ -28,6 +29,7 @@ interface WeeklyCalendarProps {
 export function WeeklyCalendar({
   availabilityData,
   conflictEvents,
+  myEvents, // <-- Destructure the new prop
   isLoading,
 }: WeeklyCalendarProps) {
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date())
@@ -74,10 +76,24 @@ export function WeeklyCalendar({
     })
   }
 
-  // Get conflict events (existing calendar events) for a given day
+  // Get conflict events for a given day
   const getConflictEventsForDay = (day: Date) => {
     if (!conflictEvents) return []
     return conflictEvents.filter((event: any) => {
+      const eventStart = parseISO(event.startTime)
+      if (!isValid(eventStart)) return false
+      const dayStart = new Date(day)
+      dayStart.setHours(0, 0, 0, 0)
+      const dayEnd = new Date(day)
+      dayEnd.setHours(23, 59, 59, 999)
+      return eventStart >= dayStart && eventStart <= dayEnd
+    })
+  }
+
+  // Get the current user's own events for a given day
+  const getMyEventsForDay = (day: Date) => {
+    if (!myEvents) return []
+    return myEvents.filter((event: any) => {
       const eventStart = parseISO(event.startTime)
       if (!isValid(eventStart)) return false
       const dayStart = new Date(day)
@@ -123,11 +139,13 @@ export function WeeklyCalendar({
             key={index}
             className={cn("text-center p-2 border-b", index < 6 ? "border-r" : "")}
           >
-            <div className={cn(
-              format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd")
-                ? "bg-focusColor/90 text-white rounded-xl"
-                : ""
-            )}>
+            <div
+              className={cn(
+                format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd")
+                  ? "bg-focusColor/90 text-white rounded-xl"
+                  : ""
+              )}
+            >
               <div className="font-medium">{formatDay(day)}</div>
               <div className="text-lg">{formatDate(day)}</div>
             </div>
@@ -158,6 +176,7 @@ export function WeeklyCalendar({
               {days.map((day) => {
                 const suggestions = getSuggestionsForDay(day)
                 const conflicts = getConflictEventsForDay(day)
+                const myDayEvents = getMyEventsForDay(day)
                 return (
                   <div
                     key={day.toString()}
@@ -193,7 +212,7 @@ export function WeeklyCalendar({
                       return (
                         <div
                           key={`suggestion-${index}`}
-                          className="absolute p-1 rounded-md bg-green-300 text-green-800 text-xs cursor-pointer"
+                          className="absolute p-1 rounded-md bg-green-300 text-green-800 text-xs cursor-pointer duration-200 ease-in transform hover:scale-110 font-bold hover:bg-green-400"
                           style={{
                             top: `${topPercent}%`,
                             height: `${heightPercent}%`,
@@ -226,7 +245,7 @@ export function WeeklyCalendar({
                       return (
                         <div
                           key={`conflict-${index}`}
-                          className="absolute p-1 rounded-md bg-red-300 text-red-800 text-xs cursor-pointer"
+                          className="absolute p-1 rounded-md bg-red-300/40 text-red-800 text-xs"
                           style={{
                             top: `${topPercent}%`,
                             height: `${heightPercent}%`,
@@ -235,6 +254,40 @@ export function WeeklyCalendar({
                           }}
                         >
                           <div className="font-medium">Conflict</div>
+                        </div>
+                      )
+                    })}
+                    {/* Render user's own events (neutral color) */}
+                    {myDayEvents.map((myEvent: any, index: number) => {
+                      const eventStart = parseISO(myEvent.startTime)
+                      const eventEnd = parseISO(myEvent.endTime)
+                      if (!isValid(eventStart) || !isValid(eventEnd)) return null
+
+                      const dayStart = new Date(day)
+                      dayStart.setHours(0, 0, 0, 0)
+                      const dayEnd = new Date(day)
+                      dayEnd.setHours(23, 59, 59, 999)
+                      const actualStart = isBefore(eventStart, dayStart) ? dayStart : eventStart
+                      const actualEnd = isAfter(eventEnd, dayEnd) ? dayEnd : eventEnd
+
+                      const startFraction = getHourFraction(actualStart)
+                      const endFraction = getHourFraction(actualEnd)
+                      const topPercent = (startFraction / totalHours) * 100
+                      const heightPercent = ((endFraction - startFraction) / totalHours) * 100
+
+                      return (
+                        <div
+                          key={`myEvent-${index}`}
+                          className="absolute p-1 rounded-md bg-gray-300/70 text-gray-900 text-xs"
+                          style={{
+                            top: `${topPercent}%`,
+                            height: `${heightPercent}%`,
+                            left: "2px",
+                            right: "2px",
+                          }}
+                        >
+                          <div className="font-medium">{myEvent.subject}</div>
+                          <div className="text-[0.7rem]">{myEvent.body}</div>
                         </div>
                       )
                     })}
