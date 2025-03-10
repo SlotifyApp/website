@@ -146,7 +146,7 @@ export function EventRangePicker({ selectedDate, onDateSelect, onRangeSelect }: 
           <div
             key={index}
             className={cn(
-              "h-8 flex items-center justify-center text-sm rounded cursor-pointer",
+              "h-8 flex items-center justify-center text-sm rounded cursor-pointer select-none",
               !isCurrentMonth && "text-muted-foreground",
               isInRange(date) && "bg-primary text-primary-foreground",
               date.toDateString() === (selectedDate?.toDateString() || "") && "ring-2 ring-primary",

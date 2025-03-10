@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback, useRef } from "react"
+import { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -32,19 +32,25 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
   const [duration, setDuration] = useState("1hr")
-  const [participants, setParticipants] = useState("")
+  // States for user search & selection
+  const [userSearchQuery, setUserSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [selectedParticipants, setSelectedParticipants] = useState<any[]>([])
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null)
   const [availabilityData, setAvailabilityData] = useState<any>(null)
+  // New state to hold conflict events (existing calendar events)
+  const [conflictEvents, setConflictEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  // Ref to store the last fetched range (optional: if you want to avoid duplicate calls)
+  // Ref to store the last fetched range (optional)
   const lastFetchedRangeRef = useRef<{ start: number; end: number } | null>(null)
 
-  // Use a memoized version of selectedRange to prevent unnecessary re-creations
+  // Memoize selectedRange to prevent unnecessary re-renders
   const memoizedRange = useMemo(() => selectedRange, [selectedRange?.start, selectedRange?.end])
 
-  // Custom callback for updating selectedRange only when necessary
+  // Update selectedRange only when necessary
   const handleRangeSelect = useCallback(
     (range: { start: Date; end: Date } | null) => {
       if (
@@ -62,24 +68,64 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
     [selectedRange]
   )
 
-  // New function to manually trigger the API call for checking availability
+  // Search for users as the query changes (minimum 3 characters)
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!userSearchQuery) {
+        setSearchResults([])
+        return
+      }
+      try {
+        let response;
+        if (userSearchQuery.includes("@")) {
+          // Search by email
+          response = await slotifyClient.GetAPIUsers({ queries: { email: userSearchQuery } })
+        } else {
+          // Search by name
+          response = await slotifyClient.GetAPIUsers({ queries: { name: userSearchQuery } })
+        }
+        console.log("User search results:", response)
+        setSearchResults(response)
+      } catch (error) {
+        console.error("Error searching users:", error)
+        toast({
+          title: "Error",
+          description: "Failed to search users.",
+          variant: "destructive",
+        })
+      }
+    }
+    searchUsers()
+  }, [userSearchQuery])
+
+  // Add a user from search results to selected participants
+  const handleAddParticipant = (user: any) => {
+    if (!selectedParticipants.find(u => u.id === user.id)) {
+      setSelectedParticipants([...selectedParticipants, user])
+    }
+    setUserSearchQuery("")
+    setSearchResults([])
+  }
+
+  // Remove a selected participant
+  const handleRemoveParticipant = (userId: string) => {
+    setSelectedParticipants(selectedParticipants.filter(u => u.id !== userId))
+  }
+
+  // Fetch scheduling suggestions and then fetch conflict events from each selected participant's calendar
   const handleCheckAvailability = async () => {
     console.log("Check Availability button clicked.")
 
-    // Validate that required fields are provided
-    if (!participants || !memoizedRange) {
+    // Validate required fields
+    if (selectedParticipants.length === 0 || !memoizedRange) {
       toast({
         title: "Missing Fields",
-        description: "Please fill out the Participants and select an Event Range.",
+        description: "Please select at least one participant and choose an Event Range.",
         variant: "destructive",
       })
       return
     }
 
-    // Optionally, you can clear the previous fetched range here if you want to allow re-fetching
-    // lastFetchedRangeRef.current = null;
-
-    // Optionally check if the range is the same as last fetched (if you want to avoid duplicate calls)
     if (
       lastFetchedRangeRef.current &&
       memoizedRange &&
@@ -96,21 +142,21 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
     setIsLoading(true)
     try {
-      const attendees = participants.split(",").map((email) => ({
+      // Build attendees array from selected participants for scheduling suggestions
+      const attendees = selectedParticipants.map(user => ({
         emailAddress: {
-          address: email.trim(),
-          name: email.trim(),
+          address: user.email,
+          name: user.name || user.email,
         },
         attendeeType: "required" as const,
       }))
-      console.log("Parsed attendees:", attendees)
+      console.log("Attendees:", attendees)
 
-      // Use the mapping to convert the selected duration to minutes
       const durationInMinutes = durationMapping[duration] || 60
       const meetingDuration = `PT${durationInMinutes}M`
-      console.log("Converted meeting duration:", meetingDuration)
+      console.log("Meeting duration:", meetingDuration)
 
-      console.log("Sending API call with meeting details:", {
+      console.log("Sending scheduling API call with details:", {
         meetingName: title || "New Meeting",
         meetingDuration,
         timeSlot: {
@@ -119,6 +165,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
         },
       })
 
+      // Fetch scheduling suggestions
       const response = await slotifyClient.PostAPISchedulingSlots({
         attendees,
         meetingName: title || "New Meeting",
@@ -138,11 +185,27 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
         },
       })
 
-      console.log("API response received:", response)
+      console.log("Scheduling API response received:", response)
       setAvailabilityData(response)
+
+      // Now fetch each selected participant's calendar events for conflicts
+      const conflictPromises = selectedParticipants.map(user =>
+        slotifyClient.GetAPICalendarUserID({
+          params: { userID: user.id },
+          queries: {
+            start: memoizedRange.start.toISOString(),
+            end: memoizedRange.end.toISOString(),
+          },
+        })
+      )
+      const conflictResults = await Promise.all(conflictPromises)
+      const allConflictEvents = conflictResults.flat()
+      console.log("Conflict events fetched:", allConflictEvents)
+      setConflictEvents(allConflictEvents)
+
       toast({
         title: "Availability Fetched",
-        description: "Potential time slots have been updated.",
+        description: "Potential time slots and conflict events have been updated.",
       })
     } catch (error) {
       console.error("Error fetching availability:", error)
@@ -157,7 +220,6 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
     }
   }
 
-  // Optional: This button still triggers manual event creation
   const handleCreateManually = () => {
     console.log("Manual event creation triggered")
     toast({
@@ -179,7 +241,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
         <div className="grid grid-cols-[350px_1fr] gap-6">
           {/* Left side - Form fields */}
-          <div className="space-y-6">
+          <div className="space-y-6 relative">
             <div className="space-y-2">
               <Label htmlFor="event-title">Event Title</Label>
               <Input
@@ -223,17 +285,54 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="participants">Participants</Label>
+            {/* Participants Search & Selected Users */}
+            <div className="space-y-2 relative">
+              <Label htmlFor="user-search">Search Participants</Label>
               <Input
-                id="participants"
-                placeholder="user1@microsoft.com"
-                value={participants}
+                id="user-search"
+                placeholder="Enter email or name"
+                value={userSearchQuery}
                 onChange={(e) => {
-                  console.log("Participants changed:", e.target.value)
-                  setParticipants(e.target.value)
+                  console.log("User search query:", e.target.value)
+                  setUserSearchQuery(e.target.value)
                 }}
               />
+              {/* Search results dropdown */}
+              {searchResults.length > 0 && (
+                <div className="border rounded bg-white shadow absolute z-10 w-full max-h-40 overflow-y-auto">
+                  {searchResults.map((user) => (
+                    <div
+                      key={user.id}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleAddParticipant(user)}
+                    >
+                      {user.name ? `${user.name} (${user.email})` : user.email}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Selected participants */}
+              {selectedParticipants.length > 0 && (
+                <div className="mt-4">
+                  <div className="font-medium mb-2">Selected Participants:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedParticipants.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center gap-1 bg-blue-100 text-blue-800 rounded px-2 py-1"
+                      >
+                        <span>{user.name ? user.name : user.email}</span>
+                        <button
+                          onClick={() => handleRemoveParticipant(user.id)}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -248,7 +347,6 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
               />
             </div>
 
-            {/* New button to trigger API call */}
             <Button
               className="w-full"
               variant="default"
@@ -267,6 +365,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
           <div className="border rounded-md">
             <WeeklyCalendar
               availabilityData={availabilityData}
+              conflictEvents={conflictEvents}
               isLoading={isLoading}
               selectedRange={selectedRange}
             />
