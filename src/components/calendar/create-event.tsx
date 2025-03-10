@@ -31,7 +31,6 @@ const durationMapping: { [key: string]: number } = {
 export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
-  // Set default duration to "1hr"
   const [duration, setDuration] = useState("1hr")
   const [participants, setParticipants] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -60,7 +59,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   }, [selectedRange])
 
   // Log every render to check state changes.
-  console.log("Render CreateEvent:", { title, location, duration, participants, selectedRange, availabilityData, isLoading })
+  // console.log("Render CreateEvent:", { title, location, duration, participants, selectedRange, availabilityData, isLoading })
 
   // Fetch availability data when participants, memoizedRange, title, or duration change
   useEffect(() => {
@@ -72,7 +71,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
     }
 
     // Check if this range has already been used to fetch data
-    const currentRangeKey = `${memoizedRange.start.getTime()}-${memoizedRange.end.getTime()}`
+    // TODO - change this so that we can fetch data for the same range if other fields change
     if (lastFetchedRangeRef.current && 
         lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
         lastFetchedRangeRef.current.end === memoizedRange.end.getTime()) {
