@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react"
+import { useState, useMemo, useCallback, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -38,113 +38,126 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   const [availabilityData, setAvailabilityData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Ref to store the last fetched range so that we only call the API if it has changed
+  // Ref to store the last fetched range (optional: if you want to avoid duplicate calls)
   const lastFetchedRangeRef = useRef<{ start: number; end: number } | null>(null)
 
   // Use a memoized version of selectedRange to prevent unnecessary re-creations
   const memoizedRange = useMemo(() => selectedRange, [selectedRange?.start, selectedRange?.end])
 
   // Custom callback for updating selectedRange only when necessary
-  const handleRangeSelect = useCallback((range: { start: Date; end: Date } | null) => {
-    if (range && (
-      !selectedRange ||
-      selectedRange.start.getTime() !== range.start.getTime() ||
-      selectedRange.end.getTime() !== range.end.getTime()
-    )) {
-      console.log("Range selected (updating):", range)
-      setSelectedRange(range)
-    } else {
-      console.log("Range selected is identical or null; no update.")
-    }
-  }, [selectedRange])
-
-  // Log every render to check state changes.
-  // console.log("Render CreateEvent:", { title, location, duration, participants, selectedRange, availabilityData, isLoading })
-
-  // Fetch availability data when participants, memoizedRange, title, or duration change
-  useEffect(() => {
-    console.log("useEffect triggered with values:", { participants, selectedRange: memoizedRange, title, duration })
-
-    if (!participants || !memoizedRange) {
-      console.log("Missing participants or selectedRange; aborting API call.")
-      return
-    }
-
-    // Check if this range has already been used to fetch data
-    // TODO - change this so that we can fetch data for the same range if other fields change
-    if (lastFetchedRangeRef.current && 
-        lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
-        lastFetchedRangeRef.current.end === memoizedRange.end.getTime()) {
-      console.log("Range unchanged from last fetch; skipping API call.")
-      return
-    }
-
-    console.log("All required values provided. Initiating fetchAvailability...")
-    lastFetchedRangeRef.current = { start: memoizedRange.start.getTime(), end: memoizedRange.end.getTime() }
-
-    const fetchAvailability = async () => {
-      setIsLoading(true)
-      try {
-        const attendees = participants.split(",").map((email) => ({
-          emailAddress: {
-            address: email.trim(),
-            name: email.trim(),
-          },
-          attendeeType: "required" as const,
-        }))
-        console.log("Parsed attendees:", attendees)
-
-        // Use the mapping to convert the selected duration to minutes
-        const durationInMinutes = durationMapping[duration] || 60
-        const meetingDuration = `PT${durationInMinutes}M`
-        console.log("Converted meeting duration:", meetingDuration)
-
-        console.log("Sending API call with meeting details:", {
-          meetingName: title || "New Meeting",
-          meetingDuration,
-          timeSlot: {
-            start: memoizedRange.start.toISOString(),
-            end: memoizedRange.end.toISOString(),
-          },
-        })
-
-        const response = await slotifyClient.PostAPISchedulingFree({
-          attendees,
-          meetingName: title || "New Meeting",
-          meetingDuration,
-          timeConstraint: {
-            timeSlots: [
-              {
-                start: memoizedRange.start.toISOString(),
-                end: memoizedRange.end.toISOString(),
-              },
-            ],
-          },
-          isOrganizerOptional: false,
-          locationConstraint: {
-            isRequired: false,
-            suggestLocation: false,
-          },
-        })
-
-        console.log("API response received:", response)
-        setAvailabilityData(response)
-      } catch (error) {
-        console.error("Error fetching availability:", error)
-        toast({
-          title: "Error",
-          description: "Failed to fetch availability data",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
-        console.log("Finished API call for availability.")
+  const handleRangeSelect = useCallback(
+    (range: { start: Date; end: Date } | null) => {
+      if (
+        range &&
+        (!selectedRange ||
+          selectedRange.start.getTime() !== range.start.getTime() ||
+          selectedRange.end.getTime() !== range.end.getTime())
+      ) {
+        console.log("Range selected (updating):", range)
+        setSelectedRange(range)
+      } else {
+        console.log("Range selected is identical or null; no update.")
       }
+    },
+    [selectedRange]
+  )
+
+  // New function to manually trigger the API call for checking availability
+  const handleCheckAvailability = async () => {
+    console.log("Check Availability button clicked.")
+
+    // Validate that required fields are provided
+    if (!participants || !memoizedRange) {
+      toast({
+        title: "Missing Fields",
+        description: "Please fill out the Participants and select an Event Range.",
+        variant: "destructive",
+      })
+      return
     }
 
-    fetchAvailability()
-  }, [participants, memoizedRange, title, duration])
+    // Optionally, you can clear the previous fetched range here if you want to allow re-fetching
+    // lastFetchedRangeRef.current = null;
 
+    // Optionally check if the range is the same as last fetched (if you want to avoid duplicate calls)
+    if (
+      lastFetchedRangeRef.current &&
+      memoizedRange &&
+      lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
+      lastFetchedRangeRef.current.end === memoizedRange.end.getTime()
+    ) {
+      console.log("Range unchanged from last fetch; re-fetching due to manual trigger.")
+    }
+
+    lastFetchedRangeRef.current = {
+      start: memoizedRange.start.getTime(),
+      end: memoizedRange.end.getTime(),
+    }
+
+    setIsLoading(true)
+    try {
+      const attendees = participants.split(",").map((email) => ({
+        emailAddress: {
+          address: email.trim(),
+          name: email.trim(),
+        },
+        attendeeType: "required" as const,
+      }))
+      console.log("Parsed attendees:", attendees)
+
+      // Use the mapping to convert the selected duration to minutes
+      const durationInMinutes = durationMapping[duration] || 60
+      const meetingDuration = `PT${durationInMinutes}M`
+      console.log("Converted meeting duration:", meetingDuration)
+
+      console.log("Sending API call with meeting details:", {
+        meetingName: title || "New Meeting",
+        meetingDuration,
+        timeSlot: {
+          start: memoizedRange.start.toISOString(),
+          end: memoizedRange.end.toISOString(),
+        },
+      })
+
+      const response = await slotifyClient.PostAPISchedulingSlots({
+        attendees,
+        meetingName: title || "New Meeting",
+        meetingDuration,
+        timeConstraint: {
+          timeSlots: [
+            {
+              start: memoizedRange.start.toISOString(),
+              end: memoizedRange.end.toISOString(),
+            },
+          ],
+        },
+        isOrganizerOptional: false,
+        locationConstraint: {
+          isRequired: false,
+          suggestLocation: false,
+        },
+      })
+
+      console.log("API response received:", response)
+      setAvailabilityData(response)
+      toast({
+        title: "Availability Fetched",
+        description: "Potential time slots have been updated.",
+      })
+    } catch (error) {
+      console.error("Error fetching availability:", error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch availability data.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+      console.log("Finished API call for availability.")
+    }
+  }
+
+  // Optional: This button still triggers manual event creation
   const handleCreateManually = () => {
     console.log("Manual event creation triggered")
     toast({
@@ -160,7 +173,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
         <DialogHeader>
           <DialogTitle>New Event</DialogTitle>
           <DialogDescription>
-            Create a new event and find the best time for all participants
+            Create a new event and find the best time for all participants.
           </DialogDescription>
         </DialogHeader>
 
@@ -195,7 +208,6 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
             <div className="space-y-2">
               <Label htmlFor="duration">Event Duration</Label>
-              {/* Replace the text input with a dropdown menu */}
               <select
                 id="duration"
                 value={duration}
@@ -235,6 +247,16 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
                 onRangeSelect={handleRangeSelect}
               />
             </div>
+
+            {/* New button to trigger API call */}
+            <Button
+              className="w-full"
+              variant="default"
+              onClick={handleCheckAvailability}
+              disabled={isLoading}
+            >
+              {isLoading ? "Checking Availability..." : "Check Availability"}
+            </Button>
 
             <Button className="w-full" variant="default" onClick={handleCreateManually}>
               Create Manually
