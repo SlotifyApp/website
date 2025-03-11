@@ -314,11 +314,12 @@ export function CalendarOverview() {
                                 : ''}
                             </div>
                             {event.body ? (
-                            <div className='text-xs truncate overflow-hidden text-gray-500 font-normal'>
-                              {extractTextFromHTML(
-                                event.body?.toString() || '',
-                              )}
-                            </div>) : null}
+                              <div className='text-xs truncate overflow-hidden text-gray-500 font-normal'>
+                                {extractTextFromHTML(
+                                  event.body?.toString() || '',
+                                )}
+                              </div>
+                            ) : null}
                             {event.locations?.length ? (
                               <div className='flex flex-row items-center'>
                                 <MapPin className='mr-2 h-4 w-4 text-focusColor' />

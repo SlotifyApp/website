@@ -9,22 +9,36 @@ type MeetingTimeSlot = {
   end: string;
   start: string;
 };
-type ReschedulingCheckBodySchema = Partial<{
-  newMeeting: Partial<{
+type RescheduleRequest = {
+  request_id: number;
+  requested_by: number;
+  status: string;
+  requested_at: string;
+  oldMeeting: ReschedulingRequestOldMeeting;
+  newMeeting?: ReschedulingRequestNewMeeting | undefined;
+};
+type ReschedulingRequestOldMeeting = {
+  msftMeetingID: string;
+  meetingId: number;
+};
+type ReschedulingRequestNewMeeting = {
+  title: string;
+  meetingDuration: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+};
+type ReschedulingCheckBodySchema = {
+  newMeeting: {
     title: string;
     meetingDuration: string;
     attendees: Array<AttendeeBase>;
-  }>;
-  oldMeeting: Partial<{
-    meetingID: number;
-    title: string;
-    meetingDuration: string;
-    attendees: Array<AttendeeBase>;
-    isOrganizerOptional: boolean;
-    locationConstraint: LocationConstraint;
-    startTime: string;
-  }>;
-}>;
+  };
+  oldMeeting: {
+    msftMeetingID: string;
+    isOrganizerOptional?: boolean | undefined;
+  };
+};
 type AttendeeBase = {
   emailAddress: EmailAddress;
   attendeeType: AttendeeType;
@@ -34,6 +48,16 @@ type EmailAddress = {
   name: string;
 };
 type AttendeeType = "required" | "optional" | "resource";
+type SchedulingSlotsBodySchema = {
+  attendees: Array<AttendeeBase>;
+  meetingName: string;
+  meetingDuration: string;
+  isOrganizerOptional: boolean;
+  locationConstraint: LocationConstraint;
+  minimumAttendeePercentage?: number | undefined;
+  maxCandidates?: number | undefined;
+  timeConstraint: TimeConstraint;
+};
 type LocationConstraint = Partial<{
   isRequired: boolean;
   locations: Array<LocationConstraintItem>;
@@ -52,16 +76,6 @@ type PhysicalAddress = Partial<{
   state: string;
   street: string;
 }>;
-type SchedulingSlotsBodySchema = {
-  attendees: Array<AttendeeBase>;
-  meetingName: string;
-  meetingDuration: string;
-  isOrganizerOptional: boolean;
-  locationConstraint: LocationConstraint;
-  minimumAttendeePercentage?: number | undefined;
-  maxCandidates?: number | undefined;
-  timeConstraint: TimeConstraint;
-};
 type AttendeeAvailability = {
   availability: FreeBusyStatus;
   attendee: AttendeeBase;
@@ -109,18 +123,21 @@ type EmptySuggestionsReason =
   | "locationsUnavailable"
   | "organizerUnavailable"
   | "unknown";
-type Attendee = Partial<{
-  email: string | null;
-  attendeeType: AttendeeType;
-  responseStatus:
-    | "none"
-    | "organizer"
-    | "entativelyAccepted"
-    | "accepted"
-    | "declined"
-    | "notResponded"
-    | null;
-}>;
+type Attendee = {
+  email: string;
+  attendeeType?: AttendeeType | undefined;
+  responseStatus?:
+    | (
+        | "none"
+        | "organizer"
+        | "entativelyAccepted"
+        | "accepted"
+        | "declined"
+        | "notResponded"
+        | null
+      )
+    | undefined;
+};
 type CalendarEvent = {
   id?: string | undefined;
   attendees: Array<Attendee>;
@@ -171,8 +188,8 @@ const Notification = z
 const AttendeeType = z.enum(["required", "optional", "resource"]);
 const Attendee: z.ZodType<Attendee> = z
   .object({
-    email: z.string().email().nullable(),
-    attendeeType: AttendeeType,
+    email: z.string().email(),
+    attendeeType: AttendeeType.optional(),
     responseStatus: z
       .enum([
         "none",
@@ -182,9 +199,8 @@ const Attendee: z.ZodType<Attendee> = z
         "declined",
         "notResponded",
       ])
-      .nullable(),
+      .nullish(),
   })
-  .partial()
   .passthrough();
 const Location: z.ZodType<Location> = z
   .object({
@@ -383,22 +399,44 @@ const ReschedulingCheckBodySchema: z.ZodType<ReschedulingCheckBodySchema> = z
         meetingDuration: z.string(),
         attendees: z.array(AttendeeBase),
       })
-      .partial()
       .passthrough(),
     oldMeeting: z
       .object({
-        meetingID: z.number().int(),
-        title: z.string(),
-        meetingDuration: z.string(),
-        attendees: z.array(AttendeeBase),
-        isOrganizerOptional: z.boolean(),
-        locationConstraint: LocationConstraint,
-        startTime: z.string().datetime({ offset: true }),
+        msftMeetingID: z.string(),
+        isOrganizerOptional: z.boolean().optional().default(false),
       })
-      .partial()
       .passthrough(),
   })
-  .partial()
+  .passthrough();
+const ReschedulingRequestOldMeeting: z.ZodType<ReschedulingRequestOldMeeting> =
+  z
+    .object({ msftMeetingID: z.string(), meetingId: z.number().int() })
+    .passthrough();
+const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
+  z
+    .object({
+      title: z.string(),
+      meetingDuration: z.string(),
+      startTime: z.string().datetime({ offset: true }),
+      endTime: z.string().datetime({ offset: true }),
+      location: z.string(),
+    })
+    .passthrough();
+const RescheduleRequest: z.ZodType<RescheduleRequest> = z
+  .object({
+    request_id: z.number().int(),
+    requested_by: z.number().int(),
+    status: z.string(),
+    requested_at: z.string().datetime({ offset: true }),
+    oldMeeting: ReschedulingRequestOldMeeting,
+    newMeeting: ReschedulingRequestNewMeeting.optional(),
+  })
+  .passthrough();
+const ReschedulingRequestAcceptBodySchema = z
+  .object({
+    newStartTime: z.string().datetime({ offset: true }),
+    newEndTime: z.string().datetime({ offset: true }),
+  })
   .passthrough();
 const ReschedulingRequestBodySchema = z
   .object({
@@ -413,18 +451,18 @@ const ReschedulingRequestBodySchema = z
         startRangeTime: z.string().datetime({ offset: true }),
         endRangeTime: z.string().datetime({ offset: true }),
       })
-      .partial()
       .passthrough(),
     oldMeeting: z
       .object({
-        meetingID: z.string(),
+        msftMeetingID: z.string(),
         meetingStartTime: z.string().datetime({ offset: true }),
         meetingOwner: z.number().int(),
       })
-      .partial()
       .passthrough(),
   })
-  .partial()
+  .passthrough();
+const ReschedulingRequestSingleBodySchema = z
+  .object({ msftMeetingID: z.string() })
   .passthrough();
 const MSFTGroup = z
   .object({ id: z.number().int(), name: z.string() })
@@ -465,7 +503,12 @@ export const schemas = {
   MeetingTimeSuggestion,
   SchedulingSlotsSuccessResponseBody,
   ReschedulingCheckBodySchema,
+  ReschedulingRequestOldMeeting,
+  ReschedulingRequestNewMeeting,
+  RescheduleRequest,
+  ReschedulingRequestAcceptBodySchema,
   ReschedulingRequestBodySchema,
+  ReschedulingRequestSingleBodySchema,
   MSFTGroup,
   MSFTUser,
 };
@@ -1098,6 +1141,114 @@ const endpoints = makeApi([
     ],
   },
   {
+    method: "get",
+    path: "/api/reschedule/request/:requestID",
+    alias: "GetAPIRescheduleRequestRequestID",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "requestID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: RescheduleRequest,
+    errors: [
+      {
+        status: 400,
+        description: `Bad request (e.g., invalid event data)`,
+        schema: z.string(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "patch",
+    path: "/api/reschedule/request/:requestID/accept",
+    alias: "PatchAPIRescheduleRequestRequestIDAccept",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: ReschedulingRequestAcceptBodySchema,
+      },
+      {
+        name: "requestID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Invite not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "patch",
+    path: "/api/reschedule/request/:requestID/reject",
+    alias: "PatchAPIRescheduleRequestRequestIDReject",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "requestID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Invite not found`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.void(),
+      },
+    ],
+  },
+  {
     method: "post",
     path: "/api/reschedule/request/replace",
     alias: "PostAPIRescheduleRequestReplace",
@@ -1110,6 +1261,61 @@ const endpoints = makeApi([
       },
     ],
     response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request (e.g., invalid event data)`,
+        schema: z.string(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/api/reschedule/request/single",
+    alias: "PostAPIRescheduleRequestSingle",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.object({ msftMeetingID: z.string() }).passthrough(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request (e.g., invalid event data)`,
+        schema: z.string(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/reschedule/requests/me",
+    alias: "GetAPIRescheduleRequestsMe",
+    requestFormat: "json",
+    response: z.array(RescheduleRequest),
     errors: [
       {
         status: 400,

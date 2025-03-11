@@ -27,3 +27,6 @@ jobs:
 
       - name: Run eslint
         run: npm run lint
+
+      - name: Run prettier
+        run: npx prettier --check .
