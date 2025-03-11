@@ -1696,7 +1696,11 @@ const endpoints = makeApi([
     ],
     response: z
       .object({
+<<<<<<< HEAD
         slotifyGroups: z.array(SlotifyGroup),
+=======
+        groups: z.array(SlotifyGroup),
+>>>>>>> e72ba61 (merge: changes from last frontend main)
         nextPageToken: z.number().int(),
       })
       .passthrough(),
@@ -1734,8 +1738,20 @@ const endpoints = makeApi([
         type: "Query",
         schema: z.string().optional(),
       },
+      {
+        name: "pageToken",
+        type: "Query",
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
     ],
-    response: z.array(User),
+    response: z
+      .object({ users: z.array(User), nextPageToken: z.number().int() })
+      .passthrough(),
     errors: [
       {
         status: 400,

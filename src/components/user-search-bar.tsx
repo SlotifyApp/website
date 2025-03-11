@@ -42,20 +42,26 @@ export function UserSearch({
       }
       if (searchType == 'name') {
         try {
-          const users = await slotifyClient.GetAPIUsers({
-            queries: { name: searchQuery },
+          const userData = await slotifyClient.GetAPIUsers({
+            queries: {
+              name: searchQuery,
+              limit: 10,
+            },
           })
-          setFilteredUsers(users)
+          setFilteredUsers((userData.Users as User[]) || [])
         } catch (error) {
           console.error(error)
           errorToast(error)
         }
       } else if (searchType == 'email') {
         try {
-          const users = await slotifyClient.GetAPIUsers({
-            queries: { name: searchQuery },
+          const userData = await slotifyClient.GetAPIUsers({
+            queries: {
+              name: searchQuery,
+              limit: 10,
+            },
           })
-          setFilteredUsers(users)
+          setFilteredUsers((userData.Users as User[]) || [])
         } catch (error) {
           console.error(error)
           errorToast(error)

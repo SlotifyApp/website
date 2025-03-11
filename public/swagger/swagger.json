@@ -515,7 +515,11 @@
     "/api/users": {
       "get": {
         "operationId": "GetAPIUsers",
+<<<<<<< HEAD
         "summary": "Search for users with by email and name. MUST provide one of the query params. Returns a max of 10 searches.",
+=======
+        "summary": "Search for users with by email and name. Only provide one of the query params or none as well as the page token.",
+>>>>>>> e72ba61 (merge: changes from last frontend main)
         "parameters": [
           {
             "in": "query",
@@ -531,18 +535,57 @@
             "schema": {
               "type": "string"
             },
+<<<<<<< HEAD
             "description": "Partial name of user to search for"
+=======
+            "description": "Name of user to search for"
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "required": true
+>>>>>>> e72ba61 (merge: changes from last frontend main)
           }
         ],
         "responses": {
           "200": {
+<<<<<<< HEAD
             "description": "Users matching the given query parameter.",
+=======
+            "description": "Users matching the query parameters and a pagination token",
+>>>>>>> e72ba61 (merge: changes from last frontend main)
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "required": [
+                    "users",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "integer",
+                      "format": "uint32"
+                    }
                   }
                 }
               }
@@ -1106,11 +1149,19 @@
                 "schema": {
                   "type": "object",
                   "required": [
+<<<<<<< HEAD
                     "slotifyGroups",
                     "nextPageToken"
                   ],
                   "properties": {
                     "slotifyGroups": {
+=======
+                    "groups",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "groups": {
+>>>>>>> e72ba61 (merge: changes from last frontend main)
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/SlotifyGroup"

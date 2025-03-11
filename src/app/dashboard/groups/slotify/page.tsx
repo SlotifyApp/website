@@ -87,8 +87,14 @@ export default function GroupsPage() {
   useEffect(() => {
     const getUserSlotifyGroups = async () => {
       try {
-        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe()
-        setYourSlotifyGroups(slotifyGroupsData)
+        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
+          queries: {
+            limit: 10,
+          },
+        })
+        setYourSlotifyGroups(
+          (slotifyGroupsData.slotifyGroups as SlotifyGroup[]) || [],
+        )
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -112,8 +118,11 @@ export default function GroupsPage() {
             params: {
               slotifyGroupID: groupID,
             },
+            queries: {
+              limit: 10,
+            },
           })
-        setMembers(slotifyGroupMemberData)
+        setMembers((slotifyGroupMemberData.users as Member[]) || [])
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -131,8 +140,15 @@ export default function GroupsPage() {
             params: {
               slotifyGroupID: selectedSlotifyGroup.id,
             },
+            queries: {
+              limit: 10,
+            },
           })
-        setGroupInvites(invites.filter(invite => invite.status === 'pending'))
+        setGroupInvites(
+          ((invites.invites as InvitesGroup[]) || []).filter(
+            invite => invite.status === 'pending',
+          ),
+        )
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -383,7 +399,7 @@ export default function GroupsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className='text-sm text-muted-foreground'>
-                        {invite.message || 'No message provided.'}
+                        {invite.message || ''}
                       </p>
                       <p className='mt-2 text-xs text-muted-foreground'>
                         Invited{' '}
