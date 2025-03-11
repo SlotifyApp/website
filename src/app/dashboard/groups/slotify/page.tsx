@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { X } from "lucide-react"
-import { api } from "@/types/client"
 
 function LoadingDashboardGroups() {
   return (
@@ -158,7 +157,7 @@ export default function GroupsPage() {
     if (!selectedSlotifyGroup || inviteEmails.length === 0) return
     try {
       // placeholder for the actual invite API call
-      for (const emailToInvite of inviteEmails) {
+      // for (const emailToInvite of inviteEmails) {
         /* await slotifyClient.PostAPISlotifyGroupsSlotifyGroupIDInvite({
           params: {
             slotifyGroupID: selectedSlotifyGroup.id,
@@ -167,7 +166,7 @@ export default function GroupsPage() {
             email: emailToInvite,
           },
         }) */
-      }
+      // }
 
       toast({
         title: "Invitations sent",
@@ -232,7 +231,7 @@ export default function GroupsPage() {
           <DialogHeader>
             <DialogTitle>Invite members to {selectedSlotifyGroup?.name}</DialogTitle>
             <DialogDescription>Enter email addresses of people you'd like to invite to this group.</DialogDescription>
-            <DialogDescription>Can’t find someone? Ask them sign up for Slotify.</DialogDescription>
+            <DialogDescription>Unable to find someone? Ask them sign up for Slotify.</DialogDescription>
           </DialogHeader>
 
           <div className="flex items-end gap-2 mt-4">
