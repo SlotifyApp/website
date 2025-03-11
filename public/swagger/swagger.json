@@ -1185,6 +1185,118 @@
         }
       }
     },
+    "/api/reschedule/check": {
+      "post": {
+        "operationId": "PostAPIRescheduleCheck",
+        "summary": "Check if the old meeting can be rescheduled",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReschedulingCheckBodySchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully checked reschedule status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isNewMeetingMoreImportant": {
+                      "type": "boolean",
+                      "description": "True if the new meeting if more important than the old meeting"
+                    },
+                    "canBeRescheduled": {
+                      "type": "boolean",
+                      "description": "true if there are valid meeting slots for the old meeting to change to"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid event data)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reschedule/request/replace": {
+      "post": {
+        "operationId": "PostAPIRescheduleRequestReplace",
+        "summary": "Request to reschedule the old meeting",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReschedulingRequestBodySchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully requested to reschedule the old meeting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid event data)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/msft-groups/me": {
       "get": {
         "operationId": "GetAPIMSFTGroupsMe",
@@ -1477,6 +1589,139 @@
         "required": [
           "timeSlots"
         ]
+      },
+      "ReschedulingCheckBodySchema": {
+        "description": "Request body of the details of the two meetings",
+        "type": "object",
+        "properties": {
+          "newMeeting": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "name of the meeting"
+              },
+              "meetingDuration": {
+                "type": "string",
+                "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
+                "example": "PT2H30M"
+              },
+              "attendees": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AttendeeBase"
+                },
+                "description": "Array of all the attendees"
+              }
+            }
+          },
+          "oldMeeting": {
+            "type": "object",
+            "properties": {
+              "meetingID": {
+                "type": "integer",
+                "description": "The meeting ID of the old meeting if it exists"
+              },
+              "title": {
+                "type": "string",
+                "description": "name of the meeting"
+              },
+              "meetingDuration": {
+                "type": "string",
+                "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
+                "example": "PT2H30M"
+              },
+              "attendees": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AttendeeBase"
+                },
+                "description": "Array of all the attendees"
+              },
+              "isOrganizerOptional": {
+                "type": "boolean"
+              },
+              "locationConstraint": {
+                "$ref": "#/components/schemas/LocationConstraint"
+              },
+              "startTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The start of the meeting denoted in *ISO 8601* format"
+              }
+            }
+          }
+        }
+      },
+      "ReschedulingRequestBodySchema": {
+        "description": "Request body of the details of the two meetings",
+        "type": "object",
+        "properties": {
+          "newMeeting": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "name of the meeting"
+              },
+              "meetingDuration": {
+                "type": "string",
+                "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
+                "example": "PT2H30M"
+              },
+              "attendees": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "description": "user ID of participants"
+                },
+                "description": "Array of all the attendees user id"
+              },
+              "startTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The start of the meeting denoted in *ISO 8601* format"
+              },
+              "endTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The end of the meeting denoted in *ISO 8601* format"
+              },
+              "location": {
+                "type": "string",
+                "description": "The location of the meeting"
+              },
+              "startRangeTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The start of the range of the meeting denoted in *ISO 8601* format"
+              },
+              "endRangeTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The end of the range of the meeting denoted in *ISO 8601* format"
+              }
+            }
+          },
+          "oldMeeting": {
+            "type": "object",
+            "properties": {
+              "meetingID": {
+                "type": "string",
+                "description": "The microsoft meeting ID of the old meeting"
+              },
+              "meetingStartTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The start of the meeting denoted in *ISO 8601* format"
+              },
+              "meetingOwner": {
+                "type": "integer",
+                "description": "Meeting owner ID"
+              }
+            }
+          }
+        }
       },
       "SchedulingSlotsBodySchema": {
         "description": "Roughly maps to [MSFT Find Meeting Schema](https://learn.microsoft.com/en-us/graph/api/user-findmeetingtimes?view=graph-rest-1.0&tabs=http#request-body)",

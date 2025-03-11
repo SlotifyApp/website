@@ -9,16 +9,22 @@ type MeetingTimeSlot = {
   end: string;
   start: string;
 };
-type SchedulingSlotsBodySchema = {
-  attendees: Array<AttendeeBase>;
-  meetingName: string;
-  meetingDuration: string;
-  isOrganizerOptional: boolean;
-  locationConstraint: LocationConstraint;
-  minimumAttendeePercentage?: number | undefined;
-  maxCandidates?: number | undefined;
-  timeConstraint: TimeConstraint;
-};
+type ReschedulingCheckBodySchema = Partial<{
+  newMeeting: Partial<{
+    title: string;
+    meetingDuration: string;
+    attendees: Array<AttendeeBase>;
+  }>;
+  oldMeeting: Partial<{
+    meetingID: number;
+    title: string;
+    meetingDuration: string;
+    attendees: Array<AttendeeBase>;
+    isOrganizerOptional: boolean;
+    locationConstraint: LocationConstraint;
+    startTime: string;
+  }>;
+}>;
 type AttendeeBase = {
   emailAddress: EmailAddress;
   attendeeType: AttendeeType;
@@ -46,6 +52,16 @@ type PhysicalAddress = Partial<{
   state: string;
   street: string;
 }>;
+type SchedulingSlotsBodySchema = {
+  attendees: Array<AttendeeBase>;
+  meetingName: string;
+  meetingDuration: string;
+  isOrganizerOptional: boolean;
+  locationConstraint: LocationConstraint;
+  minimumAttendeePercentage?: number | undefined;
+  maxCandidates?: number | undefined;
+  timeConstraint: TimeConstraint;
+};
 type AttendeeAvailability = {
   availability: FreeBusyStatus;
   attendee: AttendeeBase;
@@ -359,6 +375,57 @@ const SchedulingSlotsSuccessResponseBody: z.ZodType<SchedulingSlotsSuccessRespon
     })
     .partial()
     .passthrough();
+const ReschedulingCheckBodySchema: z.ZodType<ReschedulingCheckBodySchema> = z
+  .object({
+    newMeeting: z
+      .object({
+        title: z.string(),
+        meetingDuration: z.string(),
+        attendees: z.array(AttendeeBase),
+      })
+      .partial()
+      .passthrough(),
+    oldMeeting: z
+      .object({
+        meetingID: z.number().int(),
+        title: z.string(),
+        meetingDuration: z.string(),
+        attendees: z.array(AttendeeBase),
+        isOrganizerOptional: z.boolean(),
+        locationConstraint: LocationConstraint,
+        startTime: z.string().datetime({ offset: true }),
+      })
+      .partial()
+      .passthrough(),
+  })
+  .partial()
+  .passthrough();
+const ReschedulingRequestBodySchema = z
+  .object({
+    newMeeting: z
+      .object({
+        title: z.string(),
+        meetingDuration: z.string(),
+        attendees: z.array(z.number().int()),
+        startTime: z.string().datetime({ offset: true }),
+        endTime: z.string().datetime({ offset: true }),
+        location: z.string(),
+        startRangeTime: z.string().datetime({ offset: true }),
+        endRangeTime: z.string().datetime({ offset: true }),
+      })
+      .partial()
+      .passthrough(),
+    oldMeeting: z
+      .object({
+        meetingID: z.string(),
+        meetingStartTime: z.string().datetime({ offset: true }),
+        meetingOwner: z.number().int(),
+      })
+      .partial()
+      .passthrough(),
+  })
+  .partial()
+  .passthrough();
 const MSFTGroup = z
   .object({ id: z.number().int(), name: z.string() })
   .passthrough();
@@ -397,6 +464,8 @@ export const schemas = {
   AttendeeAvailability,
   MeetingTimeSuggestion,
   SchedulingSlotsSuccessResponseBody,
+  ReschedulingCheckBodySchema,
+  ReschedulingRequestBodySchema,
   MSFTGroup,
   MSFTUser,
 };
@@ -988,6 +1057,74 @@ const endpoints = makeApi([
         status: 401,
         description: `Access token is missing or invalid`,
         schema: z.void(),
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/api/reschedule/check",
+    alias: "PostAPIRescheduleCheck",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: ReschedulingCheckBodySchema,
+      },
+    ],
+    response: z
+      .object({
+        isNewMeetingMoreImportant: z.boolean(),
+        canBeRescheduled: z.boolean(),
+      })
+      .partial()
+      .passthrough(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request (e.g., invalid event data)`,
+        schema: z.string(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/api/reschedule/request/replace",
+    alias: "PostAPIRescheduleRequestReplace",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: ReschedulingRequestBodySchema,
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request (e.g., invalid event data)`,
+        schema: z.string(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
       },
     ],
   },
