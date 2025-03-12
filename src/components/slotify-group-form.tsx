@@ -60,6 +60,7 @@ export function ProfileForm({
       console.error(error)
       errorToast(error)
     }
+    setIsOpen(false)
   }
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

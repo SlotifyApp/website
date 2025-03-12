@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { Input } from '@/components/ui/input'
 import { SlotifyGroupList } from '@/components/slotify-group-list'
 import { SlotifyGroupMembers, Member } from '@/components/slotify-group-members'
-import { ProfileForm } from '@/components/slotify-group-form'
 import { Skeleton } from '@/components/ui/skeleton'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
@@ -27,20 +26,13 @@ export default function GroupsPage() {
   // for search bars
   const [yourSlotifyGroupsSearchTerm, setYourSlotifyGroupsSearchTerm] =
     useState<string>('')
-<<<<<<< HEAD
-  //for teams, your current teams and joinable teams
+  //for groups, your current groups and joinable groups
   const [pagetokengroups, setPageTokenGroups] = useState<number>(0)
   const [yourSlotifyGroups, setYourSlotifyGroups] = useState<Set<SlotifyGroup>>(
     new Set(),
   )
-  // currently selected teams
-=======
-  //for groups, your current groups and joinable groups
-  const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
-    Array<SlotifyGroup>
-  >([])
   // currently selected groups
->>>>>>> 68e79fe (refactor: make distinction between MS Team and Slotify Group clearer)
+
   const [selectedSlotifyGroup, setSelectedSlotifyGroup] =
     useState<SlotifyGroup | null>(null)
   // members of currently selected group
@@ -84,26 +76,12 @@ export default function GroupsPage() {
   // On every page refresh, set yourSlotifyGroups
   useEffect(() => {
     const getSlotifyGroupMembers = async () => {
-<<<<<<< HEAD
       if (!selectedSlotifyGroup) return
-=======
-      if (!selectedSlotifyGroup) {
-        return
-      }
-      const groupID = selectedSlotifyGroup?.id
-
->>>>>>> 68e79fe (refactor: make distinction between MS Team and Slotify Group clearer)
       try {
         const slotifyGroupMemberData =
           await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
-<<<<<<< HEAD
             params: { slotifyGroupID: selectedSlotifyGroup.id },
             queries: { limit: 10, pageToken: pagetokengroupmembers },
-=======
-            params: {
-              slotifyGroupID: groupID,
-            },
->>>>>>> 68e79fe (refactor: make distinction between MS Team and Slotify Group clearer)
           })
         const { users, nextPageToken } = slotifyGroupMemberData
         setMembers(users)
@@ -118,14 +96,13 @@ export default function GroupsPage() {
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold mb-6'>Slotify Groups</h1>
+      <h1 className='text-3xl font-bold mb-6'>Microsoft Groups</h1>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         <div>
           <ProfileForm
-            slotifyGroups={[...yourSlotifyGroups]}
+            slotifyGroups={yourSlotifyGroups}
             onSetYourSlotifyGroupsAction={groups =>
               setYourSlotifyGroups(new Set(groups))
-            }
           />
         </div>
         <div>
@@ -145,7 +122,7 @@ export default function GroupsPage() {
           </Suspense>
         </div>
         <div>
-          <h2 className='text-xl font-semibold mb-4'>Slotify Group Members</h2>
+          <h2 className='text-xl font-semibold mb-4'>Microsoft Teams Group Members</h2>
 
           <Suspense fallback={<LoadingDashboardGroups />}>
             {selectedSlotifyGroup ? (

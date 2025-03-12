@@ -202,12 +202,18 @@ export default function GroupsPage() {
   const handleLeaveGroup = async () => {
     if (selectedSlotifyGroup) {
       try {
-        setYourSlotifyGroups(yourSlotifyGroups.filter((group) => group.id !== selectedSlotifyGroup.id))
-        const data = await slotifyClient.DeleteSlotifyGroupsSlotifyGroupIDLeaveMe(undefined,
-          {
-            params: { slotifyGroupID: selectedSlotifyGroup.id },
-          }
+        setYourSlotifyGroups(
+          yourSlotifyGroups.filter(
+            group => group.id !== selectedSlotifyGroup.id,
+          ),
         )
+        const data =
+          await slotifyClient.DeleteSlotifyGroupsSlotifyGroupIDLeaveMe(
+            undefined,
+            {
+              params: { slotifyGroupID: selectedSlotifyGroup.id },
+            },
+          )
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -244,7 +250,12 @@ export default function GroupsPage() {
           </Suspense>
         </div>
         <div>
-          <h2 className='text-xl font-semibold mb-4'>Slotify Group Members {selectedSlotifyGroup ? `: Group ${selectedSlotifyGroup.name}` : null} </h2>
+          <h2 className='text-xl font-semibold mb-4'>
+            Slotify Group Members{' '}
+            {selectedSlotifyGroup
+              ? `: Group ${selectedSlotifyGroup.name}`
+              : null}{' '}
+          </h2>
 
           <Suspense fallback={<LoadingDashboardGroups />}>
             {selectedSlotifyGroup ? (
@@ -366,9 +377,7 @@ export default function GroupsPage() {
       <Dialog open={isLeaveGroupOpen} onOpenChange={setIsLeaveGroupOpen}>
         <DialogContent className='sm:max-w-md'>
           <DialogHeader>
-            <DialogTitle>
-              Leave Group
-            </DialogTitle>
+            <DialogTitle>Leave Group</DialogTitle>
             <DialogDescription>
               Are you sure you want to leave {selectedSlotifyGroup?.name}?
             </DialogDescription>
@@ -384,11 +393,7 @@ export default function GroupsPage() {
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleLeaveGroup}
-            >
-              Confirm
-            </Button>
+            <Button onClick={handleLeaveGroup}>Confirm</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
