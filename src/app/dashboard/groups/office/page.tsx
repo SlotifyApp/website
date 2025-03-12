@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react'
 import { Input } from '@/components/ui/input'
 import { SlotifyGroupList } from '@/components/slotify-group-list'
 import { SlotifyGroupMembers, Member } from '@/components/slotify-group-members'
-import { ProfileForm } from '@/components/slotify-group-form'
 import { Skeleton } from '@/components/ui/skeleton'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
@@ -40,7 +39,7 @@ export default function GroupsPage() {
   useEffect(() => {
     const getUserSlotifyGroups = async () => {
       try {
-        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe()
+        const slotifyGroupsData = await slotifyClient.GetAPIMSFTGroupsMe()
         setYourSlotifyGroups(slotifyGroupsData)
       } catch (error) {
         console.error(error)
@@ -52,16 +51,16 @@ export default function GroupsPage() {
       if (!selectedSlotifyGroup) {
         return
       }
-      const groupID = selectedSlotifyGroup?.id
+      const msftGroupID = selectedSlotifyGroup?.id
 
       try {
         const slotifyGrouppMemberData =
-          await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
+          await slotifyClient.GetAPIMSFTGroupsGroupIDUsers({
             params: {
-              slotifyGroupID: groupID,
+              groupID: msftGroupID,
             },
           })
-        setMembers(slotifyGrouppMemberData)
+        // setMembers(slotifyGrouppMemberData)
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -74,16 +73,10 @@ export default function GroupsPage() {
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-3xl font-bold mb-6'>Slotify Groups</h1>
+      <h1 className='text-3xl font-bold mb-6'>Microsoft Groups</h1>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         <div>
-          <ProfileForm
-            slotifyGroups={yourSlotifyGroups}
-            onSetYourSlotifyGroupsAction={setYourSlotifyGroups}
-          />
-        </div>
-        <div>
-          <h2 className='text-xl font-semibold mb-4'>My Slotify Groups</h2>
+          <h2 className='text-xl font-semibold mb-4'>My Microsoft Teams Groups</h2>
           <Input
             type='text'
             placeholder='Search your groups...'
@@ -99,7 +92,7 @@ export default function GroupsPage() {
           </Suspense>
         </div>
         <div>
-          <h2 className='text-xl font-semibold mb-4'>Slotify Group Members</h2>
+          <h2 className='text-xl font-semibold mb-4'>Microsoft Teams Group Members</h2>
 
           <Suspense fallback={<LoadingDashboardGroups />}>
             {selectedSlotifyGroup ? (
