@@ -126,7 +126,7 @@ export function DisplayCalendar() {
                   <time
                     dateTime={format(day, 'yyyy-MM-dd')}
                     className={cn(
-                      'ml-auto font-medium',
+                      'font-medium',
                       isToday(day) &&
                         'bg-focusColor text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center',
                     )}
@@ -148,7 +148,7 @@ export function DisplayCalendar() {
                       >
                         {event.startTime &&
                           format(parseISO(event.startTime), 'HH:mm')}{' '}
-                        {event.subject}
+                        {event.subject ? event.subject : '(No Name)'}
                       </Badge>
                     ))}
                     {dayEvents.length > 2 && (

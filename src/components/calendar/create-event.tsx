@@ -15,6 +15,7 @@ import { EventRangePicker } from './event-range-picker'
 import { WeeklyCalendar } from './weekly-calendar'
 import slotifyClient from '@/hooks/fetch'
 import { toast } from '@/hooks/use-toast'
+import * as ScrollArea from '@radix-ui/react-scroll-area'
 
 interface CreateEventProps {
   open: boolean
@@ -29,6 +30,23 @@ const durationMapping: { [key: string]: number } = {
 }
 
 export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
+  // Create a local open state so that child components can update it.
+  const [isOpen, setIsOpen] = useState(open)
+
+  // Sync local state if prop changes.
+  useEffect(() => {
+    setIsOpen(open)
+  }, [open])
+
+  // Callback to update open in both local state and parent state.
+  const handleUpdateOpen = useCallback(
+    (newOpen: boolean) => {
+      setIsOpen(newOpen)
+      onOpenChangeAction(newOpen)
+    },
+    [onOpenChangeAction],
+  )
+
   const [myEvents, setMyEvents] = useState<any[]>([])
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
@@ -283,7 +301,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChangeAction}>
-      <DialogContent className='max-w-6xl'>
+      <DialogContent className='max-w-[70vw] max-h-[90vh]'>
         <DialogHeader>
           <DialogTitle>New Event</DialogTitle>
           <DialogDescription>
@@ -291,140 +309,167 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className='grid grid-cols-[350px_1fr] gap-6'>
+        <div className='flex items-center gap-6 h-[70vh] w-full pb-5'>
           {/* Left side - Form fields */}
-          <div className='space-y-6 relative'>
-            <div className='space-y-2'>
-              <Label htmlFor='event-title'>Event Title</Label>
-              <Input
-                id='event-title'
-                placeholder='Example Title'
-                value={title}
-                onChange={e => {
-                  console.log('Title changed:', e.target.value)
-                  setTitle(e.target.value)
-                }}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='location'>Location</Label>
-              <Input
-                id='location'
-                placeholder='Online'
-                value={location}
-                onChange={e => {
-                  console.log('Location changed:', e.target.value)
-                  setLocation(e.target.value)
-                }}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='duration'>Event Duration</Label>
-              <select
-                id='duration'
-                value={duration}
-                onChange={e => {
-                  console.log('Duration changed:', e.target.value)
-                  setDuration(e.target.value)
-                }}
-                className='block w-full rounded-md border border-gray-300 p-2'
-              >
-                <option value='30 minutes'>30 minutes</option>
-                <option value='1hr'>1hr</option>
-                <option value='2hrs'>2hrs</option>
-              </select>
-            </div>
-
-            {/* Participants Search & Selected Users */}
-            <div className='space-y-2 relative'>
-              <Label htmlFor='user-search'>Search Participants</Label>
-              <Input
-                id='user-search'
-                placeholder='Enter email or name'
-                value={userSearchQuery}
-                onChange={e => {
-                  console.log('User search query:', e.target.value)
-                  setUserSearchQuery(e.target.value)
-                }}
-              />
-              {/* Search results dropdown */}
-              {searchResults.length > 0 && (
-                <div className='border rounded bg-white shadow absolute z-10 w-full max-h-40 overflow-y-auto'>
-                  {searchResults.map(user => (
-                    <div
-                      key={user.id}
-                      className='p-2 hover:bg-gray-100 cursor-pointer'
-                      onClick={() => handleAddParticipant(user)}
-                    >
-                      {user.name ? `${user.name} (${user.email})` : user.email}
-                    </div>
-                  ))}
+          <ScrollArea.Root className='h-full w-[22vw]'>
+            <ScrollArea.Viewport className='h-full'>
+              <div className='space-y-6 relative w-[20vw]'>
+                <div className='space-y-2 m-2'>
+                  <Label htmlFor='event-title'>Event Title</Label>
+                  <Input
+                    id='event-title'
+                    placeholder='My New Meeting'
+                    value={title}
+                    onChange={e => {
+                      console.log('Title changed:', e.target.value)
+                      setTitle(e.target.value)
+                    }}
+                  />
                 </div>
-              )}
-              {/* Selected participants */}
-              {selectedParticipants.length > 0 && (
-                <div className='mt-4'>
-                  <div className='font-medium mb-2'>Selected Participants:</div>
-                  <div className='flex flex-wrap gap-2'>
-                    {selectedParticipants.map(user => (
-                      <div
-                        key={user.id}
-                        className='flex items-center gap-1 bg-blue-100 text-blue-800 rounded px-2 py-1'
-                      >
-                        <span>{user.name ? user.name : user.email}</span>
-                        <button
-                          onClick={() => handleRemoveParticipant(user.id)}
-                          className='text-blue-500 hover:text-blue-700'
+
+                <div className='space-y-2 m-2'>
+                  <Label htmlFor='location'>Location</Label>
+                  <Input
+                    id='location'
+                    placeholder='None'
+                    value={location}
+                    onChange={e => {
+                      console.log('Location changed:', e.target.value)
+                      setLocation(e.target.value)
+                    }}
+                  />
+                </div>
+
+                <div className='space-y-2 m-2'>
+                  <Label htmlFor='duration'>Event Duration</Label>
+                  <select
+                    id='duration'
+                    value={duration}
+                    onChange={e => {
+                      console.log('Duration changed:', e.target.value)
+                      setDuration(e.target.value)
+                    }}
+                    className='block w-full rounded-md border border-gray-300 p-2'
+                  >
+                    <option value='30 minutes'>30 minutes</option>
+                    <option value='1hr'>1hr</option>
+                    <option value='2hrs'>2hrs</option>
+                  </select>
+                </div>
+
+                {/* Participants Search & Selected Users */}
+                <div className='space-y-2 relative m-2'>
+                  <Label htmlFor='user-search'>Search Participants</Label>
+                  <Input
+                    id='user-search'
+                    placeholder='Enter email or name'
+                    value={userSearchQuery}
+                    onChange={e => {
+                      console.log('User search query:', e.target.value)
+                      setUserSearchQuery(e.target.value)
+                    }}
+                  />
+                  {/* Search results dropdown */}
+                  {searchResults.length > 0 && (
+                    <div className='border rounded bg-white shadow absolute z-10 w-full max-h-40 overflow-y-auto m-2'>
+                      {searchResults.map(user => (
+                        <div
+                          key={user.id}
+                          className='p-2 hover:bg-gray-100 cursor-pointer'
+                          onClick={() => handleAddParticipant(user)}
                         >
-                          ×
-                        </button>
+                          {user.name
+                            ? `${user.name} (${user.email})`
+                            : user.email}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Selected participants */}
+                  {selectedParticipants.length > 0 && (
+                    <div className='m-2'>
+                      <div className='font-medium mb-2'>
+                        Selected Participants:
                       </div>
-                    ))}
-                  </div>
+                      <div className='flex flex-wrap gap-2'>
+                        {selectedParticipants.map(user => (
+                          <div
+                            key={user.id}
+                            className='flex items-center gap-1 bg-blue-100 text-blue-800 rounded px-2 py-1'
+                          >
+                            <span>{user.name ? user.name : user.email}</span>
+                            <button
+                              onClick={() => handleRemoveParticipant(user.id)}
+                              className='text-blue-500 hover:text-blue-700'
+                            >
+                              x
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className='space-y-2'>
-              <Label>Event Range</Label>
-              <EventRangePicker
-                selectedDate={selectedDate}
-                onDateSelect={date => {
-                  console.log('Date selected:', date)
-                  setSelectedDate(date)
-                }}
-                onRangeSelect={handleRangeSelect}
-              />
-            </div>
+                <div className='space-y-2'>
+                  <Label>Event Range</Label>
+                  <EventRangePicker
+                    selectedDate={selectedDate}
+                    onDateSelect={date => {
+                      console.log('Date selected:', date)
+                      setSelectedDate(date)
+                    }}
+                    onRangeSelect={handleRangeSelect}
+                  />
+                </div>
 
-            <Button
-              className='w-full'
-              variant='default'
-              onClick={handleCheckAvailability}
-              disabled={isLoading}
+                <Button
+                  className='w-full'
+                  variant='default'
+                  onClick={handleCheckAvailability}
+                  disabled={isLoading}
+                >
+                  {isLoading
+                    ? 'Checking Availability...'
+                    : 'Check Availability'}
+                </Button>
+
+                <Button
+                  className='w-full'
+                  variant='default'
+                  onClick={handleCreateManually}
+                >
+                  Create Manually
+                </Button>
+              </div>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar
+              className='flex touch-none select-none bg-gray-100 p-0.5 transition-colors duration-[160ms] ease-out hover:bg-gray-200 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+              orientation='vertical'
             >
-              {isLoading ? 'Checking Availability...' : 'Check Availability'}
-            </Button>
-
-            <Button
-              className='w-full'
-              variant='default'
-              onClick={handleCreateManually}
-            >
-              Create Manually
-            </Button>
-          </div>
+              <ScrollArea.Thumb className='relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:left-1/2 before:top-1/2 before:size-full before:min-h-11 before:min-w-11 before:-translate-x-1/2 before:-translate-y-1/2' />
+            </ScrollArea.Scrollbar>
+            <ScrollArea.Corner className='bg-focusColor' />
+          </ScrollArea.Root>
 
           {/* Right side - Calendar view */}
-          <div className='border rounded-md'>
+          <div className='border rounded-md w-[45vw] h-full'>
             <WeeklyCalendar
               availabilityData={availabilityData}
               conflictEvents={conflictEvents}
-              isLoading={isLoading}
-              selectedRange={selectedRange}
               myEvents={myEvents}
+              isLoading={isLoading}
+              currentUser={currentUser}
+              participants={selectedParticipants}
+              location={
+                location
+                  ? location
+                  : currentUser
+                    ? currentUser.location
+                    : 'Online'
+              }
+              eventTitle={title}
+              handleUpdateOpen={handleUpdateOpen}
             />
           </div>
         </div>
