@@ -18,7 +18,7 @@ import {
 } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
+import { CreateManualEventDialog } from '@/components/calendar/create-manual-event-dialog'
 import { DayEventsDialog } from '@/components/calendar/day-events-dialog'
 import { CalendarHeader } from '@/components/calendar/calendar-header'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -167,7 +167,7 @@ export function DisplayCalendar() {
         </motion.div>
       </AnimatePresence>
 
-      <CreateEventDialog
+      <CreateManualEventDialog
         open={isCreateEventDialogOpen}
         onOpenChangeAction={setIsCreateEventDialogOpen}
         selectedDate={selectedDate}

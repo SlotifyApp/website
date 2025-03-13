@@ -43,7 +43,9 @@ export function RescheduleRequests() {
 
   const handleAction = (id: number, action: 'accept' | 'ignore') => {
     console.log(`Action: ${action} for request with ID: ${id}`)
-    setRequests(requests.filter(request => request.id !== id))
+    // setRequests(requests.filter(request => request.id !== id))
+    window.history.pushState(null, '', 'dashboard/calendar#show')
+    window.location.reload();
   }
 
   return (

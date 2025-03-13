@@ -23,6 +23,7 @@ import {
   MapPin,
   Plus,
   Repeat,
+  Sparkles,
   User,
   Users,
 } from 'lucide-react'
@@ -41,26 +42,32 @@ import { ScrollArea } from './ui/scroll-area'
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 import Link from 'next/link'
 import slotifyClient from '@/hooks/fetch'
-import { errorToast } from '@/hooks/use-toast'
-import { CreateEventDialog } from '@/components/calendar/create-event-dialog'
+import { errorToast, toast } from '@/hooks/use-toast'
+import { CreateManualEventDialog } from '@/components/calendar/create-manual-event-dialog'
 import { CreateEvent } from '@/components/calendar/create-event'
+import { get } from 'http'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
   const [calendar, setCalendar] = useState<Array<CalendarEvent>>([])
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false)
+  const [isManualCreateEventOpen, setisManualCreateEventOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   // new create event dialogue vars
-  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false)
+  
+  // TODO refactor
+  const hash = window.location.hash;
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(hash === '#show')
+  window.location.hash = '';
+
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
 
-  // We’ll display rows for 24 hours.
+  // Display rows for 24 hours.
   const totalHours = 24
 
   const handlePreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1))
@@ -169,19 +176,21 @@ export function CalendarOverview() {
                   setIsCreateEventOpen(!isCreateEventOpen)
                   console.log('Create super event: ', isCreateEventOpen)
                 }}
+                className='bg-focusColor hover:bg-focusColor/90'
               >
+                <Sparkles className='h-4 w-4 mr-2' />
                 Create super event
               </Button>
 
               <Button
                 onClick={() => {
                   setSelectedDate(new Date())
-                  setIsCreateEventDialogOpen(true)
+                  setisManualCreateEventOpen(true)
                 }}
-                className='bg-focusColor hover:bg-focusColor/90'
+                variant={'outline'}
               >
                 <Plus className='h-4 w-4 mr-2' />
-                Create Event
+                Create Event Manually
               </Button>
 
               <Button variant='outline' onClick={handleToday}>
@@ -375,9 +384,9 @@ export function CalendarOverview() {
         </CardContent>
       </Card>
 
-      <CreateEventDialog
-        open={isCreateEventDialogOpen}
-        onOpenChangeAction={setIsCreateEventDialogOpen}
+      <CreateManualEventDialog
+        open={isManualCreateEventOpen}
+        onOpenChangeAction={setisManualCreateEventOpen}
         selectedDate={selectedDate}
       />
 
@@ -481,7 +490,16 @@ export function CalendarOverview() {
                   </Button>
                 )}
 
-                <Button variant='destructive'>
+                <Button
+                  variant='destructive'
+                  onClick={() => {
+                    toast({
+                      title: 'Reschedule sent',
+                      description: 'Sent reschedule request to the organizer',
+                    })
+                    setIsDayEventsDialogOpen(false)
+                  }}
+                >
                   <div className='flex justify-center items-center'>
                     <Repeat className='mr-2 h-4 w-4' />
                     Reschedule

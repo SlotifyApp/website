@@ -271,12 +271,6 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
       const allConflictEvents = conflictResults.flat()
       console.log('Conflict events fetched:', allConflictEvents)
       setConflictEvents(allConflictEvents)
-
-      toast({
-        title: 'Availability Fetched',
-        description:
-          'Potential time slots and conflict events have been updated.',
-      })
     } catch (error) {
       console.error('Error fetching availability:', error)
       toast({
@@ -292,10 +286,6 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
 
   const handleCreateManually = () => {
     console.log('Manual event creation triggered')
-    toast({
-      title: 'Event Created',
-      description: 'Your event has been created manually',
-    })
     onOpenChangeAction(false)
   }
 
