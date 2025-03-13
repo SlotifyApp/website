@@ -474,6 +474,9 @@ const MSFTUser = z
     lastName: z.string(),
   })
   .passthrough();
+const Room = z
+  .object({ email: z.string().email(), name: z.string() })
+  .passthrough();
 
 export const schemas = {
   Notification,
@@ -511,6 +514,7 @@ export const schemas = {
   ReschedulingRequestSingleBodySchema,
   MSFTGroup,
   MSFTUser,
+  Room,
 };
 
 const endpoints = makeApi([
@@ -1330,6 +1334,35 @@ const endpoints = makeApi([
       {
         status: 500,
         description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/api/rooms/all",
+    alias: "GetAPIRoomsAll",
+    requestFormat: "json",
+    response: z.array(Room),
+    errors: [
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 404,
+        description: `Failed to get rooms from Microsoft`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
         schema: z.string(),
       },
     ],

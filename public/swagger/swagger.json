@@ -1685,6 +1685,53 @@
         }
       }
     },
+    "/api/rooms/all": {
+      "get": {
+        "summary": "Get all possible rooms.",
+        "operationId": "GetAPIRoomsAll",
+        "responses": {
+          "200": {
+            "description": "Users successfully found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Room"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Failed to get rooms from Microsoft"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/msft-users/search": {
       "get": {
         "summary": "Get users from Microsoft based on name and email",
@@ -2762,6 +2809,22 @@
           "email",
           "firstName",
           "lastName"
+        ]
+      },
+      "Room": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "name"
         ]
       }
     }
