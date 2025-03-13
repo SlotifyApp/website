@@ -93,7 +93,7 @@ export default function LandingPage() {
       process.env.NEXT_PUBLIC_API_URL + 'api/auth/callback',
     )
     const scopes = encodeURIComponent(
-      'openid profile email User.ReadWrite Calendars.ReadBasic Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared',
+      'openid profile email User.ReadWrite Calendars.ReadBasic Calendars.Read Calendars.ReadWrite Calendars.ReadWrite.Shared Group.ReadWrite.All Place.Read.All',
     ) // Replace with your required scopes
     const state = '12345' // Random string for CSRF protection
 
