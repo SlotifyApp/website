@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { useEffect, useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface EventRangePickerProps {
   selectedDate: Date | null
@@ -11,7 +11,11 @@ interface EventRangePickerProps {
   onRangeSelect: (range: { start: Date; end: Date } | null) => void
 }
 
-export function EventRangePicker({ selectedDate, onDateSelect, onRangeSelect }: EventRangePickerProps) {
+export function EventRangePicker({
+  selectedDate,
+  onDateSelect,
+  onRangeSelect,
+}: EventRangePickerProps) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
   const [dragStart, setDragStart] = useState<Date | null>(null)
   const [dragEnd, setDragEnd] = useState<Date | null>(null)
@@ -66,15 +70,19 @@ export function EventRangePicker({ selectedDate, onDateSelect, onRangeSelect }: 
   }
 
   const days = getDaysInMonth(currentMonth)
-  const monthName = currentMonth.toLocaleString("default", { month: "long" })
+  const monthName = currentMonth.toLocaleString('default', { month: 'long' })
   const year = currentMonth.getFullYear()
 
   const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1),
+    )
   }
 
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
+    )
   }
 
   const handleMouseDown = (date: Date) => {
@@ -111,27 +119,37 @@ export function EventRangePicker({ selectedDate, onDateSelect, onRangeSelect }: 
 
   useEffect(() => {
     // Add global mouse up handler to stop selection even if mouse is released outside calendar
-    document.addEventListener("mouseup", handleMouseUp)
+    document.addEventListener('mouseup', handleMouseUp)
     return () => {
-      document.removeEventListener("mouseup", handleMouseUp)
+      document.removeEventListener('mouseup', handleMouseUp)
     }
   }, [])
 
   return (
-    <div className="border rounded-md p-4">
-      <div className="flex items-center justify-between mb-4">
-        <Button variant="outline" size="icon" onClick={prevMonth} className="h-7 w-7">
-          <ChevronLeft className="h-4 w-4" />
+    <div className='border rounded-md p-4'>
+      <div className='flex items-center justify-between mb-4'>
+        <Button
+          variant='outline'
+          size='icon'
+          onClick={prevMonth}
+          className='h-7 w-7'
+        >
+          <ChevronLeft className='h-4 w-4' />
         </Button>
-        <div className="font-medium">
+        <div className='font-medium'>
           {monthName} {year}
         </div>
-        <Button variant="outline" size="icon" onClick={nextMonth} className="h-7 w-7">
-          <ChevronRight className="h-4 w-4" />
+        <Button
+          variant='outline'
+          size='icon'
+          onClick={nextMonth}
+          className='h-7 w-7'
+        >
+          <ChevronRight className='h-4 w-4' />
         </Button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs mb-1">
+      <div className='grid grid-cols-7 gap-1 text-center text-xs mb-1'>
         <div>Mo</div>
         <div>Tu</div>
         <div>We</div>
@@ -141,15 +159,19 @@ export function EventRangePicker({ selectedDate, onDateSelect, onRangeSelect }: 
         <div>Su</div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1" onMouseLeave={() => isSelecting && setIsSelecting(false)}>
+      <div
+        className='grid grid-cols-7 gap-1'
+        onMouseLeave={() => isSelecting && setIsSelecting(false)}
+      >
         {days.map(({ date, isCurrentMonth }, index) => (
           <div
             key={index}
             className={cn(
-              "h-8 flex items-center justify-center text-sm rounded cursor-pointer select-none",
-              !isCurrentMonth && "text-muted-foreground",
-              isInRange(date) && "bg-primary text-primary-foreground",
-              date.toDateString() === (selectedDate?.toDateString() || "") && "ring-2 ring-primary",
+              'h-8 flex items-center justify-center text-sm rounded cursor-pointer select-none',
+              !isCurrentMonth && 'text-muted-foreground',
+              isInRange(date) && 'bg-primary text-primary-foreground',
+              date.toDateString() === (selectedDate?.toDateString() || '') &&
+                'ring-2 ring-primary',
             )}
             onMouseDown={() => handleMouseDown(date)}
             onMouseEnter={() => handleMouseEnter(date)}
@@ -161,4 +183,3 @@ export function EventRangePicker({ selectedDate, onDateSelect, onRangeSelect }: 
     </div>
   )
 }
-

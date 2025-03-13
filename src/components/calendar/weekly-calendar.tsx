@@ -25,32 +25,38 @@ import {
 } from '@/components/ui/dialog'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast, toast } from '@/hooks/use-toast'
+import {
+  CalendarEvent,
+  MeetingTimeSuggestion,
+  SchedulingSlotsSuccessResponse,
+  User,
+} from '@/types/types'
 
 interface WeeklyCalendarProps {
-  availabilityData: any
-  conflictEvents: any[]
-  myEvents: any[]
-  isLoading: boolean
-  currentUser: { email: any; name: any }
-  participants: { email: any; name: any }[]
+  availabilityData: SchedulingSlotsSuccessResponse | null
+  conflictEvents: CalendarEvent[]
+  myEvents: CalendarEvent[]
+  currentUser: User | null
+  participants: User[]
   location: string
   eventTitle: string
-  handleUpdateOpen: (newOpen: boolean) => void
+  closeCreateEventDialogOpen: () => void
 }
 
 export function WeeklyCalendar({
   availabilityData,
   conflictEvents,
   myEvents,
-  isLoading,
   currentUser,
   participants,
   location,
   eventTitle,
-  handleUpdateOpen,
+  closeCreateEventDialogOpen,
 }: WeeklyCalendarProps) {
+  console.log('location:', location)
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date())
-  const [selectedSuggestion, setSelectedSuggestion] = useState<any>(null)
+  const [selectedSuggestion, setSelectedSuggestion] =
+    useState<MeetingTimeSuggestion | null>(null)
   const totalHours = 24
   const viewportRef = useRef<HTMLDivElement>(null)
 
@@ -83,21 +89,24 @@ export function WeeklyCalendar({
   // Helpers for filtering events by day
   const getSuggestionsForDay = (day: Date) => {
     if (!availabilityData || !availabilityData.meetingTimeSuggestions) return []
-    return availabilityData.meetingTimeSuggestions.filter((suggestion: any) => {
-      const suggestionStart = parseISO(suggestion.meetingTimeSlot.start)
-      if (!isValid(suggestionStart)) return false
-      const dayStart = new Date(day)
-      dayStart.setHours(0, 0, 0, 0)
-      const dayEnd = new Date(day)
-      dayEnd.setHours(23, 59, 59, 999)
-      return suggestionStart >= dayStart && suggestionStart <= dayEnd
-    })
+
+    return availabilityData.meetingTimeSuggestions.filter(
+      (suggestion: MeetingTimeSuggestion) => {
+        const suggestionStart = parseISO(suggestion.meetingTimeSlot!.start)
+        if (!isValid(suggestionStart)) return false
+        const dayStart = new Date(day)
+        dayStart.setHours(0, 0, 0, 0)
+        const dayEnd = new Date(day)
+        dayEnd.setHours(23, 59, 59, 999)
+        return suggestionStart >= dayStart && suggestionStart <= dayEnd
+      },
+    )
   }
 
   const getConflictEventsForDay = (day: Date) => {
     if (!conflictEvents) return []
-    return conflictEvents.filter((event: any) => {
-      const eventStart = parseISO(event.startTime)
+    return conflictEvents.filter((event: CalendarEvent) => {
+      const eventStart = parseISO(event.startTime!)
       if (!isValid(eventStart)) return false
       const dayStart = new Date(day)
       dayStart.setHours(0, 0, 0, 0)
@@ -109,8 +118,8 @@ export function WeeklyCalendar({
 
   const getMyEventsForDay = (day: Date) => {
     if (!myEvents) return []
-    return myEvents.filter((event: any) => {
-      const eventStart = parseISO(event.startTime)
+    return myEvents.filter((event: CalendarEvent) => {
+      const eventStart = parseISO(event.startTime!)
       if (!isValid(eventStart)) return false
       const dayStart = new Date(day)
       dayStart.setHours(0, 0, 0, 0)
@@ -136,11 +145,11 @@ export function WeeklyCalendar({
     try {
       const attendees = participants.map(user => ({
         email: user.email,
-        attendeeType: 'required' as 'required',
-        responseStatus: 'none' as 'none',
+        attendeeType: 'required' as const,
+        responseStatus: 'none' as const,
       }))
 
-      const calendarEvent = {
+      const calendarEvent: CalendarEvent = {
         attendees,
         locations: [],
         subject: eventTitle ? eventTitle : 'My New Meeting',
@@ -161,7 +170,7 @@ export function WeeklyCalendar({
       console.error('Error creating event:', error)
       errorToast(error)
     }
-    handleUpdateOpen(false)
+    closeCreateEventDialogOpen()
   }
 
   useEffect(() => {
@@ -192,30 +201,29 @@ export function WeeklyCalendar({
       </div>
 
       {/* Day Header Row */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] pl-5 h-[5vh] overflow-hidden">
-  <div className="border-b"></div>
-  {days.map((day, index) => (
-    <div
-      key={index}
-      className={cn(
-        "text-center p-1 border-b", // Adjust padding if needed
-        index < 6 ? "border-r" : ""
-      )}
-    >
-      <div
-        className={cn(
-          format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd")
-            ? "bg-focusColor/90 text-white rounded-xl"
-            : ""
-        )}
-      >
-        <div className="font-medium text-xs">{formatDay(day)}</div>
-        <div className="text-xs font-bold">{formatDate(day)}</div>
+      <div className='grid grid-cols-[60px_repeat(7,1fr)] pl-5 h-[5vh] overflow-hidden'>
+        <div className='border-b'></div>
+        {days.map((day, index) => (
+          <div
+            key={index}
+            className={cn(
+              'text-center p-1 border-b', // Adjust padding if needed
+              index < 6 ? 'border-r' : '',
+            )}
+          >
+            <div
+              className={cn(
+                format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+                  ? 'bg-focusColor/90 text-white rounded-xl'
+                  : '',
+              )}
+            >
+              <div className='font-medium text-xs'>{formatDay(day)}</div>
+              <div className='text-xs font-bold'>{formatDate(day)}</div>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
-  ))}
-</div>
-
 
       <ScrollArea.Root className='w-full h-[60vh] overflow-hidden rounded'>
         <ScrollArea.Viewport
@@ -268,9 +276,9 @@ export function WeeklyCalendar({
                       />
                     ))}
                     {/* Render conflict events (red) */}
-                    {conflicts.map((conflict: any, index: number) => {
-                      const eventStart = parseISO(conflict.startTime)
-                      const eventEnd = parseISO(conflict.endTime)
+                    {conflicts.map((conflict: CalendarEvent, index: number) => {
+                      const eventStart = parseISO(conflict.startTime!)
+                      const eventEnd = parseISO(conflict.endTime!)
                       if (!isValid(eventStart) || !isValid(eventEnd))
                         return null
 
@@ -307,98 +315,105 @@ export function WeeklyCalendar({
                       )
                     })}
                     {/* Render user's own events (neutral color) */}
-                    {myDayEvents.map((myEvent: any, index: number) => {
-                      const eventStart = parseISO(myEvent.startTime)
-                      const eventEnd = parseISO(myEvent.endTime)
-                      if (!isValid(eventStart) || !isValid(eventEnd))
-                        return null
+                    {myDayEvents.map(
+                      (myEvent: CalendarEvent, index: number) => {
+                        const eventStart = parseISO(myEvent.startTime!)
+                        const eventEnd = parseISO(myEvent.endTime!)
+                        if (!isValid(eventStart) || !isValid(eventEnd))
+                          return null
 
-                      const dayStart = new Date(day)
-                      dayStart.setHours(0, 0, 0, 0)
-                      const dayEnd = new Date(day)
-                      dayEnd.setHours(23, 59, 59, 999)
-                      const actualStart = isBefore(eventStart, dayStart)
-                        ? dayStart
-                        : eventStart
-                      const actualEnd = isAfter(eventEnd, dayEnd)
-                        ? dayEnd
-                        : eventEnd
+                        const dayStart = new Date(day)
+                        dayStart.setHours(0, 0, 0, 0)
+                        const dayEnd = new Date(day)
+                        dayEnd.setHours(23, 59, 59, 999)
+                        const actualStart = isBefore(eventStart, dayStart)
+                          ? dayStart
+                          : eventStart
+                        const actualEnd = isAfter(eventEnd, dayEnd)
+                          ? dayEnd
+                          : eventEnd
 
-                      const startFraction = getHourFraction(actualStart)
-                      const endFraction = getHourFraction(actualEnd)
-                      const topPercent = (startFraction / totalHours) * 100
-                      const heightPercent =
-                        ((endFraction - startFraction) / totalHours) * 100
+                        const startFraction = getHourFraction(actualStart)
+                        const endFraction = getHourFraction(actualEnd)
+                        const topPercent = (startFraction / totalHours) * 100
+                        const heightPercent =
+                          ((endFraction - startFraction) / totalHours) * 100
 
-                      return (
-                        <div
-                          key={`myEvent-${index}`}
-                          className='absolute p-1 rounded-md bg-gray-300/70 text-gray-900 text-xs'
-                          style={{
-                            top: `${topPercent}%`,
-                            height: `${heightPercent}%`,
-                            left: '2px',
-                            right: '2px',
-                          }}
-                        >
-                          <div className='font-medium truncate'>
-                            {myEvent.subject ? myEvent.subject : '(No name)'}
+                        return (
+                          <div
+                            key={`myEvent-${index}`}
+                            className='absolute p-1 rounded-md bg-gray-300/70 text-gray-900 text-xs'
+                            style={{
+                              top: `${topPercent}%`,
+                              height: `${heightPercent}%`,
+                              left: '2px',
+                              right: '2px',
+                            }}
+                          >
+                            <div className='font-medium truncate'>
+                              {myEvent.subject ? myEvent.subject : '(No name)'}
+                            </div>
+                            <div className='text-[0.7rem] truncate'>
+                              {extractTextFromHTML(myEvent.body!)}
+                            </div>
                           </div>
-                          <div className='text-[0.7rem] truncate'>
-                            {extractTextFromHTML(myEvent.body)}
-                          </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      },
+                    )}
                     {/* Render available suggestions (green) */}
-                    {suggestions.map((suggestion: any, index: number) => {
-                      const suggestionStart = parseISO(
-                        suggestion.meetingTimeSlot.start,
-                      )
-                      const suggestionEnd = parseISO(
-                        suggestion.meetingTimeSlot.end,
-                      )
-                      if (!isValid(suggestionStart) || !isValid(suggestionEnd))
-                        return null
+                    {suggestions.map(
+                      (suggestion: MeetingTimeSuggestion, index: number) => {
+                        const suggestionStart = parseISO(
+                          suggestion.meetingTimeSlot!.start,
+                        )
+                        const suggestionEnd = parseISO(
+                          suggestion.meetingTimeSlot!.end,
+                        )
+                        if (
+                          !isValid(suggestionStart) ||
+                          !isValid(suggestionEnd)
+                        )
+                          return null
 
-                      const dayStart = new Date(day)
-                      dayStart.setHours(0, 0, 0, 0)
-                      const dayEnd = new Date(day)
-                      dayEnd.setHours(23, 59, 59, 999)
-                      const actualStart = isBefore(suggestionStart, dayStart)
-                        ? dayStart
-                        : suggestionStart
-                      const actualEnd = isAfter(suggestionEnd, dayEnd)
-                        ? dayEnd
-                        : suggestionEnd
+                        const dayStart = new Date(day)
+                        dayStart.setHours(0, 0, 0, 0)
+                        const dayEnd = new Date(day)
+                        dayEnd.setHours(23, 59, 59, 999)
+                        const actualStart = isBefore(suggestionStart, dayStart)
+                          ? dayStart
+                          : suggestionStart
+                        const actualEnd = isAfter(suggestionEnd, dayEnd)
+                          ? dayEnd
+                          : suggestionEnd
 
-                      const startFraction = getHourFraction(actualStart)
-                      const endFraction = getHourFraction(actualEnd)
-                      const topPercent = (startFraction / totalHours) * 100
-                      const heightPercent =
-                        ((endFraction - startFraction) / totalHours) * 100
+                        const startFraction = getHourFraction(actualStart)
+                        const endFraction = getHourFraction(actualEnd)
+                        const topPercent = (startFraction / totalHours) * 100
+                        const heightPercent =
+                          ((endFraction - startFraction) / totalHours) * 100
 
-                      return (
-                        <div
-                          key={`suggestion-${index}`}
-                          className='absolute p-1 rounded-md bg-green-300 text-green-800 text-xs cursor-pointer duration-200 ease-in transform hover:scale-110 font-bold hover:bg-green-400'
-                          style={{
-                            top: `${topPercent}%`,
-                            height: `${heightPercent}%`,
-                            left: '2px',
-                            right: '2px',
-                          }}
-                          onClick={() => setSelectedSuggestion(suggestion)}
-                        >
-                          <div>
-                            Rating:{' '}
-                            {suggestion.confidence
-                              ? `${suggestion.confidence}%`
-                              : ''}
+                        return (
+                          <div
+                            key={`suggestion-${index}`}
+                            className='absolute p-1 rounded-md bg-green-300 text-green-800 text-xs cursor-pointer duration-200 ease-in transform hover:scale-110 font-bold hover:bg-green-400'
+                            style={{
+                              top: `${topPercent}%`,
+                              height: `${heightPercent}%`,
+                              left: '2px',
+                              right: '2px',
+                            }}
+                            onClick={() => setSelectedSuggestion(suggestion)}
+                          >
+                            <div>
+                              Rating:{' '}
+                              {suggestion.confidence
+                                ? `${suggestion.confidence}%`
+                                : ''}
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      },
+                    )}
                   </div>
                 )
               })}
@@ -425,12 +440,12 @@ export function WeeklyCalendar({
               <p>
                 Book meeting from{' '}
                 {format(
-                  parseISO(selectedSuggestion.meetingTimeSlot.start),
+                  parseISO(selectedSuggestion.meetingTimeSlot!.start),
                   'PPpp',
                 )}{' '}
                 to{' '}
                 {format(
-                  parseISO(selectedSuggestion.meetingTimeSlot.end),
+                  parseISO(selectedSuggestion.meetingTimeSlot!.end),
                   'PPpp',
                 )}
                 ?
@@ -446,8 +461,8 @@ export function WeeklyCalendar({
                   className='bg-focusColor hover:bg-focusColor/90'
                   onClick={async () => {
                     await createEvent(
-                      selectedSuggestion.meetingTimeSlot.start,
-                      selectedSuggestion.meetingTimeSlot.end,
+                      selectedSuggestion.meetingTimeSlot!.start,
+                      selectedSuggestion.meetingTimeSlot!.end,
                     )
                     setSelectedSuggestion(null)
                   }}

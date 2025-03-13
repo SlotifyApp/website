@@ -16,10 +16,17 @@ import { WeeklyCalendar } from './weekly-calendar'
 import slotifyClient from '@/hooks/fetch'
 import { toast } from '@/hooks/use-toast'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
+import {
+  User,
+  AttendeeBase,
+  CalendarEvent,
+  SchedulingSlotsSuccessResponse,
+} from '@/types/types'
 
 interface CreateEventProps {
   open: boolean
   onOpenChangeAction: (open: boolean) => void
+  closeCreateEventDialogOpen: () => void
 }
 
 // Mapping from dropdown option to minutes
@@ -29,44 +36,49 @@ const durationMapping: { [key: string]: number } = {
   '2hrs': 120,
 }
 
-export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
-  // Create a local open state so that child components can update it.
-  const [isOpen, setIsOpen] = useState(open)
+export function CreateEvent({
+  open,
+  onOpenChangeAction,
+  closeCreateEventDialogOpen,
+}: CreateEventProps) {
+  // // Create a local open state so that child components can update it.
+  // const [isOpen, setIsOpen] = useState(open)
 
-  // Sync local state if prop changes.
-  useEffect(() => {
-    setIsOpen(open)
-  }, [open])
+  // // Sync local state with prop changes
+  // useEffect(() => {
+  //   setIsOpen(open)
+  // }, [open])
 
-  // Callback to update open in both local state and parent state.
-  const handleUpdateOpen = useCallback(
-    (newOpen: boolean) => {
-      setIsOpen(newOpen)
-      onOpenChangeAction(newOpen)
-    },
-    [onOpenChangeAction],
-  )
+  // // Callback to update open in both local state and parent state.
+  // const handleUpdateOpen = useCallback(
+  //   (newOpen: boolean) => {
+  //     setIsOpen(newOpen)
+  //     onOpenChangeAction(newOpen)
+  //   },
+  //   [onOpenChangeAction],
+  // )
 
-  const [myEvents, setMyEvents] = useState<any[]>([])
+  const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
   const [duration, setDuration] = useState('1hr')
 
   const [userSearchQuery, setUserSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [selectedParticipants, setSelectedParticipants] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<User[]>([])
+  const [selectedParticipants, setSelectedParticipants] = useState<User[]>([])
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedRange, setSelectedRange] = useState<{
     start: Date
     end: Date
   } | null>(null)
-  const [availabilityData, setAvailabilityData] = useState<any>(null)
+  const [availabilityData, setAvailabilityData] =
+    useState<SchedulingSlotsSuccessResponse | null>(null)
 
-  const [conflictEvents, setConflictEvents] = useState<any[]>([])
+  const [conflictEvents, setConflictEvents] = useState<CalendarEvent[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -87,10 +99,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   )
 
   // Memoize selectedRange to prevent unnecessary re-renders
-  const memoizedRange = useMemo(
-    () => selectedRange,
-    [selectedRange?.start, selectedRange?.end],
-  )
+  const memoizedRange = useMemo(() => selectedRange, [selectedRange])
 
   // Update selectedRange only when necessary
   const handleRangeSelect = useCallback(
@@ -144,7 +153,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   }, [userSearchQuery])
 
   // Add a user from search results to selected participants
-  const handleAddParticipant = (user: any) => {
+  const handleAddParticipant = (user: User) => {
     if (
       currentUser &&
       user.email.toLowerCase() === currentUser.email.toLowerCase()
@@ -164,7 +173,7 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
   }
 
   // Remove a selected participant
-  const handleRemoveParticipant = (userId: string) => {
+  const handleRemoveParticipant = (userId: number) => {
     setSelectedParticipants(selectedParticipants.filter(u => u.id !== userId))
   }
 
@@ -212,13 +221,19 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
     setIsLoading(true)
     try {
       // Build attendees array from selected participants for scheduling suggestions
-      const attendees = selectedParticipants.map(user => ({
-        emailAddress: {
-          address: user.email,
-          name: user.name || user.email,
-        },
-        attendeeType: 'required' as const,
-      }))
+
+      const attendees: AttendeeBase[] = []
+
+      for (const user of selectedParticipants) {
+        attendees.push({
+          emailAddress: {
+            address: user.email,
+            name: user.firstName + ' ' + user.lastName,
+          },
+          attendeeType: 'required' as const,
+        })
+      }
+
       console.log('Attendees:', attendees)
 
       const durationInMinutes = durationMapping[duration] || 60
@@ -387,7 +402,9 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
                             key={user.id}
                             className='flex items-center gap-1 bg-blue-100 text-blue-800 rounded px-2 py-1'
                           >
-                            <span>{user.name ? user.name : user.email}</span>
+                            <span>
+                              {user.firstName ? user.firstName : user.email}
+                            </span>
                             <button
                               onClick={() => handleRemoveParticipant(user.id)}
                               className='text-blue-500 hover:text-blue-700'
@@ -448,18 +465,11 @@ export function CreateEvent({ open, onOpenChangeAction }: CreateEventProps) {
               availabilityData={availabilityData}
               conflictEvents={conflictEvents}
               myEvents={myEvents}
-              isLoading={isLoading}
               currentUser={currentUser}
               participants={selectedParticipants}
-              location={
-                location
-                  ? location
-                  : currentUser
-                    ? currentUser.location
-                    : 'Online'
-              }
+              location={''} //TODO fix this
               eventTitle={title}
-              handleUpdateOpen={handleUpdateOpen}
+              closeCreateEventDialogOpen={closeCreateEventDialogOpen}
             />
           </div>
         </div>

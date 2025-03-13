@@ -137,7 +137,9 @@ export function DayEventsDialog({
           className='bg-muted p-4 rounded-lg cursor-pointer hover:bg-accent'
           onClick={() => onEventSelectAction(event)}
         >
-          <h3 className='text-lg font-semibold mb-2'>{event.subject ? event.subject : '(No Name)'}</h3>
+          <h3 className='text-lg font-semibold mb-2'>
+            {event.subject ? event.subject : '(No Name)'}
+          </h3>
           <div className='flex items-center text-sm'>
             <Clock className='mr-2 h-4 w-4' />
             {event.startTime && event.endTime && (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   format,
   startOfWeek,
@@ -45,7 +45,6 @@ import slotifyClient from '@/hooks/fetch'
 import { errorToast, toast } from '@/hooks/use-toast'
 import { CreateManualEventDialog } from '@/components/calendar/create-manual-event-dialog'
 import { CreateEvent } from '@/components/calendar/create-event'
-import { get } from 'http'
 
 export function CalendarOverview() {
   const [isDayEventsDialogOpen, setIsDayEventsDialogOpen] = useState(false)
@@ -56,12 +55,13 @@ export function CalendarOverview() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   // new create event dialogue vars
-  
-  // TODO refactor
-  const hash = window.location.hash;
-  const [isCreateEventOpen, setIsCreateEventOpen] = useState(hash === '#show')
-  window.location.hash = '';
 
+  // TODO refactor
+  const hash = window.location.hash
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(hash === '#show')
+  window.location.hash = ''
+  // remove the hash from the URL
+  window.history.replaceState({}, document.title, window.location.pathname)
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }) // Monday
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 })
@@ -75,6 +75,10 @@ export function CalendarOverview() {
   const handleToday = () => setCurrentWeek(new Date())
 
   const viewportRef = useRef<HTMLDivElement>(null)
+
+  const closeCreateEventDialogOpen = useCallback(() => {
+    setIsCreateEventOpen(false)
+  }, [setIsCreateEventOpen])
 
   useEffect(() => {
     if (viewportRef.current) {
@@ -393,6 +397,7 @@ export function CalendarOverview() {
       <CreateEvent
         open={isCreateEventOpen}
         onOpenChangeAction={setIsCreateEventOpen}
+        closeCreateEventDialogOpen={closeCreateEventDialogOpen}
       />
 
       <Dialog
