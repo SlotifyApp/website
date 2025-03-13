@@ -28,17 +28,17 @@ import { Check, ChevronDown, Search } from 'lucide-react'
 import slotifyClient from '@/hooks/fetch'
 import { Attendee, SlotifyGroup, User } from '@/types/types'
 
-interface CreateEventDialogProps {
+interface CreateManualEventDialogProps {
   open: boolean
   onOpenChangeAction: (open: boolean) => void
   selectedDate: Date | null
 }
 
-export function CreateEventDialog({
+export function CreateManualEventDialog({
   open,
   onOpenChangeAction,
   selectedDate,
-}: CreateEventDialogProps) {
+}: CreateManualEventDialogProps) {
   const [date, setDate] = useState<Date | undefined>(selectedDate || undefined)
   const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
     Array<SlotifyGroup>

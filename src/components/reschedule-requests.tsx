@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { toast } from '@/hooks/use-toast'
 
 const initialRequests = [
   {
@@ -42,7 +43,17 @@ export function RescheduleRequests() {
   const [requests, setRequests] = useState(initialRequests)
 
   const handleAction = (id: number, action: 'accept' | 'ignore') => {
-    console.log(`Action: ${action} for request with ID: ${id}`)
+    if (action === 'accept') {
+      toast({
+        title: 'Request accepted',
+        description: `Request has been accepted`,
+      })
+    } else {
+      toast({
+        title: 'Request ignored',
+        description: `Request has been ignored`,
+      })
+    }
     setRequests(requests.filter(request => request.id !== id))
   }
 

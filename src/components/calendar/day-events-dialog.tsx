@@ -27,6 +27,16 @@ interface RenderEventDetails {
   onEventSelectAction: (event: CalendarEvent | null) => void
 }
 
+/**
+ * Extract text content from an HTML string.
+ */
+function extractTextFromHTML(htmlString: string) {
+  if (!htmlString) return ''
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(htmlString, 'text/html')
+  return (doc.body.textContent || '').trim()
+}
+
 export const RenderEventDetails = ({
   event,
   onEventSelectAction,
@@ -85,7 +95,7 @@ export const RenderEventDetails = ({
     {event.body && (
       <div className='mt-4'>
         <h4 className='text-sm font-semibold mb-2'>Description:</h4>
-        <p className='text-sm'>{event.body}</p>
+        <p className='text-sm'>{extractTextFromHTML(event.body)}</p>
       </div>
     )}
     <div className='mt-4 space-y-2'>
@@ -127,7 +137,9 @@ export function DayEventsDialog({
           className='bg-muted p-4 rounded-lg cursor-pointer hover:bg-accent'
           onClick={() => onEventSelectAction(event)}
         >
-          <h3 className='text-lg font-semibold mb-2'>{event.subject}</h3>
+          <h3 className='text-lg font-semibold mb-2'>
+            {event.subject ? event.subject : '(No Name)'}
+          </h3>
           <div className='flex items-center text-sm'>
             <Clock className='mr-2 h-4 w-4' />
             {event.startTime && event.endTime && (
