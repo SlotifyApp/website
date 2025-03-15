@@ -1,46 +1,21 @@
 'use client'
 
 import { Check, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-
-const initialRequests = [
-  {
-    id: 1,
-    title: 'Teams Sync Meeting',
-    currentDateTime: '2024-02-09 10:00 AM',
-    requestedDateTime: '2024-02-10 11:00 AM',
-    participants: ['John', 'Jane', 'Bob'],
-    requestedBy: 'John',
-    status: 'pending',
-  },
-  {
-    id: 2,
-    title: 'Project Review',
-    currentDateTime: '2024-02-09 02:00 PM',
-    requestedDateTime: '2024-02-09 04:00 PM',
-    participants: ['Alice', 'Bob', 'Charlie'],
-    requestedBy: 'Bob',
-    status: 'pending',
-  },
-  {
-    id: 3,
-    title: 'Client Meeting',
-    currentDateTime: '2024-02-10 11:00 AM',
-    requestedDateTime: '2024-02-11 02:00 PM',
-    participants: ['David', 'Eve'],
-    requestedBy: 'David',
-    status: 'pending',
-  },
-]
+import slotifyClient from '@/hooks/fetch'
+import { RescheduleRequest } from '@/types/types'
 
 export function RescheduleRequests() {
-  const [requests, setRequests] = useState(initialRequests)
+  const [myRequests, setmyRequests] = useState<RescheduleRequest[] | null>(null)
+
+  // hashmap of user id to user name
+  const [userMap, setUserMap] = useState<{ [key: number]: string }>({})
 
   const handleAction = (id: number, action: 'accept' | 'ignore') => {
     if (action === 'accept') {
@@ -54,37 +29,60 @@ export function RescheduleRequests() {
         description: `Request has been ignored`,
       })
     }
-    setRequests(requests.filter(request => request.id !== id))
   }
+
+  const getRescheduleRequests = async () => {
+    const response = await slotifyClient.GetAPIRescheduleRequestsMe()
+    setmyRequests(response)
+    console.log('myRequests', myRequests)
+    // getUserForEachRequest()
+    // console.log('userMap', userMap)
+  }
+
+  const getUserForEachRequest = async () => {
+    myRequests?.forEach(async request => {
+      const response = await slotifyClient.GetAPIUsersUserID({ params: { userID: request.requested_by } })
+      setUserMap((prev) => ({ ...prev, [request.requested_by]: response.firstName + ' ' + response.lastName }))
+    })
+  }
+
+  async function getUserByID(id: number) {
+    const response = await slotifyClient.GetAPIUsersUserID({ params: { userID: id } })
+    return response.firstName + ' ' + response.lastName
+  }
+
+  useEffect(() => {
+    getRescheduleRequests()
+  }, [])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className='flex items-center justify-between'>
           Reschedule Requests
-          <Badge variant='secondary'>{requests.length}</Badge>
+          <Badge variant='secondary'>{myRequests?.length}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className='p-0'>
         <ScrollArea className='h-[calc(100vh-280px)]'>
           <div className='divide-y'>
-            {requests.map(request => (
-              <div key={request.id} className='p-4'>
+            {myRequests?.map(request => (
+              <div key={request.request_id} className='p-4'>
                 <div className='space-y-3'>
                   <div>
                     <h4 className='font-medium leading-none'>
-                      {request.title}
+                      {request.newMeeting?.title ? request.newMeeting.title : 'Untitled'}
                     </h4>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      Requested by {request.requestedBy}
+                      Requested by {getUserByID(request.requested_by)}
                     </p>
                   </div>
 
-                  <div className='space-y-1 text-sm'>
+                  {/* <div className='space-y-1 text-sm'>
                     <div className='flex items-start gap-2'>
                       <div className='w-20 font-medium shrink-0'>Current:</div>
                       <div className='text-muted-foreground'>
-                        {request.currentDateTime}
+                        {(request.oldMeeting)}
                       </div>
                     </div>
                     <div className='flex items-start gap-2'>
@@ -124,7 +122,7 @@ export function RescheduleRequests() {
                       <X className='h-4 w-4 mr-1' />
                       Ignore
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}
