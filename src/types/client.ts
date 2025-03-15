@@ -1295,7 +1295,7 @@ const endpoints = makeApi([
         schema: z.object({ msftMeetingID: z.string() }).passthrough(),
       },
     ],
-    response: z.string(),
+    response: z.number(),
     errors: [
       {
         status: 400,

@@ -155,6 +155,22 @@ export function CalendarOverview() {
     return (doc.body.textContent || '').trim()
   }
 
+  const handleReschedule = async (selectedEventID: string) => {
+    if (!selectedEventID) return
+    try {
+      await slotifyClient.PostAPIRescheduleRequestSingle({
+        msftMeetingID: selectedEventID,
+      })
+      toast({
+        title: 'Reschedule sent',
+        description: 'Sent reschedule request to the organizer',
+      })
+    } catch (error) {
+      console.error(error)
+      errorToast(error)
+    }
+  }
+
   return (
     <div>
       <Card>
@@ -492,10 +508,8 @@ export function CalendarOverview() {
                 <Button
                   variant='destructive'
                   onClick={() => {
-                    toast({
-                      title: 'Reschedule sent',
-                      description: 'Sent reschedule request to the organizer',
-                    })
+                    console.log('Reschedule event: ', selectedEvent.id)
+                    handleReschedule(selectedEvent.id!.toString())
                     setIsDayEventsDialogOpen(false)
                   }}
                 >
