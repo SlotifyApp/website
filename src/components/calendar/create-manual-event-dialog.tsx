@@ -51,6 +51,9 @@ export function CreateManualEventDialog({
   const [startTime, setStartTime] = useState<string | null>(null)
   const [endTime, setEndTime] = useState<string | null>(null)
 
+  const [pagetokengroups, setPageTokenGroups] = useState<number>(0)
+  const [pagetokengroupmembers, setPageTokenGroupMembers] = useState<number>(0)
+
   const createEvent = async (
     eventTitle: string,
     startTime: string,
@@ -95,8 +98,15 @@ export function CreateManualEventDialog({
       // This code is ugly, but needs to be done for the refresh.
       // It works, but we need better code
       try {
-        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe()
-        setYourSlotifyGroups(slotifyGroupsData)
+        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
+          queries: {
+            limit: 10,
+            pageToken: pagetokengroups
+          }
+        })
+        const {groups, nextPageToken } = slotifyGroupsData
+        setYourSlotifyGroups(groups)
+        setPageTokenGroups(nextPageToken)
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -113,9 +123,14 @@ export function CreateManualEventDialog({
             params: {
               slotifyGroupID: slotifyGroupID,
             },
+            queries: {
+              limit: 10,
+              pageToken: pagetokengroupmembers
+            },
           })
-
-        setMembers(slotifyGroupUsersData)
+        const {users, nextPageToken } = slotifyGroupUsersData
+        setMembers(users)
+        setPageTokenGroupMembers(nextPageToken)
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -124,7 +139,7 @@ export function CreateManualEventDialog({
 
     getUserSlotifyGroups()
     getSlotifyGroupMembers()
-  }, [selectedSlotifyGroup])
+  }, [selectedSlotifyGroup, pagetokengroups, pagetokengroupmembers])
 
   const toggleParticipant = (participant: User) => {
     setSelectedParticipants(current =>
