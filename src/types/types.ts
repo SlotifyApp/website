@@ -7,6 +7,7 @@ export type User = z.infer<typeof schemas.User>
 export type CalendarEvent = z.infer<typeof schemas.CalendarEvent>
 export type SlotifyGroup = z.infer<typeof schemas.SlotifyGroup>
 export type InvitesMe = z.infer<typeof schemas.InvitesMe>
+export type InvitesGroup = z.infer<typeof schemas.InvitesGroup>
 export type SchedulingSlotsSuccessResponse = z.infer<
   typeof schemas.SchedulingSlotsSuccessResponseBody
 >
