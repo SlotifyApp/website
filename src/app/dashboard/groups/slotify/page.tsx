@@ -437,11 +437,11 @@ export default function GroupsPage() {
             // PAGE 1
             <>
               <div className='flex items-end gap-2 mt-4'>
-                  <UserSearch
-                    handleAddUsersAction={handleAddParticipant}
-                    handleRemoveUserAction={handleRemoveParticipant}
-                    selectedUsers={searchedUsers}
-                  />
+                <UserSearch
+                  handleAddUsersAction={handleAddParticipant}
+                  handleRemoveUserAction={handleRemoveParticipant}
+                  selectedUsers={searchedUsers}
+                />
               </div>
               {searchedUsers.length > 0 && (
                 <div className='mt-4'>
@@ -456,7 +456,9 @@ export default function GroupsPage() {
                           ? `${userEmailID.firstName} ${userEmailID.lastName}`
                           : userEmailID.email}
                         <button
-                          onClick={() => handleRemoveParticipant(userEmailID.id)}
+                          onClick={() =>
+                            handleRemoveParticipant(userEmailID.id)
+                          }
                           className='text-secondary-foreground/70 hover:text-secondary-foreground'
                         >
                           <X className='h-3 w-3' />
