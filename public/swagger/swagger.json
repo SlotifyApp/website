@@ -336,6 +336,60 @@
         }
       }
     },
+    "/api/calendar/event": {
+      "get": {
+        "operationId": "GetAPICalendarEvent",
+        "summary": "Get calendar event by microsoft id.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "msftID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got user calendar events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/refresh": {
       "post": {
         "operationId": "PostAPIRefresh",
@@ -1501,7 +1555,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "number"
                 }
               }
             }

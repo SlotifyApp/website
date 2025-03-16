@@ -592,6 +592,42 @@ const endpoints = makeApi([
   },
   {
     method: "get",
+    path: "/api/calendar/event",
+    alias: "GetAPICalendarEvent",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "msftID",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: CalendarEvent,
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "get",
     path: "/api/calendar/me",
     alias: "GetAPICalendarMe",
     requestFormat: "json",
@@ -1295,7 +1331,7 @@ const endpoints = makeApi([
         schema: z.object({ msftMeetingID: z.string() }).passthrough(),
       },
     ],
-    response: z.string(),
+    response: z.number(),
     errors: [
       {
         status: 400,
