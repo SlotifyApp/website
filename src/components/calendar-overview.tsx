@@ -391,7 +391,7 @@ export function CalendarOverview() {
       <CreateEvent
         open={isCreateEventOpen}
         onOpenChangeAction={setIsCreateEventOpen}
-        closeCreateEventDialogOpen={closeCreateEventDialogOpen}
+        closeCreateEventDialogOpenAction={closeCreateEventDialogOpen}
       />
 
       <Dialog
