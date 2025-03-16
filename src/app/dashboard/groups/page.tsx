@@ -27,6 +27,8 @@ export default function GroupsPage() {
   const [yourSlotifyGroupsSearchTerm, setYourSlotifyGroupsSearchTerm] =
     useState<string>('')
   //for teams, your current teams and joinable teams
+  const [pagetokengroups, setPageTokenGroups] = useState<number>(0)
+  const [pagetokengroupmembers, setPageTokenGroupMembers] = useState<number>(0)
   const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
     Array<SlotifyGroup>
   >([])
@@ -40,8 +42,15 @@ export default function GroupsPage() {
   useEffect(() => {
     const getUserSlotifyGroups = async () => {
       try {
-        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe()
-        setYourSlotifyGroups(slotifyGroupsData)
+        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
+          queries: {
+            limit: 10,
+            pageToken: pagetokengroups
+          }
+        })
+        const {groups, nextPageToken } = slotifyGroupsData
+        setYourSlotifyGroups(groups)
+        setPageTokenGroups(nextPageToken)
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -60,8 +69,14 @@ export default function GroupsPage() {
             params: {
               slotifyGroupID: teamID,
             },
+            queries: {
+              limit: 10,
+              pageToken: pagetokengroupmembers,
+            }
           })
-        setMembers(slotifyGrouppMemberData)
+        const {users, nextPageToken } = slotifyGrouppMemberData
+        setMembers(users)
+        setPageTokenGroupMembers(nextPageToken)
       } catch (error) {
         console.error(error)
         errorToast(error)

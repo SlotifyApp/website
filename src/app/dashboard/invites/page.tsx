@@ -18,6 +18,7 @@ import { formatDistanceToNow, format } from 'date-fns'
 
 export default function InvitesPage() {
   const [invites, setInvites] = useState<InvitesMe[]>([])
+  const [pagetoken, setPageToken] = useState<number>(0)
   const declineInvite = async (inviteID: number) => {
     try {
       //TODO: create pop up based on the message this
@@ -65,15 +66,22 @@ export default function InvitesPage() {
   useEffect(() => {
     const getInvites = async () => {
       try {
-        const inviteData = await slotifyClient.GetAPIInvitesMe()
-        setInvites(inviteData)
+        const inviteData = await slotifyClient.GetAPIInvitesMe({
+          queries: {
+            limit: 10,
+            pageToken: pagetoken
+          }
+        })
+        const {invites, nextPageToken } = inviteData
+        setInvites(invites)
+        setPageToken(nextPageToken)
       } catch (error) {
         console.error(error)
         errorToast(error)
       }
     }
     getInvites()
-  }, [])
+  }, [pagetoken])
 
   return (
     <div className='container mx-auto py-10'>
