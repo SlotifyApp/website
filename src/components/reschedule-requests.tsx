@@ -9,13 +9,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
 import slotifyClient from '@/hooks/fetch'
-import { RescheduleRequest } from '@/types/types'
+import { CalendarEvent, RescheduleRequest, User } from '@/types/types'
+import { set } from 'date-fns'
 
 export function RescheduleRequests() {
   const [myRequests, setmyRequests] = useState<RescheduleRequest[] | null>(null)
 
-  // hashmap of user id to user name
-  const [userMap, setUserMap] = useState<{ [key: number]: string }>({})
+  const [fullRequests, setFullRequests] = useState<{
+    [key: number]: {
+      requestedAt: string
+      requestedBy: string
+      oldEvent: CalendarEvent
+      newEvent: {
+        startTime: string
+        endTime: string
+        title: string
+        duration: string
+        location: string
+      } | null
+    }
+  }>({})
 
   const handleAction = (id: number, action: 'accept' | 'ignore') => {
     if (action === 'accept') {
@@ -34,20 +47,38 @@ export function RescheduleRequests() {
   const getRescheduleRequests = async () => {
     const response = await slotifyClient.GetAPIRescheduleRequestsMe()
     setmyRequests(response)
-    console.log('myRequests', myRequests)
-    // getUserForEachRequest()
-    // console.log('userMap', userMap)
   }
 
-  const getUserForEachRequest = async () => {
+  const getFullRequests = async () => {
     myRequests?.forEach(async request => {
-      const response = await slotifyClient.GetAPIUsersUserID({ params: { userID: request.requested_by } })
-      setUserMap((prev) => ({ ...prev, [request.requested_by]: response.firstName + ' ' + response.lastName }))
+      const requestedBy = await getUserByID(request.requested_by)
+      const oldEvent = await slotifyClient.GetAPICalendarEvent({
+        queries: { msftID: request.oldMeeting.msftMeetingID },
+      })
+      const newEvent = request.newMeeting?.startTime === "0001-01-01T00:00:00Z" ? null :{
+        startTime: request.newMeeting!.startTime,
+        endTime: request.newMeeting!.endTime,
+        title: request.newMeeting!.title,
+        duration: request.newMeeting!.meetingDuration,
+        location: request.newMeeting!.location,
+      }
+
+      setFullRequests({
+        ...fullRequests,
+        [request.request_id]: {
+          requestedAt: request.requested_at,
+          requestedBy: requestedBy,
+          oldEvent: oldEvent,
+          newEvent: newEvent,
+        },
+      })
     })
   }
 
-  async function getUserByID(id: number) {
-    const response = await slotifyClient.GetAPIUsersUserID({ params: { userID: id } })
+  const getUserByID = async (id: number) => {
+    const response = await slotifyClient.GetAPIUsersUserID({
+      params: { userID: id },
+    })
     return response.firstName + ' ' + response.lastName
   }
 
@@ -55,6 +86,9 @@ export function RescheduleRequests() {
     getRescheduleRequests()
   }, [])
 
+  useEffect(() => {
+    getFullRequests()
+  }, [myRequests])
   return (
     <Card>
       <CardHeader>
@@ -71,10 +105,15 @@ export function RescheduleRequests() {
                 <div className='space-y-3'>
                   <div>
                     <h4 className='font-medium leading-none'>
-                      {request.newMeeting?.title ? request.newMeeting.title : 'Untitled'}
+                      {request.newMeeting?.title
+                        ? request.newMeeting.title
+                        : 'Untitled'}
                     </h4>
                     <p className='text-sm text-muted-foreground mt-1'>
-                      Requested by {getUserByID(request.requested_by)}
+                      Requested by{' '}
+                      {fullRequests[request.request_id]
+                        ? fullRequests[request.request_id]!.requestedBy
+                        : ''}
                     </p>
                   </div>
 
@@ -82,7 +121,7 @@ export function RescheduleRequests() {
                     <div className='flex items-start gap-2'>
                       <div className='w-20 font-medium shrink-0'>Current:</div>
                       <div className='text-muted-foreground'>
-                        {(request.oldMeeting)}
+                        {request.oldMeeting}
                       </div>
                     </div>
                     <div className='flex items-start gap-2'>
