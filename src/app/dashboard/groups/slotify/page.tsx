@@ -13,7 +13,7 @@ import { ProfileForm } from '@/components/slotify-group-form'
 import { Skeleton } from '@/components/ui/skeleton'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast, toast } from '@/hooks/use-toast'
-import type { SlotifyGroup, InvitesGroup } from '@/types/types'
+import type { SlotifyGroup, InvitesGroup, User } from '@/types/types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow, format } from 'date-fns'
+import { UserSearch } from '@/components/user-search-bar'
 
 function LoadingDashboardGroups() {
   return (
@@ -75,20 +76,12 @@ export default function GroupsPage() {
   // invite form state, and fields
   const [isInviteFormOpen, setIsInviteFormOpen] = useState(false)
   const [dialogPage, setDialogPage] = useState(1)
-  const [email, setEmail] = useState('')
-  const [inviteUserEmailIDs, setInviteUserEmailIDs] = useState<
-    {
-      email: string
-      id: number
-      firstName?: string
-      lastName?: string
-    }[]
-  >([])
   const [expiryOption, setExpiryOption] = useState<ExpiryOption>('1day')
   const [inviteMessage, setInviteMessage] = useState('')
+  // Stores all searched users
+  const [searchedUsers, setSearchedUsers] = useState<User[]>([])
   // group invites
   const [groupInvites, setGroupInvites] = useState<InvitesGroup[]>([])
-  const [isLoadingInvites, setIsLoadingInvites] = useState(false)
 
   // On every page refresh, set yourSlotifyGroups
   useEffect(() => {
@@ -105,7 +98,7 @@ export default function GroupsPage() {
     getUserSlotifyGroups()
   }, [])
 
-  // When a group is selected, fetch members and invites for that specific group
+  // When a group is selected, fetch members and pending invites for that group
   useEffect(() => {
     const getSlotifyGroupMembers = async () => {
       if (!selectedSlotifyGroup) {
@@ -132,8 +125,6 @@ export default function GroupsPage() {
         setGroupInvites([])
         return
       }
-
-      setIsLoadingInvites(true)
       try {
         const invites =
           await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDInvites({
@@ -145,8 +136,6 @@ export default function GroupsPage() {
       } catch (error) {
         console.error(error)
         errorToast(error)
-      } finally {
-        setIsLoadingInvites(false)
       }
     }
 
@@ -177,60 +166,14 @@ export default function GroupsPage() {
     return expiryDate
   }
 
-  const handleAddEmail = async () => {
-    if (email) {
-      try {
-        const userToInvite = (
-          await slotifyClient.GetAPIUsers({
-            queries: {
-              email: email,
-            },
-          })
-        ).find(user => user.email == email)
-        if (userToInvite) {
-          setInviteUserEmailIDs([
-            ...inviteUserEmailIDs,
-            {
-              email: email,
-              id: userToInvite.id,
-              firstName: userToInvite.firstName,
-              lastName: userToInvite.lastName,
-            },
-          ])
-          setEmail('')
-        }
-      } catch (error) {
-        console.error(error)
-        errorToast(error)
-      }
-    }
-  }
-
-  const handleRemoveEmail = (emailToRemove: string) => {
-    setInviteUserEmailIDs(
-      inviteUserEmailIDs.filter(e => e.email !== emailToRemove),
-    )
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddEmail()
-    }
-  }
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value)
-  }
-
   const handleSubmitInvites = async () => {
-    if (!selectedSlotifyGroup || inviteUserEmailIDs.length === 0) return
+    if (!selectedSlotifyGroup || searchedUsers.length === 0) return
     try {
       const expiryDate = calculateExpiryDate(expiryOption)
       const currentUser = await slotifyClient.GetAPIUsersMe()
       const newInvites: InvitesGroup[] = []
 
-      for (const userData of inviteUserEmailIDs) {
+      for (const userData of searchedUsers) {
         const response = await slotifyClient.PostAPIInvites({
           slotifyGroupID: selectedSlotifyGroup.id,
           // note: expiryDate needs this different format, cannot be an ISO String
@@ -261,10 +204,10 @@ export default function GroupsPage() {
 
       toast({
         title: 'Invitations sent',
-        description: `Successfully invited ${inviteUserEmailIDs.length} member(s) to ${selectedSlotifyGroup.name}`,
+        description: `Successfully invited ${searchedUsers.length} member(s) to ${selectedSlotifyGroup.name}`,
         variant: 'default',
       })
-      setInviteUserEmailIDs([])
+      setSearchedUsers([])
       setExpiryOption('1day')
       setInviteMessage('')
       setIsInviteFormOpen(false)
@@ -303,6 +246,18 @@ export default function GroupsPage() {
       setSelectedSlotifyGroup(null)
       setIsLeaveGroupOpen(false)
     }
+  }
+
+  // Add a user from search results to selected participants
+  const handleAddParticipant = (user: User) => {
+    if (!searchedUsers.find(u => u.id === user.id)) {
+      setSearchedUsers([...searchedUsers, user])
+    }
+  }
+
+  // Remove a selected participant
+  const handleRemoveParticipant = (userId: number) => {
+    setSearchedUsers(searchedUsers.filter(u => u.id !== userId))
   }
 
   // Helper function to get full name
@@ -379,12 +334,7 @@ export default function GroupsPage() {
                 ? `: Group ${selectedSlotifyGroup.name}`
                 : null}
             </h2>
-            {isLoadingInvites ? (
-              <div className='space-y-4'>
-                <Skeleton className='h-24 w-full' />
-                <Skeleton className='h-24 w-full' />
-              </div>
-            ) : groupInvites.length > 0 ? (
+            {groupInvites.length > 0 ? (
               <div className='grid gap-4'>
                 {groupInvites.map(invite => (
                   <Card key={invite.inviteID}>
@@ -472,8 +422,7 @@ export default function GroupsPage() {
             {dialogPage === 1 ? (
               <>
                 <DialogDescription>
-                  Enter email addresses of people you want to invite to this
-                  group.
+                  Search for people you want to invite to this group.
                 </DialogDescription>
                 <DialogDescription>
                   Unable to find someone? Ask them sign up for Slotify.
@@ -488,30 +437,17 @@ export default function GroupsPage() {
             // PAGE 1
             <>
               <div className='flex items-end gap-2 mt-4'>
-                <div className='grid flex-1 gap-2'>
-                  <Label htmlFor='email'>Email address</Label>
-                  <Input
-                    id='email'
-                    type='email'
-                    placeholder='name@example.com'
-                    value={email}
-                    onChange={handleEmailChange}
-                    onKeyDown={handleKeyDown}
+                  <UserSearch
+                    handleAddUsersAction={handleAddParticipant}
+                    handleRemoveUserAction={handleRemoveParticipant}
+                    selectedUsers={searchedUsers}
                   />
-                </div>
-                <Button
-                  type='button'
-                  onClick={handleAddEmail}
-                  className='mt-[22px] self-start'
-                >
-                  Add User
-                </Button>
               </div>
-              {inviteUserEmailIDs.length > 0 && (
+              {searchedUsers.length > 0 && (
                 <div className='mt-4'>
                   <Label>Users to be invited:</Label>
                   <div className='flex flex-wrap gap-2 mt-2'>
-                    {inviteUserEmailIDs.map(userEmailID => (
+                    {searchedUsers.map(userEmailID => (
                       <div
                         key={userEmailID.email}
                         className='flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm'
@@ -520,7 +456,7 @@ export default function GroupsPage() {
                           ? `${userEmailID.firstName} ${userEmailID.lastName}`
                           : userEmailID.email}
                         <button
-                          onClick={() => handleRemoveEmail(userEmailID.email)}
+                          onClick={() => handleRemoveParticipant(userEmailID.id)}
                           className='text-secondary-foreground/70 hover:text-secondary-foreground'
                         >
                           <X className='h-3 w-3' />
@@ -540,7 +476,7 @@ export default function GroupsPage() {
                 </Button>
                 <Button
                   onClick={() => setDialogPage(2)}
-                  disabled={inviteUserEmailIDs.length === 0}
+                  disabled={searchedUsers.length === 0}
                 >
                   Next
                 </Button>
@@ -588,7 +524,7 @@ export default function GroupsPage() {
                   Inviting the following users:
                 </h3>
                 <div className='bg-muted p-2 rounded-md text-sm'>
-                  {inviteUserEmailIDs
+                  {searchedUsers
                     .map(userData =>
                       userData.firstName && userData.lastName
                         ? `${userData.firstName} ${userData.lastName}`
