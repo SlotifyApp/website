@@ -1738,20 +1738,8 @@ const endpoints = makeApi([
         type: "Query",
         schema: z.string().optional(),
       },
-      {
-        name: "pageToken",
-        type: "Query",
-        schema: z.number().int().optional(),
-      },
-      {
-        name: "limit",
-        type: "Query",
-        schema: z.number().int(),
-      },
     ],
-    response: z
-      .object({ users: z.array(User), nextPageToken: z.number().int() })
-      .passthrough(),
+    response: z.array(User),
     errors: [
       {
         status: 400,
