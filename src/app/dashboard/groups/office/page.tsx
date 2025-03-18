@@ -84,7 +84,7 @@ export default function GroupsPage() {
 
     getUserMSFTGroups()
     getMSFTGroupMembers()
-  }, [selectedMSFTGroup, yourMSFTGroups])
+  }, [selectedMSFTGroup])
 
   return (
     <div className='container mx-auto px-4 py-8'>

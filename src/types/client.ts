@@ -1696,11 +1696,7 @@ const endpoints = makeApi([
     ],
     response: z
       .object({
-<<<<<<< HEAD
         slotifyGroups: z.array(SlotifyGroup),
-=======
-        groups: z.array(SlotifyGroup),
->>>>>>> e72ba61 (merge: changes from last frontend main)
         nextPageToken: z.number().int(),
       })
       .passthrough(),
@@ -1731,31 +1727,29 @@ const endpoints = makeApi([
       {
         name: "email",
         type: "Query",
-        schema: z.string().email().optional(),
+        schema: z.string().optional(),
       },
       {
         name: "name",
         type: "Query",
         schema: z.string().optional(),
       },
-      {
-        name: "pageToken",
-        type: "Query",
-        schema: z.number().int().optional(),
-      },
-      {
-        name: "limit",
-        type: "Query",
-        schema: z.number().int(),
-      },
     ],
-    response: z
-      .object({ users: z.array(User), nextPageToken: z.number().int() })
-      .passthrough(),
+    response: z.array(User),
     errors: [
       {
         status: 400,
         description: `Bad request (e.g., invalid slotifyGroup ID)`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
         schema: z.void(),
       },
     ],
