@@ -1731,29 +1731,31 @@ const endpoints = makeApi([
       {
         name: "email",
         type: "Query",
-        schema: z.string().optional(),
+        schema: z.string().email().optional(),
       },
       {
         name: "name",
         type: "Query",
         schema: z.string().optional(),
       },
+      {
+        name: "pageToken",
+        type: "Query",
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
     ],
-    response: z.array(User),
+    response: z
+      .object({ users: z.array(User), nextPageToken: z.number().int() })
+      .passthrough(),
     errors: [
       {
         status: 400,
         description: `Bad request (e.g., invalid slotifyGroup ID)`,
-        schema: z.void(),
-      },
-      {
-        status: 401,
-        description: `Access token is missing or invalid`,
-        schema: z.void(),
-      },
-      {
-        status: 500,
-        description: `Something went wrong internally`,
         schema: z.void(),
       },
     ],

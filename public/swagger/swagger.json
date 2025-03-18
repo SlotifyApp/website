@@ -517,6 +517,7 @@
         "operationId": "GetAPIUsers",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         "summary": "Search for users with by email and name. MUST provide one of the query params. Returns a max of 10 searches.",
 =======
         "summary": "Search for users with by email and name. Only provide one of the query params or none as well as the page token.",
@@ -524,14 +525,18 @@
 =======
         "summary": "Search for users with by email and name. MUST provide one of the query params. Returns a max of 10 searches.",
 >>>>>>> a40baf6 (Remove pagination call to GetAPIUsers)
+=======
+        "summary": "Search for users with by email and name. Only provide one of the query params or none as well as the page token.",
+>>>>>>> 4203e86 (merge)
         "parameters": [
           {
             "in": "query",
             "name": "email",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "email"
             },
-            "description": "Partial email of user to search for"
+            "description": "Email of user to search for"
           },
           {
             "in": "query",
@@ -541,8 +546,11 @@
             },
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             "description": "Partial name of user to search for"
 =======
+=======
+>>>>>>> 4203e86 (merge)
             "description": "Name of user to search for"
           },
           {
@@ -562,14 +570,18 @@
               "format": "int32"
             },
             "required": true
+<<<<<<< HEAD
 >>>>>>> e72ba61 (merge: changes from last frontend main)
 =======
             "description": "Partial name of user to search for"
 >>>>>>> a40baf6 (Remove pagination call to GetAPIUsers)
+=======
+>>>>>>> 4203e86 (merge)
           }
         ],
         "responses": {
           "200": {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
             "description": "Users matching the given query parameter.",
@@ -579,12 +591,28 @@
 =======
             "description": "Users matching the given query parameter.",
 >>>>>>> a40baf6 (Remove pagination call to GetAPIUsers)
+=======
+            "description": "Users matching the query parameters and a pagination token",
+>>>>>>> 4203e86 (merge)
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "required": [
+                    "users",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "integer",
+                      "format": "uint32"
+                    }
                   }
                 }
               }
@@ -592,12 +620,6 @@
           },
           "400": {
             "description": "Bad request (e.g., invalid slotifyGroup ID)"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "500": {
-            "description": "Something went wrong internally"
           }
         }
       },
