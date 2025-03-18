@@ -92,9 +92,7 @@ export default function GroupsPage() {
             limit: 10,
           },
         })
-        setYourSlotifyGroups(
-          (slotifyGroupsData.slotifyGroups as SlotifyGroup[]) || [],
-        )
+        setYourSlotifyGroups(slotifyGroupsData.slotifyGroups as SlotifyGroup[])
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -122,7 +120,7 @@ export default function GroupsPage() {
               limit: 10,
             },
           })
-        setMembers((slotifyGroupMemberData.users as Member[]) || [])
+        setMembers(slotifyGroupMemberData.users as Member[])
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -145,7 +143,7 @@ export default function GroupsPage() {
             },
           })
         setGroupInvites(
-          ((invites.invites as InvitesGroup[]) || []).filter(
+          (invites.invites as InvitesGroup[]).filter(
             invite => invite.status === 'pending',
           ),
         )
