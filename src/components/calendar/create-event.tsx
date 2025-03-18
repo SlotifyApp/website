@@ -79,7 +79,6 @@ export function CreateEvent({
   const [isLoading, setIsLoading] = useState(false)
 
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [pagetoken, setPageToken] = useState<number>(0)
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -131,18 +130,15 @@ export function CreateEvent({
         if (userSearchQuery.includes('@')) {
           // Search by email
           response = await slotifyClient.GetAPIUsers({
-            queries: { email: userSearchQuery, limit: 10, pageToken: pagetoken },
+            queries: { email: userSearchQuery },
           })
         } else {
           // Search by name
           response = await slotifyClient.GetAPIUsers({
-            queries: { name: userSearchQuery, limit: 10, pageToken: pagetoken },
+            queries: { name: userSearchQuery },
           })
         }
-        console.log('User search results:', response)
-        const {users, nextPageToken} = response
-        setSearchResults(users)
-        setPageToken(nextPageToken)
+        setSearchResults(response)
       } catch (error) {
         console.error('Error searching users:', error)
         toast({

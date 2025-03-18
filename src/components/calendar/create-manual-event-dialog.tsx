@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -51,8 +51,9 @@ export function CreateManualEventDialog({
   const [startTime, setStartTime] = useState<string | null>(null)
   const [endTime, setEndTime] = useState<string | null>(null)
 
-  const [pagetokengroups, setPageTokenGroups] = useState<number>(0)
-  const [pagetokengroupmembers, setPageTokenGroupMembers] = useState<number>(0)
+  const [pageTokenGroups, setPageTokenGroups] = useState<number>(0)
+  const [pageTokenGroupMembers, setPageTokenGroupMembers] = useState<number>(0)
+  const [isLoadingGroups, setIsLoadingGroups] = useState<boolean>(false)
 
   const createEvent = async (
     eventTitle: string,
@@ -93,25 +94,28 @@ export function CreateManualEventDialog({
       errorToast(error)
     }
   }
-  useEffect(() => {
-    const getUserSlotifyGroups = async () => {
-      // This code is ugly, but needs to be done for the refresh.
-      // It works, but we need better code
-      try {
-        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
-          queries: {
-            limit: 10,
-            pageToken: pagetokengroups
-          }
-        })
-        const {groups, nextPageToken } = slotifyGroupsData
-        setYourSlotifyGroups(groups)
-        setPageTokenGroups(nextPageToken)
-      } catch (error) {
-        console.error(error)
-        errorToast(error)
-      }
+
+  const getUserSlotifyGroups = useCallback(async () => {
+    if (pageTokenGroups === 0 && yourSlotifyGroups.length > 0) return
+    setIsLoadingGroups(true)
+    try {
+      const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
+        queries: {
+          limit: 10,
+          pageToken: pageTokenGroups,
+        },
+      })
+      const { slotifyGroups, nextPageToken } = slotifyGroupsData
+      setYourSlotifyGroups(prev => [...prev, ...slotifyGroups])
+      setPageTokenGroups(nextPageToken)
+    } catch (error) {
+      console.error(error)
+      errorToast(error)
     }
+    setIsLoadingGroups(false)
+  }, [pageTokenGroups, yourSlotifyGroups])
+
+  useEffect(() => {
     const getSlotifyGroupMembers = async () => {
       if (!selectedSlotifyGroup) {
         return
@@ -125,10 +129,10 @@ export function CreateManualEventDialog({
             },
             queries: {
               limit: 10,
-              pageToken: pagetokengroupmembers
+              pageToken: pageTokenGroupMembers,
             },
           })
-        const {users, nextPageToken } = slotifyGroupUsersData
+        const { users, nextPageToken } = slotifyGroupUsersData
         setMembers(users)
         setPageTokenGroupMembers(nextPageToken)
       } catch (error) {
@@ -139,7 +143,12 @@ export function CreateManualEventDialog({
 
     getUserSlotifyGroups()
     getSlotifyGroupMembers()
-  }, [selectedSlotifyGroup, pagetokengroups, pagetokengroupmembers])
+  }, [
+    selectedSlotifyGroup,
+    pageTokenGroups,
+    pageTokenGroupMembers,
+    getUserSlotifyGroups,
+  ])
 
   const toggleParticipant = (participant: User) => {
     setSelectedParticipants(current =>
@@ -211,6 +220,9 @@ export function CreateManualEventDialog({
                       selectedSlotifyGroup={selectedSlotifyGroup}
                       setSelectedSlotifyGroupAction={setSelectedGroup}
                       slotifyGroups={yourSlotifyGroups}
+                      loadMoreGroups={getUserSlotifyGroups}
+                      isLoadingGroups={isLoadingGroups}
+                      hasMoreGroups={pageTokenGroups !== 0}
                     />
                   </div>
                   <Label htmlFor='subject'>Subject</Label>
@@ -315,12 +327,18 @@ interface SlotifyGroupSelectProps {
   selectedSlotifyGroup: SlotifyGroup | null
   setSelectedSlotifyGroupAction: (slotifyGroup: SlotifyGroup | null) => void
   slotifyGroups: SlotifyGroup[]
+  loadMoreGroups: () => void
+  isLoadingGroups: boolean
+  hasMoreGroups: boolean
 }
 
 export default function SlotifyGroupSelect({
   selectedSlotifyGroup: selectedSlotifyGroup,
   setSelectedSlotifyGroupAction: setSelectedSlotifyGroupAction,
   slotifyGroups: slotifyGroups,
+  loadMoreGroups,
+  isLoadingGroups,
+  hasMoreGroups,
 }: SlotifyGroupSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -345,6 +363,15 @@ export default function SlotifyGroupSelect({
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
+
+  const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
+    const element = e.currentTarget
+    if (element.scrollTop + element.clientHeight >= element.scrollHeight - 10) {
+      if (hasMoreGroups && !isLoadingGroups) {
+        loadMoreGroups()
+      }
+    }
+  }
 
   return (
     <div className='relative w-64' ref={dropdownRef}>
@@ -382,6 +409,7 @@ export default function SlotifyGroupSelect({
             className='py-1 overflow-auto text-base rounded-md max-h-60 focus:outline-none sm:text-sm'
             tabIndex={-1}
             role='listbox'
+            onScroll={handleScroll}
           >
             {filteredSlotifyGroups.map(team => (
               <li
@@ -410,6 +438,11 @@ export default function SlotifyGroupSelect({
             {filteredSlotifyGroups.length === 0 && (
               <li className='px-3 py-2 text-sm text-gray-900'>
                 No teams found
+              </li>
+            )}
+            {isLoadingGroups && (
+              <li className='px-3 py-2 text-sm text-gray-900'>
+                Loading more groups...
               </li>
             )}
           </ul>

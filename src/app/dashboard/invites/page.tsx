@@ -69,10 +69,10 @@ export default function InvitesPage() {
         const inviteData = await slotifyClient.GetAPIInvitesMe({
           queries: {
             limit: 10,
-            pageToken: pagetoken
-          }
+            pageToken: pagetoken,
+          },
         })
-        const {invites, nextPageToken } = inviteData
+        const { invites, nextPageToken } = inviteData
         setInvites(invites)
         setPageToken(nextPageToken)
       } catch (error) {

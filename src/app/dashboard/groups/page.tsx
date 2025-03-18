@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { Input } from '@/components/ui/input'
 import { SlotifyGroupList } from '@/components/slotify-group-list'
 import { SlotifyGroupMembers, Member } from '@/components/slotify-group-members'
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
 import { SlotifyGroup } from '@/types/types'
+import { Button } from '@/components/ui/button'
 
 function LoadingDashboardGroups() {
   return (
@@ -28,53 +29,61 @@ export default function GroupsPage() {
     useState<string>('')
   //for teams, your current teams and joinable teams
   const [pagetokengroups, setPageTokenGroups] = useState<number>(0)
-  const [pagetokengroupmembers, setPageTokenGroupMembers] = useState<number>(0)
-  const [yourSlotifyGroups, setYourSlotifyGroups] = useState<
-    Array<SlotifyGroup>
-  >([])
+  const [yourSlotifyGroups, setYourSlotifyGroups] = useState<Set<SlotifyGroup>>(
+    new Set(),
+  )
   // currently selected teams
   const [selectedSlotifyGroup, setSelectedSlotifyGroup] =
     useState<SlotifyGroup | null>(null)
   // members of currently selected team
   const [members, setMembers] = useState<Array<Member>>([])
+  const [pagetokengroupmembers, setPageTokenGroupMembers] = useState<number>(0)
+
+  const getUserSlotifyGroups = useCallback(async () => {
+    try {
+      const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
+        queries: {
+          limit: 10,
+          pageToken: pagetokengroups,
+        },
+      })
+      const { slotifyGroups, nextPageToken } = slotifyGroupsData
+
+      setYourSlotifyGroups(prevGroups => {
+        const newGroups = new Set(prevGroups)
+        slotifyGroups.forEach((newGroup: SlotifyGroup) => {
+          const doesexists = [...newGroups].some(
+            group => group.id === newGroup.id,
+          )
+          if (!doesexists) {
+            newGroups.add(newGroup)
+          }
+        })
+        return newGroups
+      })
+      setPageTokenGroups(nextPageToken)
+    } catch (error) {
+      console.error(error)
+      errorToast(error)
+    }
+  }, [pagetokengroups, setYourSlotifyGroups, setPageTokenGroups])
+
+  useEffect(() => {
+    getUserSlotifyGroups()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // On every page refresh, set yourSlotifyGroups
   useEffect(() => {
-    const getUserSlotifyGroups = async () => {
-      try {
-        const slotifyGroupsData = await slotifyClient.GetAPISlotifyGroupsMe({
-          queries: {
-            limit: 10,
-            pageToken: pagetokengroups
-          }
-        })
-        const {groups, nextPageToken } = slotifyGroupsData
-        setYourSlotifyGroups(groups)
-        setPageTokenGroups(nextPageToken)
-      } catch (error) {
-        console.error(error)
-        errorToast(error)
-      }
-    }
-
     const getSlotifyGroupMembers = async () => {
-      if (!selectedSlotifyGroup) {
-        return
-      }
-      const teamID = selectedSlotifyGroup?.id
-
+      if (!selectedSlotifyGroup) return
       try {
-        const slotifyGrouppMemberData =
+        const slotifyGroupMemberData =
           await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
-            params: {
-              slotifyGroupID: teamID,
-            },
-            queries: {
-              limit: 10,
-              pageToken: pagetokengroupmembers,
-            }
+            params: { slotifyGroupID: selectedSlotifyGroup.id },
+            queries: { limit: 10, pageToken: pagetokengroupmembers },
           })
-        const {users, nextPageToken } = slotifyGrouppMemberData
+        const { users, nextPageToken } = slotifyGroupMemberData
         setMembers(users)
         setPageTokenGroupMembers(nextPageToken)
       } catch (error) {
@@ -82,10 +91,8 @@ export default function GroupsPage() {
         errorToast(error)
       }
     }
-
-    getUserSlotifyGroups()
     getSlotifyGroupMembers()
-  }, [selectedSlotifyGroup])
+  }, [selectedSlotifyGroup, getUserSlotifyGroups, pagetokengroupmembers])
 
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -93,8 +100,10 @@ export default function GroupsPage() {
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         <div>
           <ProfileForm
-            slotifyGroups={yourSlotifyGroups}
-            onSetYourSlotifyGroupsAction={setYourSlotifyGroups}
+            slotifyGroups={[...yourSlotifyGroups]}
+            onSetYourSlotifyGroupsAction={groups =>
+              setYourSlotifyGroups(new Set(groups))
+            }
           />
         </div>
         <div>
@@ -108,7 +117,7 @@ export default function GroupsPage() {
           />
           <Suspense fallback={<LoadingDashboardGroups />}>
             <SlotifyGroupList
-              slotifyGroups={yourSlotifyGroups}
+              slotifyGroups={[...yourSlotifyGroups]}
               onSelectSlotifyGroup={setSelectedSlotifyGroup}
             />
           </Suspense>
@@ -123,6 +132,18 @@ export default function GroupsPage() {
               <p>Select a team to view its members</p>
             )}
           </Suspense>
+        </div>
+        <div>
+          <Button
+            size='icon'
+            variant='outline'
+            onClick={() => {
+              getUserSlotifyGroups()
+            }}
+            className='h-8 w-8 text-destructive'
+          >
+            load next
+          </Button>
         </div>
       </div>
     </div>
