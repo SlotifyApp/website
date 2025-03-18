@@ -464,9 +464,7 @@ const ReschedulingRequestBodySchema = z
 const ReschedulingRequestSingleBodySchema = z
   .object({ msftMeetingID: z.string() })
   .passthrough();
-const MSFTGroup = z
-  .object({ id: z.number().int(), name: z.string() })
-  .passthrough();
+const MSFTGroup = z.object({ id: z.string(), name: z.string() }).passthrough();
 const MSFTUser = z
   .object({
     email: z.string().email(),
@@ -916,8 +914,20 @@ const endpoints = makeApi([
           .enum(["accepted", "declined", "expired", "pending"])
           .optional(),
       },
+      {
+        name: "pageToken",
+        type: "Query",
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
     ],
-    response: z.array(InvitesMe),
+    response: z
+      .object({ invites: z.array(InvitesMe), nextPageToken: z.number().int() })
+      .passthrough(),
     errors: [
       {
         status: 400,
@@ -966,7 +976,7 @@ const endpoints = makeApi([
       {
         name: "groupID",
         type: "Path",
-        schema: z.number().int(),
+        schema: z.string(),
       },
     ],
     response: MSFTGroup,
@@ -992,10 +1002,22 @@ const endpoints = makeApi([
       {
         name: "groupID",
         type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "nextLink",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
         schema: z.number().int(),
       },
     ],
-    response: z.array(MSFTUser),
+    response: z
+      .object({ users: z.array(MSFTUser), nextLink: z.string().nullish() })
+      .passthrough(),
     errors: [
       {
         status: 403,
@@ -1014,7 +1036,7 @@ const endpoints = makeApi([
     path: "/api/msft-groups/me",
     alias: "GetAPIMSFTGroupsMe",
     requestFormat: "json",
-    response: z.array(MSFTGroup),
+    response: z.array(z.string()),
     errors: [
       {
         status: 400,
@@ -1038,7 +1060,21 @@ const endpoints = makeApi([
     path: "/api/msft-users",
     alias: "GetAPIMSFTUsers",
     requestFormat: "json",
-    response: z.array(MSFTUser),
+    parameters: [
+      {
+        name: "nextLink",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
+    ],
+    response: z
+      .object({ users: z.array(MSFTUser), nextLink: z.string().nullish() })
+      .passthrough(),
     errors: [
       {
         status: 401,
@@ -1073,8 +1109,20 @@ const endpoints = makeApi([
         type: "Query",
         schema: z.string().optional(),
       },
+      {
+        name: "nextLink",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
     ],
-    response: z.array(MSFTUser),
+    response: z
+      .object({ users: z.array(MSFTUser), nextLink: z.string().optional() })
+      .passthrough(),
     errors: [
       {
         status: 401,
@@ -1525,8 +1573,23 @@ const endpoints = makeApi([
         type: "Path",
         schema: z.number().int(),
       },
+      {
+        name: "pageToken",
+        type: "Query",
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
     ],
-    response: z.array(InvitesGroup),
+    response: z
+      .object({
+        groups: z.array(InvitesGroup),
+        nextPageToken: z.number().int(),
+      })
+      .passthrough(),
     errors: [
       {
         status: 400,
@@ -1587,8 +1650,20 @@ const endpoints = makeApi([
         type: "Path",
         schema: z.number().int(),
       },
+      {
+        name: "pageToken",
+        type: "Query",
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
     ],
-    response: z.array(User),
+    response: z
+      .object({ users: z.array(User), nextPageToken: z.number().int() })
+      .passthrough(),
     errors: [
       {
         status: 404,
@@ -1607,7 +1682,24 @@ const endpoints = makeApi([
     path: "/api/slotify-groups/me",
     alias: "GetAPISlotifyGroupsMe",
     requestFormat: "json",
-    response: z.array(SlotifyGroup),
+    parameters: [
+      {
+        name: "pageToken",
+        type: "Query",
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int(),
+      },
+    ],
+    response: z
+      .object({
+        slotifyGroups: z.array(SlotifyGroup),
+        nextPageToken: z.number().int(),
+      })
+      .passthrough(),
     errors: [
       {
         status: 400,
@@ -1635,7 +1727,7 @@ const endpoints = makeApi([
       {
         name: "email",
         type: "Query",
-        schema: z.string().email().optional(),
+        schema: z.string().optional(),
       },
       {
         name: "name",
@@ -1648,6 +1740,16 @@ const endpoints = makeApi([
       {
         status: 400,
         description: `Bad request (e.g., invalid slotifyGroup ID)`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
         schema: z.void(),
       },
     ],

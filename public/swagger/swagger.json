@@ -515,16 +515,15 @@
     "/api/users": {
       "get": {
         "operationId": "GetAPIUsers",
-        "summary": "Search for users with by email and name. Only provide one of the query params or none.",
+        "summary": "Search for users with by email and name. MUST provide one of the query params. Returns a max of 10 searches.",
         "parameters": [
           {
             "in": "query",
             "name": "email",
             "schema": {
-              "type": "string",
-              "format": "email"
+              "type": "string"
             },
-            "description": "Email of user to search for"
+            "description": "Partial email of user to search for"
           },
           {
             "in": "query",
@@ -532,12 +531,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "Name of user to search for"
+            "description": "Partial name of user to search for"
           }
         ],
         "responses": {
           "200": {
-            "description": "Users matching the query parameters",
+            "description": "Users matching the given query parameter.",
             "content": {
               "application/json": {
                 "schema": {
@@ -551,6 +550,12 @@
           },
           "400": {
             "description": "Bad request (e.g., invalid slotifyGroup ID)"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "description": "Something went wrong internally"
           }
         }
       },
@@ -657,7 +662,7 @@
     "/api/invites/me": {
       "get": {
         "operationId": "GetAPIInvitesMe",
-        "summary": "Get all invites for logged in user.",
+        "summary": "Get all invites for logged in user、requires pageToken.",
         "parameters": [
           {
             "in": "query",
@@ -666,17 +671,48 @@
               "$ref": "#/components/schemas/InviteStatus"
             },
             "description": "Invite status"
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "Got all user's invites successfully",
+            "description": "Got all user's invites successfully with pageToken.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/InvitesMe"
+                  "type": "object",
+                  "required": [
+                    "invites",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "invites": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InvitesMe"
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "integer",
+                      "format": "uint32"
+                    }
                   }
                 }
               }
@@ -939,7 +975,25 @@
               "format": "uint32"
             },
             "required": true,
-            "description": "Numeric ID of the slotifyGroup to delete"
+            "description": "Numeric ID of the slotifyGroup to get invites from"
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -948,9 +1002,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/InvitesGroup"
+                  "type": "object",
+                  "required": [
+                    "groups",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InvitesGroup"
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "integer",
+                      "format": "uint32"
+                    }
                   }
                 }
               }
@@ -1011,15 +1078,48 @@
       "get": {
         "operationId": "GetAPISlotifyGroupsMe",
         "summary": "Get all slotify-groups for current user.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "Got all user's slotify-groups successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SlotifyGroup"
+                  "type": "object",
+                  "required": [
+                    "slotifyGroups",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "slotifyGroups": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SlotifyGroup"
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "integer",
+                      "format": "uint32"
+                    }
                   }
                 }
               }
@@ -1159,6 +1259,24 @@
               "format": "uint32"
             },
             "description": "ID of the slotifyGroup"
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -1167,9 +1285,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "required": [
+                    "users",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "nextPageToken": {
+                      "type": "integer",
+                      "format": "uint32"
+                    }
                   }
                 }
               }
@@ -1589,7 +1720,7 @@
     "/api/msft-groups/me": {
       "get": {
         "operationId": "GetAPIMSFTGroupsMe",
-        "summary": "Get all Microsoft groups for current user.",
+        "summary": "Get all Microsoft groups's id for current user.",
         "responses": {
           "200": {
             "description": "Got all user's Microsoft groups successfully",
@@ -1598,7 +1729,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MSFTGroup"
+                    "type": "string"
                   }
                 }
               }
@@ -1659,8 +1790,7 @@
             "in": "path",
             "name": "groupID",
             "schema": {
-              "type": "integer",
-              "format": "uint32"
+              "type": "string"
             },
             "required": true,
             "description": "Numeric ID of the Microsoft group to get"
@@ -1696,10 +1826,26 @@
             "name": "groupID",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "uint32"
+              "type": "string"
             },
             "description": "ID of the Microsoft group"
+          },
+          {
+            "in": "query",
+            "name": "nextLink",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -1708,9 +1854,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MSFTUser"
+                  "type": "object",
+                  "required": [
+                    "users",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MSFTUser"
+                      }
+                    },
+                    "nextLink": {
+                      "type": "string",
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -1798,6 +1957,22 @@
               "type": "string"
             },
             "description": "Search parameter for Microsoft users, can be first name, surname, or email"
+          },
+          {
+            "in": "query",
+            "name": "nextLink",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -1806,9 +1981,21 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MSFTUser"
+                  "type": "object",
+                  "required": [
+                    "users",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MSFTUser"
+                      }
+                    },
+                    "nextLink": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -1847,15 +2034,46 @@
       "get": {
         "summary": "Get all users from Microsoft",
         "operationId": "GetAPIMSFTUsers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nextLink",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "Users successfully found",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MSFTUser"
+                  "type": "object",
+                  "required": [
+                    "users",
+                    "nextPageToken"
+                  ],
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MSFTUser"
+                      }
+                    },
+                    "nextLink": {
+                      "type": "string",
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -2833,8 +3051,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "uint32"
+            "type": "string"
           },
           "name": {
             "type": "string"
