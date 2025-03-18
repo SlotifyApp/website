@@ -11,10 +11,12 @@ import { errorToast, toast } from '@/hooks/use-toast'
 import slotifyClient from '@/hooks/fetch'
 import { CalendarEvent, RescheduleRequest } from '@/types/types'
 import { format, parseISO } from 'date-fns'
+import { CreateEvent } from './calendar/create-event'
 
 export function RescheduleRequests() {
   // TODO - this can be removed since we are using full requests instead
   const [myRequests, setmyRequests] = useState<RescheduleRequest[] | null>(null)
+  const [createEventOpen, setCreateEventOpen] = useState(false)
 
   const [fullRequests, setFullRequests] = useState<{
     [key: number]: {
@@ -103,69 +105,74 @@ export function RescheduleRequests() {
   }, [getFullRequests])
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className='flex items-center justify-between'>
-          Reschedule Requests
-          <Badge variant='secondary'>{myRequests?.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className='h-[60vh]'>
-          <div className='divide-y'>
-            {myRequests?.map(request => (
-              <div key={request.request_id} className='p-4'>
-                <div className='space-y-3'>
-                  <div>
-                    <h4 className='font-medium leading-none'>
-                      {request.newMeeting?.title
-                        ? request.newMeeting.title
-                        : '(No name)'}
-                    </h4>
-                    <p className='text-sm text-muted-foreground mt-1'>
-                      Current event:{' '}
-                      {fullRequests[request.request_id]
-                        ? format(
-                            parseISO(
-                              fullRequests[
-                                request.request_id
-                              ]!.oldEvent.startTime?.toString() ?? '',
-                            ),
-                            'EEEE do HH:mm',
-                          )
-                        : ''}
-                    </p>
-                    <p className='text-sm text-muted-foreground mt-1'>
-                      Status:{' '}
-                      {fullRequests[request.request_id]
-                        ? fullRequests[request.request_id]!.status
-                        : ''}
-                    </p>
-                    <p className='text-sm text-muted-foreground mt-1'>
-                      Requested by{' '}
-                      {fullRequests[request.request_id]
-                        ? fullRequests[request.request_id]!.requestedBy
-                        : ''}
-                    </p>
-                  </div>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className='flex items-center justify-between'>
+            Reschedule Requests
+            <Badge variant='secondary'>{myRequests?.length}</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className='flex flex-row min-w-full'>
+            <ScrollArea className='h-[60vh]'>
+              <div className='divide-y'>
+                {myRequests
+                  ?.filter(request => request.status === 'pending')
+                  .map(request => (
+                    <div key={request.request_id} className='p-4'>
+                      <div className='space-y-3'>
+                        <div>
+                          <h4 className='font-medium leading-none'>
+                            {request.newMeeting?.title
+                              ? request.newMeeting.title
+                              : '(No name)'}
+                          </h4>
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            Current event:{' '}
+                            {fullRequests[request.request_id]
+                              ? format(
+                                  parseISO(
+                                    fullRequests[
+                                      request.request_id
+                                    ]!.oldEvent.startTime?.toString() ?? '',
+                                  ),
+                                  'EEEE do HH:mm',
+                                )
+                              : ''}
+                          </p>
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            Status:{' '}
+                            {fullRequests[request.request_id]
+                              ? fullRequests[request.request_id]!.status
+                              : ''}
+                          </p>
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            Requested by{' '}
+                            {fullRequests[request.request_id]
+                              ? fullRequests[request.request_id]!.requestedBy
+                              : ''}
+                          </p>
+                        </div>
 
-                  <div className='space-y-1 text-sm'>
-                    <div className='flex items-start gap-2'>
-                      <div className='w-25 font-medium shrink-0'>
-                        Requested on:
-                      </div>
-                      <div className='text-muted-foreground'>
-                        {fullRequests[request.request_id]
-                          ? format(
-                              parseISO(
-                                fullRequests[request.request_id]!.requestedAt,
-                              ),
-                              'EEEE do HH:mm',
-                            )
-                          : ''}
-                      </div>
-                    </div>
-                    {/* <div className='flex items-start gap-2'>
+                        <div className='space-y-1 text-sm'>
+                          <div className='flex items-start gap-2'>
+                            <div className='w-25 font-medium shrink-0'>
+                              Requested on:
+                            </div>
+                            <div className='text-muted-foreground'>
+                              {fullRequests[request.request_id]
+                                ? format(
+                                    parseISO(
+                                      fullRequests[request.request_id]!
+                                        .requestedAt,
+                                    ),
+                                    'EEEE do HH:mm',
+                                  )
+                                : ''}
+                            </div>
+                          </div>
+                          {/* <div className='flex items-start gap-2'>
                       <div className='w-20 font-medium shrink-0'>
                         Requested:
                       </div>
@@ -173,70 +180,217 @@ export function RescheduleRequests() {
                         {request.requestedDateTime}
                       </div>
                     </div> */}
-                    <div className='flex items-start gap-2'>
-                      <div className='w-25 font-medium shrink-0'>
-                        Attendees:
-                      </div>
-                      <div className='text-muted-foreground'>
-                        {fullRequests[request.request_id]
-                          ? fullRequests[
-                              request.request_id
-                            ]!.oldEvent.attendees.map(
-                              attendee => attendee.email,
-                            ).join(', ')
-                          : ''}
+                          <div className='flex items-start gap-2'>
+                            <div className='w-25 font-medium shrink-0'>
+                              Attendees:
+                            </div>
+                            <div className='text-muted-foreground'>
+                              {fullRequests[request.request_id]
+                                ? fullRequests[
+                                    request.request_id
+                                  ]!.oldEvent.attendees.map(
+                                    attendee => attendee.email,
+                                  ).join(', ')
+                                : ''}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                          {request.status === 'pending' && (
+                            <>
+                              {request.newMeeting!.startTime ===
+                              '0001-01-01T00:00:00Z' ? (
+                                <Button
+                                  variant='outline'
+                                  size='sm'
+                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
+                                  // onClick={() =>
+                                  // handleRequestAccept(request.request_id)
+                                  // }
+                                >
+                                  <Check className='h-4 w-4 mr-1' />
+                                  Reschedule Now
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant='outline'
+                                  size='sm'
+                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
+                                  // onClick={() => handleAction(request.id, 'accept')}
+                                >
+                                  <Check className='h-4 w-4 mr-1' />
+                                  View Proposal
+                                </Button>
+                              )}
+                            </>
+                          )}
+
+                          {request.status === 'pending' && (
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              className='w-full text-red-500 hover:text-red-600 hover:bg-red-50'
+                              onClick={() =>
+                                handleRequestReject(request.request_id)
+                              }
+                            >
+                              <X className='h-4 w-4 mr-1' />
+                              Ignore
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className='flex items-center gap-2'>
-                    {request.status === 'pending' && (
-                      <>
-                        {request.newMeeting!.startTime ===
-                        '0001-01-01T00:00:00Z' ? (
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
-                            // onClick={() =>
-                              // handleRequestAccept(request.request_id)
-                            // }
-                          >
-                            <Check className='h-4 w-4 mr-1' />
-                            Reschedule Now
-                          </Button>
-                        ) : (
-                          <Button
-                            variant='outline'
-                            size='sm'
-                            className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
-                            // onClick={() => handleAction(request.id, 'accept')}
-                          >
-                            <Check className='h-4 w-4 mr-1' />
-                            View Proposal
-                          </Button>
-                        )}
-                      </>
-                    )}
-
-                    {request.status === 'pending' && (
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        className='w-full text-red-500 hover:text-red-600 hover:bg-red-50'
-                        onClick={() => handleRequestReject(request.request_id)}
-                      >
-                        <X className='h-4 w-4 mr-1' />
-                        Ignore
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                  ))}
               </div>
-            ))}
+            </ScrollArea>
+
+            <ScrollArea className='h-[60vh]'>
+              <div className='divide-y'>
+                {myRequests
+                  ?.filter(request => request.status !== 'pending')
+                  .map(request => (
+                    <div
+                      key={request.request_id}
+                      className='p-4 duration-200 hover:bg-gray-200 hover:rounded-lg'
+                      onClick={() =>
+                        setCreateEventOpen(true)
+                      }
+                    >
+                      <div className='space-y-3'>
+                        <div>
+                          <h4 className='font-medium leading-none'>
+                            {request.newMeeting?.title
+                              ? request.newMeeting.title
+                              : '(No name)'}
+                          </h4>
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            Current event:{' '}
+                            {fullRequests[request.request_id]
+                              ? format(
+                                  parseISO(
+                                    fullRequests[
+                                      request.request_id
+                                    ]!.oldEvent.startTime?.toString() ?? '',
+                                  ),
+                                  'EEEE do HH:mm',
+                                )
+                              : ''}
+                          </p>
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            Status:{' '}
+                            {fullRequests[request.request_id]
+                              ? fullRequests[request.request_id]!.status
+                              : ''}
+                          </p>
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            Requested by{' '}
+                            {fullRequests[request.request_id]
+                              ? fullRequests[request.request_id]!.requestedBy
+                              : ''}
+                          </p>
+                        </div>
+
+                        <div className='space-y-1 text-sm'>
+                          <div className='flex items-start gap-2'>
+                            <div className='w-25 font-medium shrink-0'>
+                              Requested on:
+                            </div>
+                            <div className='text-muted-foreground'>
+                              {fullRequests[request.request_id]
+                                ? format(
+                                    parseISO(
+                                      fullRequests[request.request_id]!
+                                        .requestedAt,
+                                    ),
+                                    'EEEE do HH:mm',
+                                  )
+                                : ''}
+                            </div>
+                          </div>
+                          {/* <div className='flex items-start gap-2'>
+                      <div className='w-20 font-medium shrink-0'>
+                        Requested:
+                      </div>
+                      <div className='text-muted-foreground'>
+                        {request.requestedDateTime}
+                      </div>
+                    </div> */}
+                          <div className='flex items-start gap-2'>
+                            <div className='w-25 font-medium shrink-0'>
+                              Attendees:
+                            </div>
+                            <div className='text-muted-foreground'>
+                              {fullRequests[request.request_id]
+                                ? fullRequests[
+                                    request.request_id
+                                  ]!.oldEvent.attendees.map(
+                                    attendee => attendee.email,
+                                  ).join(', ')
+                                : ''}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className='flex items-center gap-2'>
+                          {request.status === 'pending' && (
+                            <>
+                              {request.newMeeting!.startTime ===
+                              '0001-01-01T00:00:00Z' ? (
+                                <Button
+                                  variant='outline'
+                                  size='sm'
+                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
+                                  // onClick={() =>
+                                  // handleRequestAccept(request.request_id)
+                                  // }
+                                >
+                                  <Check className='h-4 w-4 mr-1' />
+                                  Reschedule Now
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant='outline'
+                                  size='sm'
+                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
+                                  // onClick={() => handleAction(request.id, 'accept')}
+                                >
+                                  <Check className='h-4 w-4 mr-1' />
+                                  View Proposal
+                                </Button>
+                              )}
+                            </>
+                          )}
+
+                          {request.status === 'pending' && (
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              className='w-full text-red-500 hover:text-red-600 hover:bg-red-50'
+                              onClick={() =>
+                                handleRequestReject(request.request_id)
+                              }
+                            >
+                              <X className='h-4 w-4 mr-1' />
+                              Ignore
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </ScrollArea>
           </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <CreateEvent
+        open={createEventOpen}
+        onOpenChangeAction={setCreateEventOpen}
+        closeCreateEventDialogOpen={() => setCreateEventOpen(false)}
+      />
+    </>
   )
 }
