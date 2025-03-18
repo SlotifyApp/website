@@ -1,9 +1,10 @@
 'use client'
 
-// Inspired by react-hot-toast library
 import * as React from 'react'
+import { XCircle, CheckCircle2 } from 'lucide-react'
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast'
+import { string } from 'zod'
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -13,6 +14,7 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  icon?: React.ReactNode
 }
 
 const actionTypes = {
@@ -139,8 +141,32 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>
 
+// In your use-toast.tsx file
+
 function toast({ ...props }: Toast) {
   const id = genId()
+
+  // Add default icon based on variant if not provided
+  let icon = props.icon
+  if (!icon) {
+    if (props.variant === 'destructive') {
+      icon = React.createElement(XCircle, { className: 'h-5 w-5 text-red-500' })
+    } else {
+      icon = React.createElement(CheckCircle2, {
+        className: 'h-5 w-5 text-green-500',
+      })
+    }
+  }
+
+  // Format description if it's a complex object
+  let description = props.description
+  if (typeof description === 'object' && description !== null) {
+    try {
+      description = JSON.stringify(description, null, 2)
+    } catch {
+      description = String(description)
+    }
+  }
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -153,8 +179,11 @@ function toast({ ...props }: Toast) {
     type: 'ADD_TOAST',
     toast: {
       ...props,
+      description,
       id,
+      icon,
       open: true,
+      className: `${props.className || ''} bg-gray-200 border-gray-300`,
       onOpenChange: open => {
         if (!open) dismiss()
       },
@@ -192,8 +221,13 @@ function errorToast(error: any) {
   toast({
     variant: 'destructive',
     title: 'Uh oh! Something went wrong.',
-    description: JSON.stringify(error),
+    description: typeof error === 'object' ? formatError(error) : String(error),
+    icon: React.createElement(XCircle, { className: 'h-5 w-5 text-red-500' }),
   })
+}
+
+function formatError(error: any): string {
+  return error.toString().split('cause')[0].trim()
 }
 
 export { useToast, toast, errorToast }

@@ -22,11 +22,12 @@ import {
   CalendarEvent,
   SchedulingSlotsSuccessResponse,
 } from '@/types/types'
+import { UserSearch } from '@/components/user-search-bar'
 
 interface CreateEventProps {
   open: boolean
   onOpenChangeAction: (open: boolean) => void
-  closeCreateEventDialogOpen: () => void
+  closeCreateEventDialogOpenAction: () => void
 }
 
 // Mapping from dropdown option to minutes
@@ -39,32 +40,15 @@ const durationMapping: { [key: string]: number } = {
 export function CreateEvent({
   open,
   onOpenChangeAction,
-  closeCreateEventDialogOpen,
+  closeCreateEventDialogOpenAction,
 }: CreateEventProps) {
-  // // Create a local open state so that child components can update it.
-  // const [isOpen, setIsOpen] = useState(open)
-
-  // // Sync local state with prop changes
-  // useEffect(() => {
-  //   setIsOpen(open)
-  // }, [open])
-
-  // // Callback to update open in both local state and parent state.
-  // const handleUpdateOpen = useCallback(
-  //   (newOpen: boolean) => {
-  //     setIsOpen(newOpen)
-  //     onOpenChangeAction(newOpen)
-  //   },
-  //   [onOpenChangeAction],
-  // )
-
   const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
   const [duration, setDuration] = useState('1hr')
 
-  const [userSearchQuery, setUserSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<User[]>([])
+  // const [userSearchQuery, setUserSearchQuery] = useState('')
+  // const [searchResults, setSearchResults] = useState<User[]>([])
   const [selectedParticipants, setSelectedParticipants] = useState<User[]>([])
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -119,38 +103,6 @@ export function CreateEvent({
     [selectedRange],
   )
 
-  useEffect(() => {
-    const searchUsers = async () => {
-      if (!userSearchQuery) {
-        setSearchResults([])
-        return
-      }
-      try {
-        let response
-        if (userSearchQuery.includes('@')) {
-          // Search by email
-          response = await slotifyClient.GetAPIUsers({
-            queries: { email: userSearchQuery },
-          })
-        } else {
-          // Search by name
-          response = await slotifyClient.GetAPIUsers({
-            queries: { name: userSearchQuery },
-          })
-        }
-        setSearchResults(response)
-      } catch (error) {
-        console.error('Error searching users:', error)
-        toast({
-          title: 'Error',
-          description: 'Failed to search users.',
-          variant: 'destructive',
-        })
-      }
-    }
-    searchUsers()
-  }, [userSearchQuery])
-
   // Add a user from search results to selected participants
   const handleAddParticipant = (user: User) => {
     if (
@@ -167,8 +119,6 @@ export function CreateEvent({
     if (!selectedParticipants.find(u => u.id === user.id)) {
       setSelectedParticipants([...selectedParticipants, user])
     }
-    setUserSearchQuery('')
-    setSearchResults([])
   }
 
   // Remove a selected participant
@@ -361,61 +311,11 @@ export function CreateEvent({
                   </select>
                 </div>
 
-                {/* Participants Search & Selected Users */}
-                <div className='space-y-2 relative m-2'>
-                  <Label htmlFor='user-search'>Search Participants</Label>
-                  <Input
-                    id='user-search'
-                    placeholder='Enter email or name'
-                    value={userSearchQuery}
-                    onChange={e => {
-                      console.log('User search query:', e.target.value)
-                      setUserSearchQuery(e.target.value)
-                    }}
-                  />
-                  {/* Search results dropdown */}
-                  {searchResults.length > 0 && (
-                    <div className='border rounded bg-white shadow absolute z-10 w-full max-h-40 overflow-y-auto m-2'>
-                      {searchResults.map(user => (
-                        <div
-                          key={user.id}
-                          className='p-2 hover:bg-gray-100 cursor-pointer'
-                          onClick={() => handleAddParticipant(user)}
-                        >
-                          {user.name
-                            ? `${user.name} (${user.email})`
-                            : user.email}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* Selected participants */}
-                  {selectedParticipants.length > 0 && (
-                    <div className='m-2'>
-                      <div className='font-medium mb-2'>
-                        Selected Participants:
-                      </div>
-                      <div className='flex flex-wrap gap-2'>
-                        {selectedParticipants.map(user => (
-                          <div
-                            key={user.id}
-                            className='flex items-center gap-1 bg-blue-100 text-blue-800 rounded px-2 py-1'
-                          >
-                            <span>
-                              {user.firstName ? user.firstName : user.email}
-                            </span>
-                            <button
-                              onClick={() => handleRemoveParticipant(user.id)}
-                              className='text-blue-500 hover:text-blue-700'
-                            >
-                              x
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <UserSearch
+                  handleAddUsersAction={handleAddParticipant}
+                  handleRemoveUserAction={handleRemoveParticipant}
+                  selectedUsers={selectedParticipants}
+                />
 
                 <div className='space-y-2'>
                   <Label>Event Range</Label>
@@ -468,7 +368,7 @@ export function CreateEvent({
               participants={selectedParticipants}
               location={''} //TODO fix this
               eventTitle={title}
-              closeCreateEventDialogOpen={closeCreateEventDialogOpen}
+              closeCreateEventDialogOpen={closeCreateEventDialogOpenAction}
             />
           </div>
         </div>

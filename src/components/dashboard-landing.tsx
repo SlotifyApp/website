@@ -294,9 +294,9 @@ export default function LandingPage() {
                     <CardContent className='pt-6'>
                       <div className='flex flex-col items-center space-y-4 text-center'>
                         <Users className='h-12 w-12 text-focusColor' />
-                        <h3 className='font-bold'>Team Collaboration</h3>
+                        <h3 className='font-bold'>Group Collaboration</h3>
                         <p className='text-sm text-muted-foreground'>
-                          Invite team members and collaborate seamlessly. Keep
+                          Invite group members and collaborate seamlessly. Keep
                           everyone in sync.
                         </p>
                       </div>
@@ -356,7 +356,7 @@ export default function LandingPage() {
                           <blockquote className='space-y-2'>
                             <p className='text-sm'>
                               &quot;The automated scheduling has saved our
-                              administrative team countless hours. Highly
+                              administrative group countless hours. Highly
                               recommended.&quot;
                             </p>
                             <footer className='text-sm text-muted-foreground'>

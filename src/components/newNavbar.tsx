@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { Calendar, Home, LogOut, Users, Video } from 'lucide-react'
+import { Calendar, ChevronDown, Home, LogOut, Users, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useNotifications } from '@/context/notification_context'
 import { Badge } from '@/components/ui/badge'
 import NotificationButton from './notification-bell'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const items = [
   {
@@ -22,6 +22,11 @@ const items = [
     title: 'Groups',
     href: '/dashboard/groups',
     icon: Users,
+    hasDropdown: true,
+    dropdownItems: [
+      { title: 'Slotify', href: '/dashboard/groups/slotify' },
+      { title: 'Office', href: '/dashboard/groups/office' },
+    ],
   },
   {
     title: 'Meetings',
@@ -38,6 +43,8 @@ const items = [
 export default function NewNavbar() {
   const { notifications } = useNotifications()
   const [isNotifsOpen, setIsNotifsOpen] = useState<boolean>(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const pathname = usePathname()
   const handleLogout = async () => {
@@ -52,6 +59,20 @@ export default function NewNavbar() {
     window.location.href = '/'
   }
 
+  const handleMouseEnter = (title: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setOpenDropdown(title)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null)
+    }, 100)
+  }
+
   return (
     <div className='flex flex-row justify-between items-center h-[10vh] min-w-screen border-b'>
       <Link href='/dashboard'>
@@ -61,44 +82,68 @@ export default function NewNavbar() {
       </Link>
       <div className='flex flex-row items-center'>
         <nav className='h-[10vh] flex items-center justify-around w-[40vw]'>
-          {items.map(
-            item =>
-              item.title === 'Meetings' ? (
-                <Button variant={'ghost'} disabled key={item.href}>
-                  <item.icon className='h-4 w-4' />
-                  Meetings
-                </Button>
-              ) : pathname === item.href ? (
+          {items.map(item =>
+            item.title === 'Meetings' ? (
+              <Button variant={'ghost'} disabled key={item.href}>
+                <item.icon className='h-4 w-4' />
+                Meetings
+              </Button>
+            ) : item.hasDropdown ? (
+              <div
+                key={item.href}
+                className='relative'
+                onMouseEnter={() => handleMouseEnter(item.title)}
+                onMouseLeave={handleMouseLeave}
+              >
                 <div
-                  key={item.href}
-                  className='flex flex-row justify-center items-center gap-3 h-[7vh] w-36 bg-gray-300/40 rounded-2xl ml-5 text-focusColor font-semibold'
-                  onClick={() => (window.location.href = item.href)}
+                  className={`flex flex-row justify-center items-center gap-3 h-[7vh] w-36 ${
+                    pathname.startsWith(item.href)
+                      ? 'bg-gray-300/40 rounded-2xl ml-5 text-focusColor font-semibold'
+                      : 'duration-300 hover:scale-110 hover:text-focusColor hover:font-semibold rounded-2xl ml-5'
+                  }`}
                 >
                   <item.icon className='h-4 w-4' />
                   {item.title}
+                  <ChevronDown className='h-3 w-3' />
                 </div>
-              ) : (
-                <div
-                  key={item.href}
-                  className='flex flex-row justify-center items-center gap-3 h-[7vh] w-36 duration-300 hover:scale-110 hover:text-focusColor hover:font-semibold rounded-2xl ml-5'
-                  onClick={() => (window.location.href = item.href)}
-                >
-                  <item.icon className='h-4 w-4' />
-                  {item.title}
-                </div>
-              ),
 
-            // <Button
-            //   key={item.href}
-            //   variant={pathname === item.href ? "secondary" : "ghost"}
-            //   asChild
-            //   size={"sm"}
-            // >
-            //   <Link href={item.href}>
-            //     <item.icon className="h-4 w-4" />
-            //     {item.title}
-            //   </Link>
-            // </Button>
+                {openDropdown === item.title && (
+                  <div
+                    className='absolute left-0 top-[7vh] z-10 mt-1 w-48 origin-top-left rounded-md border border-input bg-white shadow-md py-1'
+                    onMouseEnter={() => handleMouseEnter(item.title)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {item.dropdownItems?.map(dropdownItem => (
+                      <Link
+                        key={dropdownItem.href}
+                        href={dropdownItem.href}
+                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-300/40 hover:font-semibold hover:text-focusColor duration-300'
+                      >
+                        {dropdownItem.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : pathname === item.href ? (
+              <div
+                key={item.href}
+                className='flex flex-row justify-center items-center gap-3 h-[7vh] w-36 bg-gray-300/40 rounded-2xl ml-5 text-focusColor font-semibold'
+                onClick={() => (window.location.href = item.href)}
+              >
+                <item.icon className='h-4 w-4' />
+                {item.title}
+              </div>
+            ) : (
+              <div
+                key={item.href}
+                className='flex flex-row justify-center items-center gap-3 h-[7vh] w-36 duration-300 hover:scale-110 hover:text-focusColor hover:font-semibold rounded-2xl ml-5'
+                onClick={() => (window.location.href = item.href)}
+              >
+                <item.icon className='h-4 w-4' />
+                {item.title}
+              </div>
+            ),
           )}
         </nav>
         <Menu as='div' className='relative ml-5 mr-10'>
