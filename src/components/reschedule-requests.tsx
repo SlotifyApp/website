@@ -110,8 +110,8 @@ export function RescheduleRequests() {
           <Badge variant='secondary'>{myRequests?.length}</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className='p-0'>
-        <ScrollArea className='h-[calc(100vh-280px)]'>
+      <CardContent>
+        <ScrollArea className='h-[60vh]'>
           <div className='divide-y'>
             {myRequests?.map(request => (
               <div key={request.request_id} className='p-4'>

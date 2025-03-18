@@ -122,10 +122,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className='flex flex-col justify-start items-center mt-10 h-[90vh] w-screen overflow-x-hidden'>
+    <div className='flex flex-col justify-start items-center pt-10 h-[90vh] w-screen overflow-hidden'>
       <User />
-      <div className='flex flex-row justify-start ml-[10vw] w-screen gap-6 mt-10'>
-        <div className='w-[60vw]'>
+      <div className='flex flex-row justify-center w-screen gap-10 mt-5'>
+        <div className='w-[45vw]'>
           <div className='mb-8'>
             <EventsForToday events={calendar} />
           </div>
@@ -222,7 +222,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-        <div className='w-[30vw]'>
+        <div className='w-[45vw]'>
           <RescheduleRequests />
         </div>
       </div>
