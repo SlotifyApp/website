@@ -52,14 +52,13 @@ export function CreateEvent({
   initialSelectedRange = null,
   inputsDisabled = false,
 }: CreateEventProps) {
-  
   const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
   const [title, setTitle] = useState(initialTitle)
   const [location, setLocation] = useState('')
   const [duration, setDuration] = useState(initialDuration)
 
-  const [userSearchQuery, setUserSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<User[]>([])
+  // const [userSearchQuery, setUserSearchQuery] = useState('')
+  // const [searchResults, setSearchResults] = useState<User[]>([])
   const [selectedParticipants, setSelectedParticipants] =
     useState<User[]>(initialParticipants)
 
@@ -123,37 +122,37 @@ export function CreateEvent({
     [selectedRange],
   )
 
-  useEffect(() => {
-    const searchUsers = async () => {
-      if (!userSearchQuery) {
-        setSearchResults([])
-        return
-      }
-      try {
-        let response
-        if (userSearchQuery.includes('@')) {
-          // Search by email
-          response = await slotifyClient.GetAPIUsers({
-            queries: { email: userSearchQuery },
-          })
-        } else {
-          // Search by name
-          response = await slotifyClient.GetAPIUsers({
-            queries: { name: userSearchQuery },
-          })
-        }
-        setSearchResults(response)
-      } catch (error) {
-        console.error('Error searching users:', error)
-        toast({
-          title: 'Error',
-          description: 'Failed to search users.',
-          variant: 'destructive',
-        })
-      }
-    }
-    searchUsers()
-  }, [userSearchQuery])
+  // useEffect(() => {
+  //   const searchUsers = async () => {
+  //     if (!userSearchQuery) {
+  //       setSearchResults([])
+  //       return
+  //     }
+  //     try {
+  //       let response
+  //       if (userSearchQuery.includes('@')) {
+  //         // Search by email
+  //         response = await slotifyClient.GetAPIUsers({
+  //           queries: { email: userSearchQuery },
+  //         })
+  //       } else {
+  //         // Search by name
+  //         response = await slotifyClient.GetAPIUsers({
+  //           queries: { name: userSearchQuery },
+  //         })
+  //       }
+  //       setSearchResults(response)
+  //     } catch (error) {
+  //       console.error('Error searching users:', error)
+  //       toast({
+  //         title: 'Error',
+  //         description: 'Failed to search users.',
+  //         variant: 'destructive',
+  //       })
+  //     }
+  //   }
+  //   searchUsers()
+  // }, [userSearchQuery])
 
   // Add a user from search results to selected participants
   const handleAddParticipant = (user: User) => {
@@ -206,11 +205,10 @@ export function CreateEvent({
       lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
       lastFetchedRangeRef.current.end === memoizedRange.end.getTime()
     )
-
-    lastFetchedRangeRef.current = {
-      start: memoizedRange.start.getTime(),
-      end: memoizedRange.end.getTime(),
-    }
+      lastFetchedRangeRef.current = {
+        start: memoizedRange.start.getTime(),
+        end: memoizedRange.end.getTime(),
+      }
 
     setIsLoading(true)
     try {

@@ -10,7 +10,7 @@ interface EventRangePickerProps {
   onDateSelect: (date: Date) => void
   onRangeSelect: (range: { start: Date; end: Date } | null) => void
   selectedRange?: { start: Date; end: Date } | null
-  disabled?: boolean  // new optional prop to disable input changes
+  disabled?: boolean // new optional prop to disable input changes
 }
 
 export function EventRangePicker({

@@ -126,12 +126,14 @@ export function RescheduleRequests() {
     const start = parseISO(oldEvent.startTime!)
     const end = parseISO(oldEvent.endTime!)
     const diffInMinutes = Math.round((end.getTime() - start.getTime()) / 60000)
-    const candidates = [30, 60, 120];
+    const candidates = [30, 60, 120]
     const closest = candidates.reduce((prev, curr) =>
-      Math.abs(curr - diffInMinutes) < Math.abs(prev - diffInMinutes) ? curr : prev
-    );
+      Math.abs(curr - diffInMinutes) < Math.abs(prev - diffInMinutes)
+        ? curr
+        : prev,
+    )
     const durationString =
-      closest === 30 ? '30 minutes' : closest === 60 ? '1hr' : '2hrs';
+      closest === 30 ? '30 minutes' : closest === 60 ? '1hr' : '2hrs'
 
     const newParticipants = await convertAttendeesToUsers(oldEvent.attendees)
 
@@ -255,7 +257,9 @@ export function RescheduleRequests() {
                             size='sm'
                             className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
                             onClick={() =>
-                            handleRequestAccept(fullRequests[request.request_id]!.oldEvent)
+                              handleRequestAccept(
+                                fullRequests[request.request_id]!.oldEvent,
+                              )
                             }
                           >
                             <Check className='h-4 w-4 mr-1' />
