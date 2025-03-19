@@ -914,20 +914,8 @@ const endpoints = makeApi([
           .enum(["accepted", "declined", "expired", "pending"])
           .optional(),
       },
-      {
-        name: "pageToken",
-        type: "Query",
-        schema: z.number().int().optional(),
-      },
-      {
-        name: "limit",
-        type: "Query",
-        schema: z.number().int(),
-      },
     ],
-    response: z
-      .object({ invites: z.array(InvitesMe), nextPageToken: z.number().int() })
-      .passthrough(),
+    response: z.array(InvitesMe),
     errors: [
       {
         status: 400,
@@ -965,6 +953,16 @@ const endpoints = makeApi([
         description: `Bad request (e.g., invalid microsoft group name)`,
         schema: z.void(),
       },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
+      },
     ],
   },
   {
@@ -982,6 +980,11 @@ const endpoints = makeApi([
     response: MSFTGroup,
     errors: [
       {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
         status: 404,
         description: `Microsoft group not found`,
         schema: z.void(),
@@ -990,6 +993,11 @@ const endpoints = makeApi([
         status: 500,
         description: `Something went wrong internally`,
         schema: z.void(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
       },
     ],
   },
@@ -1020,6 +1028,11 @@ const endpoints = makeApi([
       .passthrough(),
     errors: [
       {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
         status: 403,
         description: `Bad request, Microsoft group id is invalid`,
         schema: z.string(),
@@ -1027,6 +1040,11 @@ const endpoints = makeApi([
       {
         status: 500,
         description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
         schema: z.string(),
       },
     ],
@@ -1501,6 +1519,11 @@ const endpoints = makeApi([
         description: `Bad request (e.g., invalid slotifyGroup name)`,
         schema: z.string(),
       },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
     ],
   },
   {
@@ -1520,6 +1543,11 @@ const endpoints = makeApi([
       {
         status: 400,
         description: `Bad request (e.g., invalid slotifyGroup id)`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
         schema: z.void(),
       },
       {
@@ -1543,6 +1571,11 @@ const endpoints = makeApi([
     ],
     response: SlotifyGroup,
     errors: [
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
       {
         status: 404,
         description: `SlotifyGroup not found`,
@@ -1665,6 +1698,11 @@ const endpoints = makeApi([
       .object({ users: z.array(User), nextPageToken: z.number().int() })
       .passthrough(),
     errors: [
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
       {
         status: 404,
         description: `Bad request, slotifyGroup id is invalid`,

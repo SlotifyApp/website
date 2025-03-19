@@ -51,12 +51,8 @@ export default function Dashboard() {
   useEffect(() => {
     const getInvites = async () => {
       try {
-        const inviteData = await slotifyClient.GetAPIInvitesMe({
-          queries: {
-            limit: 10,
-          },
-        })
-        setInvites(inviteData.invites as InvitesMe[])
+        const inviteData = await slotifyClient.GetAPIInvitesMe({})
+        setInvites(inviteData)
       } catch (error) {
         console.error(error)
         errorToast(error)

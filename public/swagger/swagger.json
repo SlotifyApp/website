@@ -671,24 +671,6 @@
               "$ref": "#/components/schemas/InviteStatus"
             },
             "description": "Invite status"
-          },
-          {
-            "in": "query",
-            "name": "pageToken",
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            },
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "required": true
           }
         ],
         "responses": {
@@ -697,22 +679,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "invites",
-                    "nextPageToken"
-                  ],
-                  "properties": {
-                    "invites": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/InvitesMe"
-                      }
-                    },
-                    "nextPageToken": {
-                      "type": "integer",
-                      "format": "uint32"
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvitesMe"
                   }
                 }
               }
@@ -1162,6 +1131,9 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
           "400": {
             "description": "Bad request (e.g., invalid slotifyGroup name)",
             "content": {
@@ -1202,6 +1174,9 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
           "400": {
             "description": "Bad request (e.g., invalid slotifyGroup id)"
           },
@@ -1235,6 +1210,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
           },
           "404": {
             "description": "SlotifyGroup not found"
@@ -1305,6 +1283,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
           },
           "404": {
             "description": "Bad request, slotifyGroup id is invalid",
@@ -1777,6 +1758,19 @@
           },
           "400": {
             "description": "Bad request (e.g., invalid microsoft group name)"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -1807,11 +1801,24 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
           "404": {
             "description": "Microsoft group not found"
           },
           "500": {
             "description": "Something went wrong internally"
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -1875,6 +1882,9 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
           "403": {
             "description": "Bad request, Microsoft group id is invalid",
             "content": {
@@ -1887,6 +1897,16 @@
           },
           "500": {
             "description": "Something went wrong internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Something went wrong with an external API",
             "content": {
               "application/json": {
                 "schema": {
