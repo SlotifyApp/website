@@ -35,8 +35,8 @@ export default function User() {
     <div className='flex flex-row w-screen pl-20 pr-20 justify-between'>
       <div className='flex flex-row justify-center items-center'>
         <div className='flex flex-row justify-center items-center gap-5 text-2xl font-semibold'>
-        <LucideUserIcon className='h-10 w-10' />
-          Welcome {user ? user.firstName: 'User'}
+          <LucideUserIcon className='h-10 w-10' />
+          Welcome {user ? user.firstName : 'User'}
         </div>
       </div>
       <div className='flex flex-row justify-center items-center gap-5 text-xl'>

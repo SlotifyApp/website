@@ -15,7 +15,7 @@ export function EventsForToday({ events }: EventsForTodayProps) {
     <Card>
       <CardHeader>
         <CardTitle className='flex items-center justify-between'>
-          Today's Events
+          Today&apos;s Events
           <Badge variant='secondary'>{events.length}</Badge>
         </CardTitle>
       </CardHeader>

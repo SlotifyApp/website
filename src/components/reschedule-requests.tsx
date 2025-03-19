@@ -2,21 +2,34 @@
 
 import { Check, X } from 'lucide-react'
 import { useEffect, useState, useCallback } from 'react'
-
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { errorToast, toast } from '@/hooks/use-toast'
 import slotifyClient from '@/hooks/fetch'
-import { CalendarEvent, RescheduleRequest } from '@/types/types'
+import { CalendarEvent, RescheduleRequest, Attendee, User } from '@/types/types'
 import { format, parseISO } from 'date-fns'
 import { CreateEvent } from './calendar/create-event'
+
+interface CreateEventData {
+  title: string
+  duration: string
+  participants: User[]
+  selectedRange: { start: Date; end: Date } | null
+}
 
 export function RescheduleRequests() {
   // TODO - this can be removed since we are using full requests instead
   const [myRequests, setmyRequests] = useState<RescheduleRequest[] | null>(null)
   const [createEventOpen, setCreateEventOpen] = useState(false)
+
+  const [createEventData, setCreateEventData] = useState<CreateEventData>({
+    title: '',
+    duration: '1hr',
+    participants: [],
+    selectedRange: null,
+  })
 
   const [fullRequests, setFullRequests] = useState<{
     [key: number]: {
@@ -33,6 +46,20 @@ export function RescheduleRequests() {
       } | null
     }
   }>({})
+
+  const convertAttendeesToUsers = async (attendees: Attendee[]) => {
+    try {
+      const usersPromises = attendees.map(attendee =>
+        slotifyClient.GetAPIUsers({ queries: { email: attendee.email } }),
+      )
+      const usersArrays = await Promise.all(usersPromises)
+      const users = usersArrays.flat()
+      return users
+    } catch (error) {
+      console.error('Error converting attendees:', error)
+      return []
+    }
+  }
 
   const getRescheduleRequests = async () => {
     const response = await slotifyClient.GetAPIRescheduleRequestsMe()
@@ -254,9 +281,48 @@ export function RescheduleRequests() {
                     <div
                       key={request.request_id}
                       className='p-4 duration-200 hover:bg-gray-200 hover:rounded-lg'
-                      onClick={() =>
+                      onClick={async () => {
+                        const currentFullRequest =
+                          fullRequests[request.request_id]
+                        if (!currentFullRequest) {
+                          return
+                        }
+
+                        // If newMeeting exists and is valid, update createEventData.
+                        if (
+                          currentFullRequest.newEvent &&
+                          currentFullRequest.newEvent.startTime !==
+                            '0001-01-01T00:00:00Z'
+                        ) {
+                          const newParticipants = await convertAttendeesToUsers(
+                            currentFullRequest.oldEvent.attendees,
+                          )
+                          setCreateEventData({
+                            title: currentFullRequest.newEvent.title,
+                            duration: currentFullRequest.newEvent.duration,
+                            participants: newParticipants,
+                            selectedRange: {
+                              start: new Date(
+                                currentFullRequest.newEvent.startTime,
+                              ),
+                              end: new Date(
+                                currentFullRequest.newEvent.endTime,
+                              ),
+                            },
+                          })
+                        } else {
+                          const newParticipants = await convertAttendeesToUsers(
+                            currentFullRequest.oldEvent.attendees,
+                          )
+                          setCreateEventData({
+                            title: '',
+                            duration: '1hr',
+                            participants: newParticipants,
+                            selectedRange: null,
+                          })
+                        }
                         setCreateEventOpen(true)
-                      }
+                      }}
                     >
                       <div className='space-y-3'>
                         <div>
@@ -390,6 +456,10 @@ export function RescheduleRequests() {
         open={createEventOpen}
         onOpenChangeAction={setCreateEventOpen}
         closeCreateEventDialogOpen={() => setCreateEventOpen(false)}
+        initialTitle={createEventData.title}
+        initialDuration={createEventData.duration}
+        initialParticipants={createEventData.participants}
+        initialSelectedRange={createEventData.selectedRange}
       />
     </>
   )
