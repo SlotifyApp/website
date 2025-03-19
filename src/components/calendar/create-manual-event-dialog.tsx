@@ -143,12 +143,7 @@ export function CreateManualEventDialog({
 
     getUserSlotifyGroups()
     getSlotifyGroupMembers()
-  }, [
-    selectedSlotifyGroup,
-    pageTokenGroups,
-    pageTokenGroupMembers,
-    getUserSlotifyGroups,
-  ])
+  }, [selectedSlotifyGroup, pageTokenGroups, pageTokenGroupMembers])
 
   const toggleParticipant = (participant: User) => {
     setSelectedParticipants(current =>

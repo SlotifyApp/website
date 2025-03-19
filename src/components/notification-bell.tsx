@@ -71,16 +71,6 @@ function NotificationList({
         </li>
       ) : (
         <>
-          <Button
-            variant='secondary'
-            size='sm'
-            onClick={() => {
-              const copyNotifs = notifications
-              copyNotifs.forEach(notif => handleMarkAsRead(notif.id))
-            }}
-          >
-            Mark all as read
-          </Button>
           {notifications.map(notification => (
             <li
               key={notification.id}
