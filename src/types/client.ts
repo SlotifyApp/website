@@ -1693,6 +1693,16 @@ const endpoints = makeApi([
         type: "Query",
         schema: z.number().int(),
       },
+      {
+        name: "name",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "email",
+        type: "Query",
+        schema: z.string().optional(),
+      },
     ],
     response: z
       .object({ users: z.array(User), nextPageToken: z.number().int() })

@@ -46,7 +46,7 @@ export function CreateManualEventDialog({
   const [selectedSlotifyGroup, setSelectedGroup] =
     useState<SlotifyGroup | null>(null)
   const [members, setMembers] = useState<User[]>([])
-  const [selectedParticipants, setSelectedParticipants] = useState<User[]>([])
+  const [selectedParticipants, setSelectedParticipants] = useState<(User & { attendeeType: "required" | "optional" | "resource" })[]>([])
 
   const [startTime, setStartTime] = useState<string | null>(null)
   const [endTime, setEndTime] = useState<string | null>(null)
@@ -54,6 +54,12 @@ export function CreateManualEventDialog({
   const [pageTokenGroups, setPageTokenGroups] = useState<number>(0)
   const [pageTokenGroupMembers, setPageTokenGroupMembers] = useState<number>(0)
   const [isLoadingGroups, setIsLoadingGroups] = useState<boolean>(false)
+
+  const [attendeeModalOpen, setAttendeeModalOpen] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [selectedAttendeeType, setSelectedAttendeeType] = useState<"required" | "optional" | "resource">("required")
+
+  const [memberSearchTerm, setMemberSearchTerm] = useState("")
 
   const createEvent = async (
     eventTitle: string,
@@ -65,7 +71,7 @@ export function CreateManualEventDialog({
     selectedParticipants.forEach(participant => {
       const attendee: Attendee = {
         email: participant.email,
-        attendeeType: 'required', //TODO: Ask what the type is
+        attendeeType: participant.attendeeType || 'required',
         responseStatus: 'notResponded',
       }
       attendees.push(attendee)
@@ -115,43 +121,113 @@ export function CreateManualEventDialog({
     setIsLoadingGroups(false)
   }, [pageTokenGroups, yourSlotifyGroups])
 
-  useEffect(() => {
-    const getSlotifyGroupMembers = async () => {
-      if (!selectedSlotifyGroup) {
-        return
+  const loadMembers = async (reset: boolean = false) => {
+    if (!selectedSlotifyGroup) return
+    try {
+      const slotifyGroupID = selectedSlotifyGroup.id
+      const currentPageToken = reset ? 0 : pageTokenGroupMembers
+      interface MemberSearchQueries {
+        limit: number;
+        pageToken: number;
+        email?: string;
+        name?: string;
       }
-      const slotifyGroupID = selectedSlotifyGroup?.id
-      try {
-        const slotifyGroupUsersData =
-          await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
-            params: {
-              slotifyGroupID: slotifyGroupID,
-            },
-            queries: {
-              limit: 10,
-              pageToken: pageTokenGroupMembers,
-            },
-          })
-        const { users, nextPageToken } = slotifyGroupUsersData
+      const queries: MemberSearchQueries = {
+        limit: 10,
+        pageToken: currentPageToken,
+      }
+      if (memberSearchTerm && /@/.test(memberSearchTerm)) {
+        queries.email = memberSearchTerm
+      } else if (memberSearchTerm) {
+        queries.name = memberSearchTerm
+      }
+      const slofityGroupUserData = 
+        await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
+          params: {
+            slotifyGroupID: slotifyGroupID,
+          },
+          queries,
+        })
+      const { users, nextPageToken } = slofityGroupUserData
+      if (reset) {
         setMembers(users)
-        setPageTokenGroupMembers(nextPageToken)
-      } catch (error) {
-        console.error(error)
-        errorToast(error)
+      } else {
+        setMembers(prev => [...prev, ...users])
+      }
+      setPageTokenGroupMembers(nextPageToken)
+    } catch (error) {
+      console.log(error)
+      errorToast(error)
+    }
+  }
+  // useEffect(() => {
+  //   const getSlotifyGroupMembers = async () => {
+  //     if (!selectedSlotifyGroup) {
+  //       return
+  //     }
+  //     const slotifyGroupID = selectedSlotifyGroup?.id
+  //     try {
+  //       const slotifyGroupUsersData =
+  //         await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDUsers({
+  //           params: {
+  //             slotifyGroupID: slotifyGroupID,
+  //           },
+  //           queries: {
+  //             limit: 10,
+  //             pageToken: pageTokenGroupMembers,
+  //           },
+  //         })
+  //       const { users, nextPageToken } = slotifyGroupUsersData
+  //       setMembers(users)
+  //       setPageTokenGroupMembers(nextPageToken)
+  //     } catch (error) {
+  //       console.error(error)
+  //       errorToast(error)
+  //     }
+  //   }
+//   getUserSlotifyGroups()
+//   getSlotifyGroupMembers()
+// }, [
+//   selectedSlotifyGroup,
+//   pageTokenGroups,
+//   pageTokenGroupMembers,
+//   getUserSlotifyGroups,
+// ])
+  useEffect(() => {
+    if (selectedSlotifyGroup) {
+      setPageTokenGroupMembers(0)
+      loadMembers(true)
+    }
+  }, [selectedSlotifyGroup])
+
+  useEffect(() => {
+    getUserSlotifyGroups()
+  }, [])
+
+  const handleMembersScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget
+    if (element.scrollTop + element.clientHeight >= element.scrollHeight - 10) {
+      if (pageTokenGroupMembers !== 0) {
+        loadMembers(false)
       }
     }
-
-    getUserSlotifyGroups()
-    getSlotifyGroupMembers()
-  }, [selectedSlotifyGroup, pageTokenGroups, pageTokenGroupMembers])
-
-  const toggleParticipant = (participant: User) => {
-    setSelectedParticipants(current =>
-      current.some(p => p.id === participant.id)
-        ? current.filter(p => p.id !== participant.id)
-        : [...current, participant],
-    )
   }
+
+  const openAttendeeModal = (participant: User) => {
+    setCurrentUser(participant)
+    // Pre-select the type if already selected, otherwise default to 'required'
+    const existing = selectedParticipants.find(p => p.id === participant.id)
+    setSelectedAttendeeType(existing ? existing.attendeeType : 'required')
+    setAttendeeModalOpen(true)
+  }
+
+  // const toggleParticipant = (participant: User) => {
+  //   setSelectedParticipants(current =>
+  //     current.some(p => p.id === participant.id)
+  //       ? current.filter(p => p.id !== participant.id)
+  //       : [...current, participant],
+  //   )
+  // }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChangeAction}>
@@ -164,7 +240,14 @@ export function CreateManualEventDialog({
           {/* Left side - Participants */}
           <div className='border-r pr-6'>
             <h2 className='font-semibold mb-4'>Participants</h2>
-            <ScrollArea className='h-[500px]'>
+            <div className="mb-2">
+              <Input
+                placeholder="Search users..."
+                value={memberSearchTerm}
+                onChange={(e) => setMemberSearchTerm(e.target.value)}
+              />
+            </div>
+            <ScrollArea className='h-[500px]' onScroll={handleMembersScroll}>
               <div className='space-y-2'>
                 {members.map(member => (
                   <div
@@ -174,7 +257,7 @@ export function CreateManualEventDialog({
                       selectedParticipants.some(p => p.id === member.id) &&
                         'bg-accent',
                     )}
-                    onClick={() => toggleParticipant(member)}
+                    onClick={() => openAttendeeModal(member)}
                   >
                     <Avatar>
                       <AvatarImage
@@ -314,6 +397,56 @@ export function CreateManualEventDialog({
           </div>
         </div>
       </DialogContent>
+      <Dialog open={attendeeModalOpen} onOpenChange={setAttendeeModalOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Select Attendee Type</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Select
+              value={selectedAttendeeType}
+              onValueChange={(val) => setSelectedAttendeeType(val as "required" | "optional" | "resource")}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select attendee type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="required">Required</SelectItem>
+                <SelectItem value="optional">Optional</SelectItem>
+                <SelectItem value="resource">Resource</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setAttendeeModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (currentUser) {
+                  setSelectedParticipants(prev => {
+                    const exists = prev.find(p => p.id === currentUser.id)
+                    if (exists) {
+                      // update attendee type if already selected
+                      return prev.map(p =>
+                        p.id === currentUser.id
+                          ? { ...p, attendeeType: selectedAttendeeType }
+                          : p,
+                      )
+                    } else {
+                      // add new participant with selected attendee type
+                      return [...prev, { ...currentUser, attendeeType: selectedAttendeeType }]
+                    }
+                  })
+                }
+                setAttendeeModalOpen(false)
+              }}
+            >
+              Confirm
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }
