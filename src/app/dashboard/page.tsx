@@ -56,7 +56,7 @@ export default function Dashboard() {
             limit: 10,
           },
         })
-        setInvites(inviteData.Invites as InvitesMe[])
+        setInvites(inviteData.invites as InvitesMe[])
       } catch (error) {
         console.error(error)
         errorToast(error)

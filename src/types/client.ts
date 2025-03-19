@@ -1586,7 +1586,7 @@ const endpoints = makeApi([
     ],
     response: z
       .object({
-        groups: z.array(InvitesGroup),
+        invites: z.array(InvitesGroup),
         nextPageToken: z.number().int(),
       })
       .passthrough(),
