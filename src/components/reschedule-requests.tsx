@@ -65,7 +65,15 @@ export function RescheduleRequests() {
 
   const getRescheduleRequests = async () => {
     const response = await slotifyClient.GetAPIRescheduleRequestsMe()
-    setmyRequests(response)
+    const requests : RescheduleRequest[] = []
+    response.pending.forEach((request: RescheduleRequest) => {
+      requests.push(request)
+    })
+    response.responses.forEach((request: RescheduleRequest) => {
+      requests.push(request)
+    })
+    
+    setmyRequests(requests)
   }
 
   const getFullRequests = useCallback(async () => {

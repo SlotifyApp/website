@@ -23,6 +23,9 @@ type ReschedulingRequestOldMeeting = {
   meetingStartTime: string;
   timeRangeStart: string;
   timeRangeEnd: string;
+  meetingStartTime: string;
+  timeRangeStart: string;
+  timeRangeEnd: string;
 };
 type ReschedulingRequestNewMeeting = {
   title: string;
@@ -30,6 +33,7 @@ type ReschedulingRequestNewMeeting = {
   startTime: string;
   endTime: string;
   location: string;
+  attendees: Array<number>;
   attendees: Array<number>;
 };
 type ReschedulingCheckBodySchema = {
@@ -181,10 +185,6 @@ type InvitesMe = {
   fromUserFirstName: string;
   fromUserLastName: string;
 };
-type InvitesGroupsAndPagination = {
-  invites: Array<InvitesGroup>;
-  nextPageToken: number;
-};
 type UsersAndPagination = {
   users: Array<User>;
   nextPageToken: number;
@@ -259,6 +259,7 @@ const CalendarEvent: z.ZodType<CalendarEvent> = z
   })
   .passthrough();
 const User: z.ZodType<User> = z
+const User: z.ZodType<User> = z
   .object({
     id: z.number().int(),
     email: z.string().email(),
@@ -311,8 +312,8 @@ const InvitesGroup: z.ZodType<InvitesGroup> = z
     createdAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
-const InvitesGroupsAndPagination: z.ZodType<InvitesGroupsAndPagination> = z
-  .object({ invites: z.array(InvitesGroup), nextPageToken: z.number().int() })
+const UsersAndPagination: z.ZodType<UsersAndPagination> = z
+  .object({ users: z.array(User), nextPageToken: z.number().int() })
   .passthrough();
 const SlotifyGroup = z
   .object({ id: z.number().int(), name: z.string() })
@@ -441,6 +442,13 @@ const ReschedulingRequestOldMeeting: z.ZodType<ReschedulingRequestOldMeeting> =
       timeRangeStart: z.string().datetime({ offset: true }),
       timeRangeEnd: z.string().datetime({ offset: true }),
     })
+    .object({
+      msftMeetingID: z.string(),
+      meetingId: z.number().int(),
+      meetingStartTime: z.string().datetime({ offset: true }),
+      timeRangeStart: z.string().datetime({ offset: true }),
+      timeRangeEnd: z.string().datetime({ offset: true }),
+    })
     .passthrough();
 const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
   z
@@ -450,6 +458,7 @@ const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
       startTime: z.string().datetime({ offset: true }),
       endTime: z.string().datetime({ offset: true }),
       location: z.string(),
+      attendees: z.array(z.number().int()),
       attendees: z.array(z.number().int()),
     })
     .passthrough();
@@ -513,7 +522,7 @@ export const schemas = {
   InvitesMe,
   InviteCreate,
   InvitesGroup,
-  InvitesGroupsAndPagination,
+  UsersAndPagination,
   SlotifyGroup,
   SlotifyGroupCreate,
   UsersAndPagination,
@@ -1423,6 +1432,83 @@ const endpoints = makeApi([
     ],
   },
   {
+    method: "get",
+    path: "/api/reschedule/request/:requestID/close",
+    alias: "GetAPIRescheduleRequestRequestIDClose",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "requestID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.string(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/api/reschedule/request/:requestID/complete",
+    alias: "PostAPIRescheduleRequestRequestIDComplete",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: CalendarEvent,
+      },
+      {
+        name: "requestID",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: CalendarEvent,
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z.void(),
+      },
+      {
+        status: 401,
+        description: `Access token is missing or invalid`,
+        schema: z.void(),
+      },
+      {
+        status: 500,
+        description: `Something went wrong internally`,
+        schema: z.string(),
+      },
+      {
+        status: 502,
+        description: `Something went wrong with an external API`,
+        schema: z.string(),
+      },
+    ],
+  },
+  {
     method: "patch",
     path: "/api/reschedule/request/:requestID/reject",
     alias: "PatchAPIRescheduleRequestRequestIDReject",
@@ -1525,6 +1611,12 @@ const endpoints = makeApi([
     path: "/api/reschedule/requests/me",
     alias: "GetAPIRescheduleRequestsMe",
     requestFormat: "json",
+    response: z
+      .object({
+        pending: z.array(RescheduleRequest),
+        responses: z.array(RescheduleRequest),
+      })
+      .passthrough(),
     response: z
       .object({
         pending: z.array(RescheduleRequest),
@@ -1726,7 +1818,7 @@ const endpoints = makeApi([
         schema: z.number().int(),
       },
     ],
-    response: InvitesGroupsAndPagination,
+    response: UsersAndPagination,
     errors: [
       {
         status: 400,
@@ -1796,6 +1888,16 @@ const endpoints = makeApi([
         name: "limit",
         type: "Query",
         schema: z.number().int(),
+      },
+      {
+        name: "name",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "email",
+        type: "Query",
+        schema: z.string().optional(),
       },
       {
         name: "name",

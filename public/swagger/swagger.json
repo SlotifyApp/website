@@ -971,7 +971,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InvitesGroupsAndPagination"
+                  "$ref": "#/components/schemas/UsersAndPagination"
                 }
               }
             }
@@ -3257,27 +3257,12 @@
           "name"
         ]
       },
-      "InvitesGroupsAndPagination": {
-        "type": "object",
-        "properties": {
-          "invites": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InvitesGroup"
-            }
-          },
-          "nextPageToken": {
-            "type": "integer",
-            "format": "uint32"
-          }
-        },
-        "required": [
-          "invites",
-          "nextPageToken"
-        ]
-      },
       "UsersAndPagination": {
         "type": "object",
+        "required": [
+          "users",
+          "nextPageToken"
+        ],
         "properties": {
           "users": {
             "type": "array",
@@ -3289,11 +3274,7 @@
             "type": "integer",
             "format": "uint32"
           }
-        },
-        "required": [
-          "users",
-          "nextPageToken"
-        ]
+        }
       }
     }
   }
