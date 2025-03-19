@@ -9,14 +9,16 @@ interface EventRangePickerProps {
   selectedDate: Date | null
   onDateSelect: (date: Date) => void
   onRangeSelect: (range: { start: Date; end: Date } | null) => void
-  selectedRange?: { start: Date; end: Date } | null // new optional prop
+  selectedRange?: { start: Date; end: Date } | null
+  disabled?: boolean  // new optional prop to disable input changes
 }
 
 export function EventRangePicker({
   selectedDate,
   onDateSelect,
   onRangeSelect,
-  selectedRange, // destructure the new prop
+  selectedRange,
+  disabled = false,
 }: EventRangePickerProps) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
   const [dragStart, setDragStart] = useState<Date | null>(null)
@@ -112,6 +114,7 @@ export function EventRangePicker({
   }
 
   const handleMouseDown = (date: Date) => {
+    if (disabled) return
     setIsSelecting(true)
     setDragStart(date)
     setDragEnd(date)
@@ -119,12 +122,14 @@ export function EventRangePicker({
   }
 
   const handleMouseEnter = (date: Date) => {
+    if (disabled) return
     if (isSelecting) {
       setDragEnd(date)
     }
   }
 
   const handleMouseUp = () => {
+    if (disabled) return
     setIsSelecting(false)
   }
 
@@ -147,6 +152,7 @@ export function EventRangePicker({
           size='icon'
           onClick={prevMonth}
           className='h-7 w-7'
+          disabled={disabled}
         >
           <ChevronLeft className='h-4 w-4' />
         </Button>
@@ -158,6 +164,7 @@ export function EventRangePicker({
           size='icon'
           onClick={nextMonth}
           className='h-7 w-7'
+          disabled={disabled}
         >
           <ChevronRight className='h-4 w-4' />
         </Button>
@@ -175,7 +182,7 @@ export function EventRangePicker({
 
       <div
         className='grid grid-cols-7 gap-1'
-        onMouseLeave={() => isSelecting && setIsSelecting(false)}
+        onMouseLeave={() => !disabled && isSelecting && setIsSelecting(false)}
       >
         {days.map(({ date, isCurrentMonth }, index) => (
           <div

@@ -32,6 +32,7 @@ interface CreateEventProps {
   initialDuration?: string
   initialParticipants?: User[]
   initialSelectedRange?: { start: Date; end: Date } | null
+  inputsDisabled?: boolean
 }
 
 // Mapping from dropdown option to minutes
@@ -49,6 +50,7 @@ export function CreateEvent({
   initialDuration = '1hr',
   initialParticipants = [],
   initialSelectedRange = null,
+  inputsDisabled = false,
 }: CreateEventProps) {
   
   const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
@@ -305,6 +307,7 @@ export function CreateEvent({
                     onChange={e => {
                       setTitle(e.target.value)
                     }}
+                    disabled={inputsDisabled}
                   />
                 </div>
 
@@ -317,6 +320,7 @@ export function CreateEvent({
                     onChange={e => {
                       setLocation(e.target.value)
                     }}
+                    disabled={inputsDisabled}
                   />
                 </div>
 
@@ -329,6 +333,7 @@ export function CreateEvent({
                       setDuration(e.target.value)
                     }}
                     className='block w-full rounded-md border border-gray-300 p-2'
+                    disabled={inputsDisabled}
                   >
                     <option value='30 minutes'>30 minutes</option>
                     <option value='1hr'>1hr</option>
@@ -348,9 +353,12 @@ export function CreateEvent({
                     selectedDate={selectedDate}
                     selectedRange={selectedRange}
                     onDateSelect={date => {
-                      setSelectedDate(date)
+                      if (!inputsDisabled) setSelectedDate(date)
                     }}
-                    onRangeSelect={handleRangeSelect}
+                    onRangeSelect={range => {
+                      if (!inputsDisabled) handleRangeSelect(range)
+                    }}
+                    disabled={inputsDisabled}
                   />
                 </div>
 

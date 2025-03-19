@@ -17,6 +17,7 @@ interface CreateEventData {
   duration: string
   participants: User[]
   selectedRange: { start: Date; end: Date } | null
+  disabled: boolean
 }
 
 export function RescheduleRequests() {
@@ -29,6 +30,7 @@ export function RescheduleRequests() {
     duration: '1hr',
     participants: [],
     selectedRange: null,
+    disabled: false,
   })
 
   const [fullRequests, setFullRequests] = useState<{
@@ -120,7 +122,31 @@ export function RescheduleRequests() {
     }
   }
 
-  const handleRequestAccept = async (requestID: number) => {}
+  const handleRequestAccept = async (oldEvent: CalendarEvent) => {
+    const start = parseISO(oldEvent.startTime!)
+    const end = parseISO(oldEvent.endTime!)
+    const diffInMinutes = Math.round((end.getTime() - start.getTime()) / 60000)
+    const candidates = [30, 60, 120];
+    const closest = candidates.reduce((prev, curr) =>
+      Math.abs(curr - diffInMinutes) < Math.abs(prev - diffInMinutes) ? curr : prev
+    );
+    const durationString =
+      closest === 30 ? '30 minutes' : closest === 60 ? '1hr' : '2hrs';
+
+    const newParticipants = await convertAttendeesToUsers(oldEvent.attendees)
+
+    setCreateEventData({
+      title: oldEvent.subject ?? '',
+      duration: durationString,
+      participants: newParticipants,
+      selectedRange: {
+        start: new Date(oldEvent.startTime!),
+        end: new Date(oldEvent.endTime!),
+      },
+      disabled: true,
+    })
+    setCreateEventOpen(true)
+  }
 
   // TODO - this can be removed since we are using full requests instead
   useEffect(() => {
@@ -224,48 +250,29 @@ export function RescheduleRequests() {
                         </div>
 
                         <div className='flex items-center gap-2'>
-                          {request.status === 'pending' && (
-                            <>
-                              {request.newMeeting!.startTime ===
-                              '0001-01-01T00:00:00Z' ? (
-                                <Button
-                                  variant='outline'
-                                  size='sm'
-                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
-                                  // onClick={() =>
-                                  // handleRequestAccept(request.request_id)
-                                  // }
-                                >
-                                  <Check className='h-4 w-4 mr-1' />
-                                  Reschedule Now
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant='outline'
-                                  size='sm'
-                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
-                                  // onClick={() => handleAction(request.id, 'accept')}
-                                >
-                                  <Check className='h-4 w-4 mr-1' />
-                                  View Proposal
-                                </Button>
-                              )}
-                            </>
-                          )}
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
+                            onClick={() =>
+                            handleRequestAccept(fullRequests[request.request_id]!.oldEvent)
+                            }
+                          >
+                            <Check className='h-4 w-4 mr-1' />
+                            Reschedule Now
+                          </Button>
 
-                          {request.status === 'pending' && (
-                            <Button
-                              variant='outline'
-                              size='sm'
-                              className='w-full text-red-500 hover:text-red-600 hover:bg-red-50'
-                              onClick={() =>
-                                handleRequestReject(request.request_id)
-                              }
-                            >
-                              <X className='h-4 w-4 mr-1' />
-                              Ignore
-                            </Button>
-                          )}
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='w-full text-red-500 hover:text-red-600 hover:bg-red-50'
+                            onClick={() =>
+                              handleRequestReject(request.request_id)
+                            }
+                          >
+                            <X className='h-4 w-4 mr-1' />
+                            Ignore
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -309,6 +316,7 @@ export function RescheduleRequests() {
                                 currentFullRequest.newEvent.endTime,
                               ),
                             },
+                            disabled: false,
                           })
                         } else {
                           const newParticipants = await convertAttendeesToUsers(
@@ -319,6 +327,7 @@ export function RescheduleRequests() {
                             duration: '1hr',
                             participants: newParticipants,
                             selectedRange: null,
+                            disabled: false,
                           })
                         }
                         setCreateEventOpen(true)
@@ -375,14 +384,7 @@ export function RescheduleRequests() {
                                 : ''}
                             </div>
                           </div>
-                          {/* <div className='flex items-start gap-2'>
-                      <div className='w-20 font-medium shrink-0'>
-                        Requested:
-                      </div>
-                      <div className='text-muted-foreground'>
-                        {request.requestedDateTime}
-                      </div>
-                    </div> */}
+
                           <div className='flex items-start gap-2'>
                             <div className='w-25 font-medium shrink-0'>
                               Attendees:
@@ -397,51 +399,6 @@ export function RescheduleRequests() {
                                 : ''}
                             </div>
                           </div>
-                        </div>
-
-                        <div className='flex items-center gap-2'>
-                          {request.status === 'pending' && (
-                            <>
-                              {request.newMeeting!.startTime ===
-                              '0001-01-01T00:00:00Z' ? (
-                                <Button
-                                  variant='outline'
-                                  size='sm'
-                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
-                                  // onClick={() =>
-                                  // handleRequestAccept(request.request_id)
-                                  // }
-                                >
-                                  <Check className='h-4 w-4 mr-1' />
-                                  Reschedule Now
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant='outline'
-                                  size='sm'
-                                  className='w-full text-green-500 hover:text-green-600 hover:bg-green-50'
-                                  // onClick={() => handleAction(request.id, 'accept')}
-                                >
-                                  <Check className='h-4 w-4 mr-1' />
-                                  View Proposal
-                                </Button>
-                              )}
-                            </>
-                          )}
-
-                          {request.status === 'pending' && (
-                            <Button
-                              variant='outline'
-                              size='sm'
-                              className='w-full text-red-500 hover:text-red-600 hover:bg-red-50'
-                              onClick={() =>
-                                handleRequestReject(request.request_id)
-                              }
-                            >
-                              <X className='h-4 w-4 mr-1' />
-                              Ignore
-                            </Button>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -460,6 +417,7 @@ export function RescheduleRequests() {
         initialDuration={createEventData.duration}
         initialParticipants={createEventData.participants}
         initialSelectedRange={createEventData.selectedRange}
+        inputsDisabled={createEventData.disabled}
       />
     </>
   )
