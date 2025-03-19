@@ -181,6 +181,10 @@ type InvitesMe = {
   fromUserFirstName: string;
   fromUserLastName: string;
 };
+type InvitesGroupsAndPagination = {
+  invites: Array<InvitesGroup>;
+  nextPageToken: number;
+};
 type UsersAndPagination = {
   users: Array<User>;
   nextPageToken: number;
@@ -307,13 +311,16 @@ const InvitesGroup: z.ZodType<InvitesGroup> = z
     createdAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
-const UsersAndPagination: z.ZodType<UsersAndPagination> = z
-  .object({ users: z.array(User), nextPageToken: z.number().int() })
+const InvitesGroupsAndPagination: z.ZodType<InvitesGroupsAndPagination> = z
+  .object({ invites: z.array(InvitesGroup), nextPageToken: z.number().int() })
   .passthrough();
 const SlotifyGroup = z
   .object({ id: z.number().int(), name: z.string() })
   .passthrough();
 const SlotifyGroupCreate = z.object({ name: z.string() }).passthrough();
+const UsersAndPagination: z.ZodType<UsersAndPagination> = z
+  .object({ users: z.array(User), nextPageToken: z.number().int() })
+  .passthrough();
 const EmailAddress: z.ZodType<EmailAddress> = z
   .object({ address: z.string().email(), name: z.string() })
   .passthrough();
@@ -506,9 +513,10 @@ export const schemas = {
   InvitesMe,
   InviteCreate,
   InvitesGroup,
-  UsersAndPagination,
+  InvitesGroupsAndPagination,
   SlotifyGroup,
   SlotifyGroupCreate,
+  UsersAndPagination,
   EmailAddress,
   AttendeeBase,
   PhysicalAddress,
@@ -1718,7 +1726,7 @@ const endpoints = makeApi([
         schema: z.number().int(),
       },
     ],
-    response: UsersAndPagination,
+    response: InvitesGroupsAndPagination,
     errors: [
       {
         status: 400,
@@ -1800,9 +1808,7 @@ const endpoints = makeApi([
         schema: z.string().optional(),
       },
     ],
-    response: z
-      .object({ users: z.array(User), nextPageToken: z.number().int() })
-      .passthrough(),
+    response: UsersAndPagination,
     errors: [
       {
         status: 401,

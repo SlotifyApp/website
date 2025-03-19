@@ -120,7 +120,7 @@ export default function GroupsPage() {
               limit: 10,
             },
           })
-        setMembers(slotifyGroupMemberData.users as Member[])
+        setMembers(slotifyGroupMemberData.users)
       } catch (error) {
         console.error(error)
         errorToast(error)
@@ -133,7 +133,7 @@ export default function GroupsPage() {
         return
       }
       try {
-        const invites =
+        const invitesAndPagination =
           await slotifyClient.GetAPISlotifyGroupsSlotifyGroupIDInvites({
             params: {
               slotifyGroupID: selectedSlotifyGroup.id,
@@ -143,7 +143,7 @@ export default function GroupsPage() {
             },
           })
         setGroupInvites(
-          (invites.invites as InvitesGroup[]).filter(
+          invitesAndPagination.invites.filter(
             invite => invite.status === 'pending',
           ),
         )
