@@ -64,16 +64,20 @@ export function RescheduleRequests() {
   }
 
   const getRescheduleRequests = async () => {
-    const response = await slotifyClient.GetAPIRescheduleRequestsMe()
-    const requests: RescheduleRequest[] = []
-    response.pending.forEach((request: RescheduleRequest) => {
-      requests.push(request)
-    })
-    response.responses.forEach((request: RescheduleRequest) => {
-      requests.push(request)
-    })
+    try {
+      const response = await slotifyClient.GetAPIRescheduleRequestsMe()
+      const requests: RescheduleRequest[] = []
+      response.pending.forEach((request: RescheduleRequest) => {
+        requests.push(request)
+      })
+      response.responses.forEach((request: RescheduleRequest) => {
+        requests.push(request)
+      })
 
-    setmyRequests(requests)
+      setmyRequests(requests)
+    } catch (error) {
+      errorToast(error)
+    }
   }
 
   const getFullRequests = useCallback(async () => {
