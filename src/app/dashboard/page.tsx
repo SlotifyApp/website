@@ -122,7 +122,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className='flex flex-col justify-start items-center pt-10 h-[90vh] w-screen overflow-hidden'>
+    <div className='flex flex-col justify-start items-center pt-10 h-[90vh] w-screen'>
       <User />
       <div className='flex flex-row justify-center w-screen gap-10 mt-5'>
         <div className='w-[45vw]'>

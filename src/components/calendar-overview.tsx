@@ -407,7 +407,12 @@ export function CalendarOverview() {
       <CreateEvent
         open={isCreateEventOpen}
         onOpenChangeAction={setIsCreateEventOpen}
-        closeCreateEventDialogOpen={closeCreateEventDialogOpen}
+        closeCreateEventDialogOpen={() => setIsCreateEventOpen(false)}
+        initialTitle={''}
+        initialDuration={'1hr'}
+        initialParticipants={[]}
+        initialSelectedRange={null}
+        inputsDisabled={false}
       />
 
       <Dialog

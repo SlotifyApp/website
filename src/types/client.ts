@@ -33,8 +33,7 @@ type ReschedulingRequestNewMeeting = {
   startTime: string;
   endTime: string;
   location: string;
-  attendees: Array<number>;
-  attendees: Array<number>;
+  attendees: Array<number> | null;
 };
 type ReschedulingCheckBodySchema = {
   newMeeting: {
@@ -185,6 +184,10 @@ type InvitesMe = {
   fromUserFirstName: string;
   fromUserLastName: string;
 };
+type InvitesGroupsAndPagination = {
+  invites: Array<InvitesGroup>;
+  nextPageToken: number;
+};
 type UsersAndPagination = {
   users: Array<User>;
   nextPageToken: number;
@@ -312,8 +315,8 @@ const InvitesGroup: z.ZodType<InvitesGroup> = z
     createdAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
-const UsersAndPagination: z.ZodType<UsersAndPagination> = z
-  .object({ users: z.array(User), nextPageToken: z.number().int() })
+const InvitesGroupsAndPagination: z.ZodType<InvitesGroupsAndPagination> = z
+  .object({ invites: z.array(InvitesGroup), nextPageToken: z.number().int() })
   .passthrough();
 const SlotifyGroup = z
   .object({ id: z.number().int(), name: z.string() })
@@ -458,8 +461,7 @@ const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
       startTime: z.string().datetime({ offset: true }),
       endTime: z.string().datetime({ offset: true }),
       location: z.string(),
-      attendees: z.array(z.number().int()),
-      attendees: z.array(z.number().int()),
+      attendees: z.array(z.number().int()).nullable(),
     })
     .passthrough();
 const RescheduleRequest: z.ZodType<RescheduleRequest> = z
@@ -522,7 +524,7 @@ export const schemas = {
   InvitesMe,
   InviteCreate,
   InvitesGroup,
-  UsersAndPagination,
+  InvitesGroupsAndPagination,
   SlotifyGroup,
   SlotifyGroupCreate,
   UsersAndPagination,
@@ -1818,7 +1820,7 @@ const endpoints = makeApi([
         schema: z.number().int(),
       },
     ],
-    response: UsersAndPagination,
+    response: InvitesGroupsAndPagination,
     errors: [
       {
         status: 400,
