@@ -65,14 +65,14 @@ export function RescheduleRequests() {
 
   const getRescheduleRequests = async () => {
     const response = await slotifyClient.GetAPIRescheduleRequestsMe()
-    const requests : RescheduleRequest[] = []
+    const requests: RescheduleRequest[] = []
     response.pending.forEach((request: RescheduleRequest) => {
       requests.push(request)
     })
     response.responses.forEach((request: RescheduleRequest) => {
       requests.push(request)
     })
-    
+
     setmyRequests(requests)
   }
 
@@ -348,8 +348,9 @@ export function RescheduleRequests() {
                       <div className='space-y-3'>
                         <div>
                           <h4 className='font-medium leading-none'>
-                            {request.newMeeting?.title
-                              ? request.newMeeting.title
+                            {fullRequests[request.request_id]
+                              ? fullRequests[request.request_id]!.oldEvent
+                                  .subject
                               : '(No name)'}
                           </h4>
                           <p className='text-sm text-muted-foreground mt-1'>

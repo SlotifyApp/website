@@ -23,9 +23,6 @@ type ReschedulingRequestOldMeeting = {
   meetingStartTime: string;
   timeRangeStart: string;
   timeRangeEnd: string;
-  meetingStartTime: string;
-  timeRangeStart: string;
-  timeRangeEnd: string;
 };
 type ReschedulingRequestNewMeeting = {
   title: string;
@@ -262,7 +259,6 @@ const CalendarEvent: z.ZodType<CalendarEvent> = z
   })
   .passthrough();
 const User: z.ZodType<User> = z
-const User: z.ZodType<User> = z
   .object({
     id: z.number().int(),
     email: z.string().email(),
@@ -438,13 +434,6 @@ const ReschedulingCheckBodySchema: z.ZodType<ReschedulingCheckBodySchema> = z
   .passthrough();
 const ReschedulingRequestOldMeeting: z.ZodType<ReschedulingRequestOldMeeting> =
   z
-    .object({
-      msftMeetingID: z.string(),
-      meetingId: z.number().int(),
-      meetingStartTime: z.string().datetime({ offset: true }),
-      timeRangeStart: z.string().datetime({ offset: true }),
-      timeRangeEnd: z.string().datetime({ offset: true }),
-    })
     .object({
       msftMeetingID: z.string(),
       meetingId: z.number().int(),
@@ -1434,83 +1423,6 @@ const endpoints = makeApi([
     ],
   },
   {
-    method: "get",
-    path: "/api/reschedule/request/:requestID/close",
-    alias: "GetAPIRescheduleRequestRequestIDClose",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "requestID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: z.string(),
-    errors: [
-      {
-        status: 400,
-        description: `Bad request`,
-        schema: z.void(),
-      },
-      {
-        status: 401,
-        description: `Access token is missing or invalid`,
-        schema: z.void(),
-      },
-      {
-        status: 500,
-        description: `Something went wrong internally`,
-        schema: z.string(),
-      },
-      {
-        status: 502,
-        description: `Something went wrong with an external API`,
-        schema: z.string(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/api/reschedule/request/:requestID/complete",
-    alias: "PostAPIRescheduleRequestRequestIDComplete",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: CalendarEvent,
-      },
-      {
-        name: "requestID",
-        type: "Path",
-        schema: z.number().int(),
-      },
-    ],
-    response: CalendarEvent,
-    errors: [
-      {
-        status: 400,
-        description: `Bad request`,
-        schema: z.void(),
-      },
-      {
-        status: 401,
-        description: `Access token is missing or invalid`,
-        schema: z.void(),
-      },
-      {
-        status: 500,
-        description: `Something went wrong internally`,
-        schema: z.string(),
-      },
-      {
-        status: 502,
-        description: `Something went wrong with an external API`,
-        schema: z.string(),
-      },
-    ],
-  },
-  {
     method: "patch",
     path: "/api/reschedule/request/:requestID/reject",
     alias: "PatchAPIRescheduleRequestRequestIDReject",
@@ -1613,12 +1525,6 @@ const endpoints = makeApi([
     path: "/api/reschedule/requests/me",
     alias: "GetAPIRescheduleRequestsMe",
     requestFormat: "json",
-    response: z
-      .object({
-        pending: z.array(RescheduleRequest),
-        responses: z.array(RescheduleRequest),
-      })
-      .passthrough(),
     response: z
       .object({
         pending: z.array(RescheduleRequest),
@@ -1890,16 +1796,6 @@ const endpoints = makeApi([
         name: "limit",
         type: "Query",
         schema: z.number().int(),
-      },
-      {
-        name: "name",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-      {
-        name: "email",
-        type: "Query",
-        schema: z.string().optional(),
       },
       {
         name: "name",

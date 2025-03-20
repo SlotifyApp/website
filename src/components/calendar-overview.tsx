@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   format,
   startOfWeek,
@@ -69,10 +69,6 @@ export function CalendarOverview() {
   const handleToday = () => setCurrentWeek(new Date())
 
   const viewportRef = useRef<HTMLDivElement>(null)
-
-  const closeCreateEventDialogOpen = useCallback(() => {
-    setIsCreateEventOpen(false)
-  }, [setIsCreateEventOpen])
 
   useEffect(() => {
     if (viewportRef.current) {
