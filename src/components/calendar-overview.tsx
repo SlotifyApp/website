@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   format,
   startOfWeek,
@@ -69,10 +69,6 @@ export function CalendarOverview() {
   const handleToday = () => setCurrentWeek(new Date())
 
   const viewportRef = useRef<HTMLDivElement>(null)
-
-  const closeCreateEventDialogOpen = useCallback(() => {
-    setIsCreateEventOpen(false)
-  }, [setIsCreateEventOpen])
 
   useEffect(() => {
     if (viewportRef.current) {
@@ -153,6 +149,22 @@ export function CalendarOverview() {
     const parser = new DOMParser()
     const doc = parser.parseFromString(htmlString, 'text/html')
     return (doc.body.textContent || '').trim()
+  }
+
+  const handleReschedule = async (selectedEventID: string) => {
+    if (!selectedEventID) return
+    try {
+      await slotifyClient.PostAPIRescheduleRequestSingle({
+        msftMeetingID: selectedEventID,
+      })
+      toast({
+        title: 'Reschedule sent',
+        description: 'Sent reschedule request to the organizer',
+      })
+    } catch (error) {
+      console.error(error)
+      errorToast(error)
+    }
   }
 
   return (
@@ -391,7 +403,12 @@ export function CalendarOverview() {
       <CreateEvent
         open={isCreateEventOpen}
         onOpenChangeAction={setIsCreateEventOpen}
-        closeCreateEventDialogOpenAction={closeCreateEventDialogOpen}
+        closeCreateEventDialogOpen={() => setIsCreateEventOpen(false)}
+        initialTitle={''}
+        initialDuration={'1hr'}
+        initialParticipants={[]}
+        initialSelectedRange={null}
+        inputsDisabled={false}
       />
 
       <Dialog
@@ -492,10 +509,8 @@ export function CalendarOverview() {
                 <Button
                   variant='destructive'
                   onClick={() => {
-                    toast({
-                      title: 'Reschedule sent',
-                      description: 'Sent reschedule request to the organizer',
-                    })
+                    console.log('Reschedule event: ', selectedEvent.id)
+                    handleReschedule(selectedEvent.id!.toString())
                     setIsDayEventsDialogOpen(false)
                   }}
                 >

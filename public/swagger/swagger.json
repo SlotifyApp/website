@@ -2427,6 +2427,7 @@
           },
           "attendees": {
             "type": "array",
+            "nullable": true,
             "items": {
               "type": "integer",
               "format": "uint32",

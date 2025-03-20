@@ -27,7 +27,12 @@ import { UserSearch } from '@/components/user-search-bar'
 interface CreateEventProps {
   open: boolean
   onOpenChangeAction: (open: boolean) => void
-  closeCreateEventDialogOpenAction: () => void
+  closeCreateEventDialogOpen: () => void
+  initialTitle?: string
+  initialDuration?: string
+  initialParticipants?: User[]
+  initialSelectedRange?: { start: Date; end: Date } | null
+  inputsDisabled?: boolean
 }
 
 // Mapping from dropdown option to minutes
@@ -40,22 +45,25 @@ const durationMapping: { [key: string]: number } = {
 export function CreateEvent({
   open,
   onOpenChangeAction,
-  closeCreateEventDialogOpenAction,
+  closeCreateEventDialogOpen,
+  initialTitle = '',
+  initialDuration = '1hr',
+  initialParticipants = [],
+  initialSelectedRange = null,
+  inputsDisabled = false,
 }: CreateEventProps) {
   const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState(initialTitle)
   const [location, setLocation] = useState('')
-  const [duration, setDuration] = useState('1hr')
+  const [duration, setDuration] = useState(initialDuration)
 
   // const [userSearchQuery, setUserSearchQuery] = useState('')
   // const [searchResults, setSearchResults] = useState<User[]>([])
-  const [selectedParticipants, setSelectedParticipants] = useState<User[]>([])
+  const [selectedParticipants, setSelectedParticipants] =
+    useState<User[]>(initialParticipants)
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [selectedRange, setSelectedRange] = useState<{
-    start: Date
-    end: Date
-  } | null>(null)
+  const [selectedRange, setSelectedRange] = useState(initialSelectedRange)
   const [availabilityData, setAvailabilityData] =
     useState<SchedulingSlotsSuccessResponse | null>(null)
 
@@ -68,7 +76,6 @@ export function CreateEvent({
     const fetchCurrentUser = async () => {
       try {
         const user = await slotifyClient.GetAPIUsersMe()
-        console.log('Current user:', user)
         setCurrentUser(user)
       } catch (error) {
         console.error('Error fetching current user:', error)
@@ -76,6 +83,21 @@ export function CreateEvent({
     }
     fetchCurrentUser()
   }, [])
+
+  useEffect(() => {
+    if (open) {
+      setTitle(initialTitle)
+      setDuration(initialDuration)
+      setSelectedParticipants(initialParticipants)
+      setSelectedRange(initialSelectedRange)
+    }
+  }, [
+    open,
+    initialTitle,
+    initialDuration,
+    initialParticipants,
+    initialSelectedRange,
+  ])
 
   // Ref to store the last fetched range (optional)
   const lastFetchedRangeRef = useRef<{ start: number; end: number } | null>(
@@ -94,14 +116,43 @@ export function CreateEvent({
           selectedRange.start.getTime() !== range.start.getTime() ||
           selectedRange.end.getTime() !== range.end.getTime())
       ) {
-        console.log('Range selected (updating):', range)
         setSelectedRange(range)
-      } else {
-        console.log('Range selected is identical or null; no update.')
       }
     },
     [selectedRange],
   )
+
+  // useEffect(() => {
+  //   const searchUsers = async () => {
+  //     if (!userSearchQuery) {
+  //       setSearchResults([])
+  //       return
+  //     }
+  //     try {
+  //       let response
+  //       if (userSearchQuery.includes('@')) {
+  //         // Search by email
+  //         response = await slotifyClient.GetAPIUsers({
+  //           queries: { email: userSearchQuery },
+  //         })
+  //       } else {
+  //         // Search by name
+  //         response = await slotifyClient.GetAPIUsers({
+  //           queries: { name: userSearchQuery },
+  //         })
+  //       }
+  //       setSearchResults(response)
+  //     } catch (error) {
+  //       console.error('Error searching users:', error)
+  //       toast({
+  //         title: 'Error',
+  //         description: 'Failed to search users.',
+  //         variant: 'destructive',
+  //       })
+  //     }
+  //   }
+  //   searchUsers()
+  // }, [userSearchQuery])
 
   // Add a user from search results to selected participants
   const handleAddParticipant = (user: User) => {
@@ -135,10 +186,7 @@ export function CreateEvent({
         end: memoizedRange?.end?.toISOString() || new Date().toISOString(),
       },
     })
-    console.log("User's own events:", myEventsResponse)
     setMyEvents(myEventsResponse)
-
-    console.log('Check Availability button clicked.')
 
     // Validate required fields
     if (selectedParticipants.length === 0 || !memoizedRange) {
@@ -156,16 +204,11 @@ export function CreateEvent({
       memoizedRange &&
       lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
       lastFetchedRangeRef.current.end === memoizedRange.end.getTime()
-    ) {
-      console.log(
-        'Range unchanged from last fetch; re-fetching due to manual trigger.',
-      )
-    }
-
-    lastFetchedRangeRef.current = {
-      start: memoizedRange.start.getTime(),
-      end: memoizedRange.end.getTime(),
-    }
+    )
+      lastFetchedRangeRef.current = {
+        start: memoizedRange.start.getTime(),
+        end: memoizedRange.end.getTime(),
+      }
 
     setIsLoading(true)
     try {
@@ -183,20 +226,8 @@ export function CreateEvent({
         })
       }
 
-      console.log('Attendees:', attendees)
-
       const durationInMinutes = durationMapping[duration] || 60
       const meetingDuration = `PT${durationInMinutes}M`
-      console.log('Meeting duration:', meetingDuration)
-
-      console.log('Sending scheduling API call with details:', {
-        meetingName: title || 'New Meeting',
-        meetingDuration,
-        timeSlot: {
-          start: memoizedRange.start.toISOString(),
-          end: memoizedRange.end.toISOString(),
-        },
-      })
 
       // Fetch scheduling suggestions
       const response = await slotifyClient.PostAPISchedulingSlots({
@@ -218,7 +249,6 @@ export function CreateEvent({
         },
       })
 
-      console.log('Scheduling API response received:', response)
       setAvailabilityData(response)
 
       // Now fetch each selected participant's calendar events for conflicts
@@ -233,7 +263,7 @@ export function CreateEvent({
       )
       const conflictResults = await Promise.all(conflictPromises)
       const allConflictEvents = conflictResults.flat()
-      console.log('Conflict events fetched:', allConflictEvents)
+
       setConflictEvents(allConflictEvents)
     } catch (error) {
       console.error('Error fetching availability:', error)
@@ -244,12 +274,10 @@ export function CreateEvent({
       })
     } finally {
       setIsLoading(false)
-      console.log('Finished API call for availability.')
     }
   }
 
   const handleCreateManually = () => {
-    console.log('Manual event creation triggered')
     onOpenChangeAction(false)
   }
 
@@ -275,9 +303,9 @@ export function CreateEvent({
                     placeholder='My New Meeting'
                     value={title}
                     onChange={e => {
-                      console.log('Title changed:', e.target.value)
                       setTitle(e.target.value)
                     }}
+                    disabled={inputsDisabled}
                   />
                 </div>
 
@@ -288,9 +316,9 @@ export function CreateEvent({
                     placeholder='None'
                     value={location}
                     onChange={e => {
-                      console.log('Location changed:', e.target.value)
                       setLocation(e.target.value)
                     }}
+                    disabled={inputsDisabled}
                   />
                 </div>
 
@@ -300,10 +328,10 @@ export function CreateEvent({
                     id='duration'
                     value={duration}
                     onChange={e => {
-                      console.log('Duration changed:', e.target.value)
                       setDuration(e.target.value)
                     }}
                     className='block w-full rounded-md border border-gray-300 p-2'
+                    disabled={inputsDisabled}
                   >
                     <option value='30 minutes'>30 minutes</option>
                     <option value='1hr'>1hr</option>
@@ -321,11 +349,14 @@ export function CreateEvent({
                   <Label>Event Range</Label>
                   <EventRangePicker
                     selectedDate={selectedDate}
+                    selectedRange={selectedRange}
                     onDateSelect={date => {
-                      console.log('Date selected:', date)
-                      setSelectedDate(date)
+                      if (!inputsDisabled) setSelectedDate(date)
                     }}
-                    onRangeSelect={handleRangeSelect}
+                    onRangeSelect={range => {
+                      if (!inputsDisabled) handleRangeSelect(range)
+                    }}
+                    disabled={inputsDisabled}
                   />
                 </div>
 
@@ -368,7 +399,7 @@ export function CreateEvent({
               participants={selectedParticipants}
               location={''} //TODO fix this
               eventTitle={title}
-              closeCreateEventDialogOpen={closeCreateEventDialogOpenAction}
+              closeCreateEventDialogOpen={closeCreateEventDialogOpen}
             />
           </div>
         </div>

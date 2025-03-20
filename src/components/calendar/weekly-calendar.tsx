@@ -407,7 +407,7 @@ export function WeeklyCalendar({
                             <div>
                               Rating:{' '}
                               {suggestion.confidence
-                                ? `${suggestion.confidence}%`
+                                ? `${parseInt(suggestion.confidence.toString(), 10)}%`
                                 : ''}
                             </div>
                           </div>

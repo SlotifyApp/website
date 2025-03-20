@@ -15,3 +15,4 @@ export type SchedulingSlotsSuccessResponse = z.infer<
 export type MeetingTimeSuggestion = z.infer<
   typeof schemas.MeetingTimeSuggestion
 >
+export type RescheduleRequest = z.infer<typeof schemas.RescheduleRequest>

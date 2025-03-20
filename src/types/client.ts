@@ -30,7 +30,7 @@ type ReschedulingRequestNewMeeting = {
   startTime: string;
   endTime: string;
   location: string;
-  attendees: Array<number>;
+  attendees: Array<number> | null;
 };
 type ReschedulingCheckBodySchema = {
   newMeeting: {
@@ -450,7 +450,7 @@ const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
       startTime: z.string().datetime({ offset: true }),
       endTime: z.string().datetime({ offset: true }),
       location: z.string(),
-      attendees: z.array(z.number().int()),
+      attendees: z.array(z.number().int()).nullable(),
     })
     .passthrough();
 const RescheduleRequest: z.ZodType<RescheduleRequest> = z
