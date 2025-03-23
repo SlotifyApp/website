@@ -151,7 +151,10 @@ export function CalendarOverview() {
     return (doc.body.textContent || '').trim()
   }
 
-  const handleReschedule = async (selectedEventID: string, ownerEmail: string) => {
+  const handleReschedule = async (
+    selectedEventID: string,
+    ownerEmail: string,
+  ) => {
     if (!selectedEventID) return
     if (!ownerEmail) return
     try {
@@ -511,8 +514,14 @@ export function CalendarOverview() {
                 <Button
                   variant='destructive'
                   onClick={() => {
-                    console.log('Reschedule event: ', selectedEvent.iCalUId!.toString())
-                    handleReschedule(selectedEvent.iCalUId!.toString(), selectedEvent.organizer!.toString())
+                    console.log(
+                      'Reschedule event: ',
+                      selectedEvent.iCalUId!.toString(),
+                    )
+                    handleReschedule(
+                      selectedEvent.iCalUId!.toString(),
+                      selectedEvent.organizer!.toString(),
+                    )
                     setIsDayEventsDialogOpen(false)
                   }}
                 >

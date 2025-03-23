@@ -84,7 +84,7 @@ export function RescheduleRequests() {
     myRequests?.forEach(async request => {
       const requestedBy = await getUserByID(request.requested_by)
       const oldEvent = await slotifyClient.GetAPICalendarEvent({
-        queries: { msftID: request.oldMeeting.msftMeetingID , isICalUId: true},
+        queries: { msftID: request.oldMeeting.msftMeetingID, isICalUId: true },
       })
       const newEvent =
         request.newMeeting?.startTime === '0001-01-01T00:00:00Z'
@@ -192,7 +192,8 @@ export function RescheduleRequests() {
                         <div>
                           <h4 className='font-medium leading-none'>
                             {fullRequests[request.request_id]
-                              ? fullRequests[request.request_id]!.oldEvent.subject
+                              ? fullRequests[request.request_id]!.oldEvent
+                                  .subject
                               : '(No name)'}
                           </h4>
                           <p className='text-sm text-muted-foreground mt-1'>
