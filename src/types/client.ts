@@ -27,8 +27,8 @@ type ReschedulingRequestOldMeeting = {
 type ReschedulingRequestNewMeeting = {
   title: string;
   meetingDuration: string;
-  startTime: string;
-  endTime: string;
+  startRangeTime?: string | undefined;
+  endRangeTime?: string | undefined;
   location: string;
   attendees: Array<number> | null;
 };
@@ -454,8 +454,8 @@ const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
     .object({
       title: z.string(),
       meetingDuration: z.string(),
-      startTime: z.string().datetime({ offset: true }),
-      endTime: z.string().datetime({ offset: true }),
+      startRangeTime: z.string().datetime({ offset: true }).optional(),
+      endRangeTime: z.string().datetime({ offset: true }).optional(),
       location: z.string(),
       attendees: z.array(z.number().int()).nullable(),
     })
@@ -483,8 +483,6 @@ const ReschedulingRequestBodySchema = z
         title: z.string(),
         meetingDuration: z.string(),
         attendees: z.array(z.number().int()),
-        startTime: z.string().datetime({ offset: true }),
-        endTime: z.string().datetime({ offset: true }),
         location: z.string(),
         startRangeTime: z.string().datetime({ offset: true }),
         endRangeTime: z.string().datetime({ offset: true }),

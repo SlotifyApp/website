@@ -2419,12 +2419,12 @@
             "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
             "example": "PT2H30M"
           },
-          "startTime": {
+          "startRangeTime": {
             "type": "string",
             "format": "date-time",
             "description": "The start of the meeting denoted in *ISO 8601* format In the format: yyyy-mm-ddThh:mm:ssZ Where lowercase letters are replaced by their numerical values\n"
           },
-          "endTime": {
+          "endRangeTime": {
             "type": "string",
             "format": "date-time",
             "description": "The start of the meeting denoted in *ISO 8601* format In the format: yyyy-mm-ddThh:mm:ssZ Where lowercase letters are replaced by their numerical values\n"
@@ -2539,16 +2539,6 @@
                   "description": "user ID of participants"
                 },
                 "description": "Array of all the attendees user id"
-              },
-              "startTime": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The start of the meeting denoted in *ISO 8601* format In the format: yyyy-mm-ddThh:mm:ssZ Where lowercase letters are replaced by their numerical values\n"
-              },
-              "endTime": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The start of the meeting denoted in *ISO 8601* format In the format: yyyy-mm-ddThh:mm:ssZ Where lowercase letters are replaced by their numerical values\n"
               },
               "location": {
                 "type": "string",
