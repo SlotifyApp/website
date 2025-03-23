@@ -1730,7 +1730,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "number"
                 }
               }
             }
@@ -2404,10 +2404,10 @@
         "required": [
           "title",
           "meetingDuration",
-          "startTime",
-          "endTime",
           "location",
-          "attendees"
+          "attendees",
+          "endRangeTime",
+          "startRangeTime"
         ],
         "properties": {
           "title": {
@@ -2415,9 +2415,9 @@
             "description": "name of the meeting"
           },
           "meetingDuration": {
-            "type": "string",
-            "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
-            "example": "PT2H30M"
+            "type": "integer",
+            "format": "int32",
+            "description": "The length of the meeting in minutes"
           },
           "startRangeTime": {
             "type": "string",
@@ -2516,8 +2516,6 @@
               "title",
               "meetingDuration",
               "attendees",
-              "startTime",
-              "endTime",
               "location",
               "startRangeTime",
               "endRangeTime"
@@ -2528,9 +2526,9 @@
                 "description": "name of the meeting"
               },
               "meetingDuration": {
-                "type": "string",
-                "description": "The length of the meeting, denoted in **ISO 8601** format. - Example:\n  - **1 hour** → `'PT1H'`\n  - **2 hours, 30 minutes** → `'PT2H30M'`\n- `'P'` is the duration designator. - `'T'` separates date and time components. - `'H'` (hours) and `'M'` (minutes) specify the time duration. - If omitted, the default duration is **30 minutes** (`'PT30M'`).\n",
-                "example": "PT2H30M"
+                "type": "integer",
+                "format": "int32",
+                "description": "The length of the meeting in minutes"
               },
               "attendees": {
                 "type": "array",

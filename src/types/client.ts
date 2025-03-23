@@ -26,9 +26,9 @@ type ReschedulingRequestOldMeeting = {
 };
 type ReschedulingRequestNewMeeting = {
   title: string;
-  meetingDuration: string;
-  startRangeTime?: string | undefined;
-  endRangeTime?: string | undefined;
+  meetingDuration: number;
+  startRangeTime: string;
+  endRangeTime: string;
   location: string;
   attendees: Array<number> | null;
 };
@@ -453,9 +453,9 @@ const ReschedulingRequestNewMeeting: z.ZodType<ReschedulingRequestNewMeeting> =
   z
     .object({
       title: z.string(),
-      meetingDuration: z.string(),
-      startRangeTime: z.string().datetime({ offset: true }).optional(),
-      endRangeTime: z.string().datetime({ offset: true }).optional(),
+      meetingDuration: z.number().int(),
+      startRangeTime: z.string().datetime({ offset: true }),
+      endRangeTime: z.string().datetime({ offset: true }),
       location: z.string(),
       attendees: z.array(z.number().int()).nullable(),
     })
@@ -481,7 +481,7 @@ const ReschedulingRequestBodySchema = z
     newMeeting: z
       .object({
         title: z.string(),
-        meetingDuration: z.string(),
+        meetingDuration: z.number().int(),
         attendees: z.array(z.number().int()),
         location: z.string(),
         startRangeTime: z.string().datetime({ offset: true }),
@@ -1482,7 +1482,7 @@ const endpoints = makeApi([
         schema: ReschedulingRequestBodySchema,
       },
     ],
-    response: z.string(),
+    response: z.number(),
     errors: [
       {
         status: 400,

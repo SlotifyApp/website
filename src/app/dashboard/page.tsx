@@ -20,7 +20,7 @@ import { errorToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 
 export default function Dashboard() {
-  const [calendar, setCalendar] = useState<Array<CalendarEvent>>([])
+  const [calendar, setCalendar] = useState<CalendarEvent[]>([])
   const [invites, setInvites] = useState<InvitesMe[]>([])
 
   useEffect(() => {
@@ -31,6 +31,9 @@ export default function Dashboard() {
 
       const startFormatted = now.toISOString().slice(0, 19) + 'Z'
       const endFormatted = endOfDay.toISOString().slice(0, 19) + 'Z'
+
+      console.log('startFormatted', startFormatted)
+      console.log('endFormatted', endFormatted)
 
       try {
         const data = await slotifyClient.GetAPICalendarMe({

@@ -18,7 +18,6 @@ export default function User() {
 
   const fetchUser = async () => {
     try {
-      console.log('Making fetch call to /users')
       const data = await slotifyClient.GetAPIUsersMe()
       setUser(data)
     } catch (error) {

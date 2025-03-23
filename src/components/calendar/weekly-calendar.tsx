@@ -41,6 +41,11 @@ interface WeeklyCalendarProps {
   location: string
   eventTitle: string
   closeCreateEventDialogOpen: () => void
+  isRescheduleAccepted: boolean
+  isComplete: boolean
+  rescheduleID: number | null
+  selectedRange: { start: Date; end: Date } | null
+  getRescheduleEvents?: () => Promise<void>
 }
 
 export function WeeklyCalendar({
@@ -52,11 +57,18 @@ export function WeeklyCalendar({
   location,
   eventTitle,
   closeCreateEventDialogOpen,
+  isRescheduleAccepted,
+  isComplete,
+  rescheduleID,
+  selectedRange,
+  getRescheduleEvents,
 }: WeeklyCalendarProps) {
   console.log('location:', location)
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date())
   const [selectedSuggestion, setSelectedSuggestion] =
     useState<MeetingTimeSuggestion | null>(null)
+  const [selectedConflict, setSelectedConflict] =
+    useState<CalendarEvent | null>(null)
   const totalHours = 24
   const viewportRef = useRef<HTMLDivElement>(null)
 
@@ -143,29 +155,78 @@ export function WeeklyCalendar({
   // This builds a CalendarEvent object per your schema and calls the API.
   const createEvent = async (start: string, end: string) => {
     try {
-      const attendees = participants.map(user => ({
-        email: user.email,
-        attendeeType: 'required' as const,
-        responseStatus: 'none' as const,
-      }))
+      if (rescheduleID) {
+        if (isRescheduleAccepted) {
+          void (await slotifyClient.PatchAPIRescheduleRequestRequestIDAccept(
+            {
+              newStartTime: start,
+              newEndTime: end,
+            },
+            {
+              params: {
+                requestID: rescheduleID,
+              },
+            },
+          ))
+          toast({
+            title: 'Successfully rescheduled meeting',
+          })
+          if (getRescheduleEvents) {
+            void (await getRescheduleEvents())
+          }
+        } else if (isComplete) {
+          const attendees = participants.map(user => ({
+            email: user.email,
+            attendeeType: 'required' as const,
+            responseStatus: 'none' as const,
+          }))
 
-      const calendarEvent: CalendarEvent = {
-        attendees,
-        locations: [],
-        subject: eventTitle ? eventTitle : 'My New Meeting',
-        body: 'Meeting booked via Slotify AI',
-        startTime: start,
-        endTime: end,
-        isCancelled: false,
-        organizer: currentUser?.email || 'user@example.com',
-        joinURL: null,
-        webLink: '',
+          const calendarEvent: CalendarEvent = {
+            attendees,
+            locations: [],
+            subject: eventTitle ? eventTitle : 'My New Meeting',
+            body: 'Meeting booked via Slotify AI',
+            startTime: start,
+            endTime: end,
+            isCancelled: false,
+            organizer: currentUser?.email || 'user@example.com',
+            joinURL: null,
+            webLink: '',
+          }
+
+          void (await slotifyClient.PostAPIRescheduleRequestRequestIDComplete(
+            calendarEvent,
+            {
+              params: {
+                requestID: rescheduleID,
+              },
+            },
+          ))
+        }
+      } else {
+        const attendees = participants.map(user => ({
+          email: user.email,
+          attendeeType: 'required' as const,
+          responseStatus: 'none' as const,
+        }))
+
+        const calendarEvent: CalendarEvent = {
+          attendees,
+          locations: [],
+          subject: eventTitle ? eventTitle : 'My New Meeting',
+          body: 'Meeting booked via Slotify AI',
+          startTime: start,
+          endTime: end,
+          isCancelled: false,
+          organizer: currentUser?.email || 'user@example.com',
+          joinURL: null,
+          webLink: '',
+        }
+        void (await slotifyClient.PostAPICalendarMe(calendarEvent))
+        toast({
+          title: 'Successfully scheduled meeting',
+        })
       }
-      const response = await slotifyClient.PostAPICalendarMe(calendarEvent)
-      console.log('Event created:', response)
-      toast({
-        title: 'Successfully scheduled meeting',
-      })
     } catch (error) {
       console.error('Error creating event:', error)
       errorToast(error)
@@ -275,45 +336,6 @@ export function WeeklyCalendar({
                         style={{ top: `${(i / totalHours) * 100}%` }}
                       />
                     ))}
-                    {/* Render conflict events (red) */}
-                    {conflicts.map((conflict: CalendarEvent, index: number) => {
-                      const eventStart = parseISO(conflict.startTime!)
-                      const eventEnd = parseISO(conflict.endTime!)
-                      if (!isValid(eventStart) || !isValid(eventEnd))
-                        return null
-
-                      const dayStart = new Date(day)
-                      dayStart.setHours(0, 0, 0, 0)
-                      const dayEnd = new Date(day)
-                      dayEnd.setHours(23, 59, 59, 999)
-                      const actualStart = isBefore(eventStart, dayStart)
-                        ? dayStart
-                        : eventStart
-                      const actualEnd = isAfter(eventEnd, dayEnd)
-                        ? dayEnd
-                        : eventEnd
-
-                      const startFraction = getHourFraction(actualStart)
-                      const endFraction = getHourFraction(actualEnd)
-                      const topPercent = (startFraction / totalHours) * 100
-                      const heightPercent =
-                        ((endFraction - startFraction) / totalHours) * 100
-
-                      return (
-                        <div
-                          key={`conflict-${index}`}
-                          className='absolute p-1 rounded-md bg-red-300/40 text-red-800 text-xs'
-                          style={{
-                            top: `${topPercent}%`,
-                            height: `${heightPercent}%`,
-                            left: '2px',
-                            right: '2px',
-                          }}
-                        >
-                          <div className='font-medium'>Conflict</div>
-                        </div>
-                      )
-                    })}
                     {/* Render user's own events (neutral color) */}
                     {myDayEvents.map(
                       (myEvent: CalendarEvent, index: number) => {
@@ -360,6 +382,55 @@ export function WeeklyCalendar({
                         )
                       },
                     )}
+                    {/* Render conflict events (red) */}
+                    {conflicts
+                      .filter(
+                        (conflict: CalendarEvent) =>
+                          !conflict.attendees.some(
+                            attendee => attendee.email === currentUser!.email,
+                          ),
+                      )
+                      .map((conflict: CalendarEvent, index: number) => {
+                        const eventStart = parseISO(conflict.startTime!)
+                        const eventEnd = parseISO(conflict.endTime!)
+                        if (!isValid(eventStart) || !isValid(eventEnd))
+                          return null
+
+                        const dayStart = new Date(day)
+                        dayStart.setHours(0, 0, 0, 0)
+                        const dayEnd = new Date(day)
+                        dayEnd.setHours(23, 59, 59, 999)
+                        const actualStart = isBefore(eventStart, dayStart)
+                          ? dayStart
+                          : eventStart
+                        const actualEnd = isAfter(eventEnd, dayEnd)
+                          ? dayEnd
+                          : eventEnd
+
+                        const startFraction = getHourFraction(actualStart)
+                        const endFraction = getHourFraction(actualEnd)
+                        const topPercent = (startFraction / totalHours) * 100
+                        const heightPercent =
+                          ((endFraction - startFraction) / totalHours) * 100
+
+                        return (
+                          <div
+                            key={`conflict-${index}`}
+                            className='absolute p-1 rounded-md bg-red-300/40 text-red-800 text-xs cursor-pointer duration-200 ease-in transform hover:scale-110 font-bold hover:bg-red-400 hover:text-white'
+                            style={{
+                              top: `${topPercent}%`,
+                              height: `${heightPercent}%`,
+                              left: '2px',
+                              right: '2px',
+                            }}
+                            onClick={() => {
+                              setSelectedConflict(conflict)
+                            }}
+                          >
+                            <div className='font-medium'>Conflict</div>
+                          </div>
+                        )
+                      })}
                     {/* Render available suggestions (green) */}
                     {suggestions.map(
                       (suggestion: MeetingTimeSuggestion, index: number) => {
@@ -465,6 +536,78 @@ export function WeeklyCalendar({
                       selectedSuggestion.meetingTimeSlot!.end,
                     )
                     setSelectedSuggestion(null)
+                  }}
+                >
+                  Confirm
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal to confirm reschdule request */}
+      {selectedConflict && !isRescheduleAccepted && !isComplete && (
+        <Dialog open={true} onOpenChange={() => setSelectedConflict(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reschedule Request</DialogTitle>
+            </DialogHeader>
+            <div>
+              <p>
+                Reschedule meeting from{' '}
+                {format(parseISO(selectedConflict.startTime!), 'PPpp')} to{' '}
+                {format(parseISO(selectedConflict.endTime!), 'PPpp')}?
+              </p>
+              <p>
+                Participants:{' '}
+                {selectedConflict.attendees
+                  ?.map(attendee => attendee.email)
+                  .join(', ')}
+              </p>
+              <p>
+                Range of times:{' '}
+                {selectedRange ? format(selectedRange.start, 'PPpp') : 'N/A'} to{' '}
+                {selectedRange ? format(selectedRange.end, 'PPpp') : 'N/A'}
+              </p>
+              <div className='flex justify-center gap-5 mt-4'>
+                <Button
+                  variant='outline'
+                  onClick={() => setSelectedConflict(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className='bg-focusColor hover:bg-focusColor/90'
+                  onClick={async () => {
+                    const repsonse =
+                      await slotifyClient.PostAPIRescheduleRequestReplace({
+                        newMeeting: {
+                          title: selectedConflict.subject!,
+                          meetingDuration: 60,
+                          attendees: participants.map(user => user.id),
+                          location: '',
+                          startRangeTime: selectedRange
+                            ? selectedRange.start.toISOString()
+                            : '',
+                          endRangeTime: selectedRange
+                            ? selectedRange.end.toISOString()
+                            : '',
+                        },
+                        oldMeeting: {
+                          ownerEmail: selectedConflict.organizer!,
+                          msftMeetingID: selectedConflict.iCalUId!,
+                        },
+                      })
+
+                    if (repsonse) {
+                      toast({
+                        title: 'Reschedule request sent',
+                      })
+                    } else {
+                      errorToast('Error sending reschedule request')
+                    }
+                    setSelectedConflict(null)
                   }}
                 >
                   Confirm

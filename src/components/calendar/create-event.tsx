@@ -29,17 +29,14 @@ interface CreateEventProps {
   onOpenChangeAction: (open: boolean) => void
   closeCreateEventDialogOpen: () => void
   initialTitle?: string
-  initialDuration?: string
+  initialDuration?: number
   initialParticipants?: User[]
   initialSelectedRange?: { start: Date; end: Date } | null
   inputsDisabled?: boolean
-}
-
-// Mapping from dropdown option to minutes
-const durationMapping: { [key: string]: number } = {
-  '30 minutes': 30,
-  '1hr': 60,
-  '2hrs': 120,
+  isRescheduleAccepted: boolean
+  isComplete: boolean
+  rescheduleID?: number | null
+  getRescheduleEvents?: () => Promise<void>
 }
 
 export function CreateEvent({
@@ -47,10 +44,14 @@ export function CreateEvent({
   onOpenChangeAction,
   closeCreateEventDialogOpen,
   initialTitle = '',
-  initialDuration = '1hr',
+  initialDuration,
   initialParticipants = [],
   initialSelectedRange = null,
   inputsDisabled = false,
+  isRescheduleAccepted,
+  isComplete,
+  rescheduleID = null,
+  getRescheduleEvents,
 }: CreateEventProps) {
   const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
   const [title, setTitle] = useState(initialTitle)
@@ -121,38 +122,6 @@ export function CreateEvent({
     },
     [selectedRange],
   )
-
-  // useEffect(() => {
-  //   const searchUsers = async () => {
-  //     if (!userSearchQuery) {
-  //       setSearchResults([])
-  //       return
-  //     }
-  //     try {
-  //       let response
-  //       if (userSearchQuery.includes('@')) {
-  //         // Search by email
-  //         response = await slotifyClient.GetAPIUsers({
-  //           queries: { email: userSearchQuery },
-  //         })
-  //       } else {
-  //         // Search by name
-  //         response = await slotifyClient.GetAPIUsers({
-  //           queries: { name: userSearchQuery },
-  //         })
-  //       }
-  //       setSearchResults(response)
-  //     } catch (error) {
-  //       console.error('Error searching users:', error)
-  //       toast({
-  //         title: 'Error',
-  //         description: 'Failed to search users.',
-  //         variant: 'destructive',
-  //       })
-  //     }
-  //   }
-  //   searchUsers()
-  // }, [userSearchQuery])
 
   // Add a user from search results to selected participants
   const handleAddParticipant = (user: User) => {
@@ -226,7 +195,8 @@ export function CreateEvent({
         })
       }
 
-      const durationInMinutes = durationMapping[duration] || 60
+      const durationInMinutes = duration
+      console.log('durationInMinutes', durationInMinutes)
       const meetingDuration = `PT${durationInMinutes}M`
 
       // Fetch scheduling suggestions
@@ -247,6 +217,7 @@ export function CreateEvent({
           isRequired: false,
           suggestLocation: false,
         },
+        minimumAttendeePercentage: 0,
       })
 
       setAvailabilityData(response)
@@ -328,14 +299,16 @@ export function CreateEvent({
                     id='duration'
                     value={duration}
                     onChange={e => {
-                      setDuration(e.target.value)
+                      setDuration(Number(e.target.value))
+                      console.log('e.target.value', e.target.value)
+                      console.log('duration', duration)
                     }}
                     className='block w-full rounded-md border border-gray-300 p-2'
                     disabled={inputsDisabled}
                   >
-                    <option value='30 minutes'>30 minutes</option>
-                    <option value='1hr'>1hr</option>
-                    <option value='2hrs'>2hrs</option>
+                    <option value={30}>30 minutes</option>
+                    <option value={60}>1hr</option>
+                    <option value={120}>2hrs</option>
                   </select>
                 </div>
 
@@ -398,8 +371,13 @@ export function CreateEvent({
               currentUser={currentUser}
               participants={selectedParticipants}
               location={''} //TODO fix this
-              eventTitle={title}
+              eventTitle={title ?? 'New Meeting'}
               closeCreateEventDialogOpen={closeCreateEventDialogOpen}
+              isRescheduleAccepted={isRescheduleAccepted!}
+              isComplete={isComplete!}
+              rescheduleID={rescheduleID}
+              selectedRange={memoizedRange}
+              getRescheduleEvents={getRescheduleEvents}
             />
           </div>
         </div>
