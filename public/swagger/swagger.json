@@ -348,6 +348,14 @@
               "type": "string"
             },
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "isICalUId",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": true
           }
         ],
         "responses": {
@@ -2440,7 +2448,6 @@
         "description": "Request body of the details of the two meetings",
         "type": "object",
         "required": [
-          "newMeeting",
           "oldMeeting"
         ],
         "properties": {
@@ -2473,12 +2480,18 @@
           "oldMeeting": {
             "type": "object",
             "required": [
-              "msftMeetingID"
+              "msftMeetingID",
+              "ownerEmail"
             ],
             "properties": {
+              "ownerEmail": {
+                "type": "string",
+                "format": "email",
+                "description": "The email of the owner of the old meeting"
+              },
               "msftMeetingID": {
                 "type": "string",
-                "description": "The microsoft meeting ID of the old meeting if it exists"
+                "description": "The microsoft iCalUId meeting ID of the old meeting"
               },
               "isOrganizerOptional": {
                 "type": "boolean",
@@ -2557,13 +2570,17 @@
             "type": "object",
             "required": [
               "msftMeetingID",
-              "meetingStartTime",
-              "meetingOwner"
+              "ownerEmail"
             ],
             "properties": {
+              "ownerEmail": {
+                "type": "string",
+                "format": "email",
+                "description": "The email of the owner of the old meeting"
+              },
               "msftMeetingID": {
                 "type": "string",
-                "description": "The microsoft meeting ID of the old meeting"
+                "description": "The microsoft iCalUId meeting ID of the old meeting"
               }
             }
           }
@@ -2573,12 +2590,17 @@
         "description": "Request body of the details of the old meeting",
         "type": "object",
         "required": [
-          "msftMeetingID"
+          "msftMeetingID",
+          "ownerEmail"
         ],
         "properties": {
+          "ownerEmail": {
+            "type": "string",
+            "format": "email"
+          },
           "msftMeetingID": {
             "type": "string",
-            "description": "The microsoft meeting ID of the old meeting"
+            "description": "The microsoft iCalUId meeting ID of the old meeting"
           }
         }
       },
@@ -2876,6 +2898,9 @@
         "type": "object",
         "properties": {
           "id": {
+            "type": "string"
+          },
+          "iCalUId": {
             "type": "string"
           },
           "attendees": {

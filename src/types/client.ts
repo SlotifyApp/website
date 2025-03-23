@@ -33,12 +33,15 @@ type ReschedulingRequestNewMeeting = {
   attendees: Array<number> | null;
 };
 type ReschedulingCheckBodySchema = {
-  newMeeting: {
-    title: string;
-    meetingDuration: string;
-    attendees: Array<AttendeeBase>;
-  };
+  newMeeting?:
+    | {
+        title: string;
+        meetingDuration: string;
+        attendees: Array<AttendeeBase>;
+      }
+    | undefined;
   oldMeeting: {
+    ownerEmail: string;
     msftMeetingID: string;
     isOrganizerOptional?: boolean | undefined;
   };
@@ -144,6 +147,7 @@ type Attendee = {
 };
 type CalendarEvent = {
   id?: string | undefined;
+  iCalUId?: string | undefined;
   attendees: Array<Attendee>;
   body?: string | undefined;
   created?: string | undefined;
@@ -245,6 +249,7 @@ const Location: z.ZodType<Location> = z
 const CalendarEvent: z.ZodType<CalendarEvent> = z
   .object({
     id: z.string().optional(),
+    iCalUId: z.string().optional(),
     attendees: z.array(Attendee),
     body: z.string().optional(),
     created: z.string().datetime({ offset: true }).optional(),
@@ -423,9 +428,11 @@ const ReschedulingCheckBodySchema: z.ZodType<ReschedulingCheckBodySchema> = z
         meetingDuration: z.string(),
         attendees: z.array(AttendeeBase),
       })
-      .passthrough(),
+      .passthrough()
+      .optional(),
     oldMeeting: z
       .object({
+        ownerEmail: z.string().email(),
         msftMeetingID: z.string(),
         isOrganizerOptional: z.boolean().optional().default(false),
       })
@@ -483,11 +490,13 @@ const ReschedulingRequestBodySchema = z
         endRangeTime: z.string().datetime({ offset: true }),
       })
       .passthrough(),
-    oldMeeting: z.object({ msftMeetingID: z.string() }).passthrough(),
+    oldMeeting: z
+      .object({ ownerEmail: z.string().email(), msftMeetingID: z.string() })
+      .passthrough(),
   })
   .passthrough();
 const ReschedulingRequestSingleBodySchema = z
-  .object({ msftMeetingID: z.string() })
+  .object({ ownerEmail: z.string().email(), msftMeetingID: z.string() })
   .passthrough();
 const MSFTGroup = z.object({ id: z.string(), name: z.string() }).passthrough();
 const MSFTUser = z
@@ -625,6 +634,11 @@ const endpoints = makeApi([
         name: "msftID",
         type: "Query",
         schema: z.string(),
+      },
+      {
+        name: "isICalUId",
+        type: "Query",
+        schema: z.boolean(),
       },
     ],
     response: CalendarEvent,
@@ -1498,7 +1512,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z.object({ msftMeetingID: z.string() }).passthrough(),
+        schema: ReschedulingRequestSingleBodySchema,
       },
     ],
     response: z.number(),

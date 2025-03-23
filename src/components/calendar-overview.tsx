@@ -151,11 +151,16 @@ export function CalendarOverview() {
     return (doc.body.textContent || '').trim()
   }
 
-  const handleReschedule = async (selectedEventID: string) => {
+  const handleReschedule = async (
+    selectedEventID: string,
+    ownerEmail: string,
+  ) => {
     if (!selectedEventID) return
+    if (!ownerEmail) return
     try {
       await slotifyClient.PostAPIRescheduleRequestSingle({
         msftMeetingID: selectedEventID,
+        ownerEmail: ownerEmail,
       })
       toast({
         title: 'Reschedule sent',
@@ -509,8 +514,14 @@ export function CalendarOverview() {
                 <Button
                   variant='destructive'
                   onClick={() => {
-                    console.log('Reschedule event: ', selectedEvent.id)
-                    handleReschedule(selectedEvent.id!.toString())
+                    console.log(
+                      'Reschedule event: ',
+                      selectedEvent.iCalUId!.toString(),
+                    )
+                    handleReschedule(
+                      selectedEvent.iCalUId!.toString(),
+                      selectedEvent.organizer!.toString(),
+                    )
                     setIsDayEventsDialogOpen(false)
                   }}
                 >
