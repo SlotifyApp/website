@@ -21,6 +21,7 @@ import {
   AttendeeBase,
   CalendarEvent,
   SchedulingSlotsSuccessResponse,
+  MeetingTimeSuggestion,
 } from '@/types/types'
 import { UserSearch } from '@/components/user-search-bar'
 
@@ -37,6 +38,7 @@ interface CreateEventProps {
   isComplete: boolean
   rescheduleID?: number | null
   getRescheduleEvents?: () => Promise<void>
+  handleManualCreateEvent?: (date: Date) => void
 }
 
 export function CreateEvent({
@@ -52,6 +54,7 @@ export function CreateEvent({
   isComplete,
   rescheduleID = null,
   getRescheduleEvents,
+  handleManualCreateEvent,
 }: CreateEventProps) {
   const [myEvents, setMyEvents] = useState<CalendarEvent[]>([])
   const [title, setTitle] = useState(initialTitle)
@@ -148,6 +151,7 @@ export function CreateEvent({
 
   // Fetch scheduling suggestions and then fetch conflict events from each selected participant's calendar
   const handleCheckAvailability = async () => {
+    setIsLoading(true)
     // Fetch user's own events
     const myEventsResponse = await slotifyClient.GetAPICalendarMe({
       queries: {
@@ -173,54 +177,90 @@ export function CreateEvent({
       memoizedRange &&
       lastFetchedRangeRef.current.start === memoizedRange.start.getTime() &&
       lastFetchedRangeRef.current.end === memoizedRange.end.getTime()
-    )
+    ) {
       lastFetchedRangeRef.current = {
         start: memoizedRange.start.getTime(),
         end: memoizedRange.end.getTime(),
       }
+    }
 
-    setIsLoading(true)
     try {
       // Build attendees array from selected participants for scheduling suggestions
-
       const attendees: AttendeeBase[] = []
-
       for (const user of selectedParticipants) {
         attendees.push({
           emailAddress: {
             address: user.email,
             name: user.firstName + ' ' + user.lastName,
           },
-          attendeeType: 'required' as const,
+          attendeeType: 'required',
         })
       }
 
       const durationInMinutes = duration
-      console.log('durationInMinutes', durationInMinutes)
       const meetingDuration = `PT${durationInMinutes}M`
 
-      // Fetch scheduling suggestions
-      const response = await slotifyClient.PostAPISchedulingSlots({
-        attendees,
-        meetingName: title || 'New Meeting',
-        meetingDuration,
-        timeConstraint: {
-          timeSlots: [
-            {
-              start: memoizedRange.start.toISOString(),
-              end: memoizedRange.end.toISOString(),
+      // Divide the selected range into daily segments
+      const dailyPromises: Promise<SchedulingSlotsSuccessResponse>[] = []
+      const suggestionsResults: MeetingTimeSuggestion[] = []
+      let currentStart = new Date(memoizedRange.start)
+      const overallEnd = new Date(memoizedRange.end)
+
+      while (currentStart < overallEnd) {
+        const nextDay = new Date(currentStart)
+        nextDay.setDate(nextDay.getDate() + 1)
+        const dayEnd = nextDay < overallEnd ? nextDay : overallEnd
+
+        dailyPromises.push(
+          slotifyClient.PostAPISchedulingSlots({
+            attendees,
+            meetingName: title || 'New Meeting',
+            meetingDuration,
+            timeConstraint: {
+              timeSlots: [
+                {
+                  start: currentStart.toISOString(),
+                  end: dayEnd.toISOString(),
+                },
+              ],
             },
-          ],
-        },
-        isOrganizerOptional: false,
-        locationConstraint: {
-          isRequired: false,
-          suggestLocation: false,
-        },
-        minimumAttendeePercentage: 0,
+            isOrganizerOptional: false,
+            locationConstraint: {
+              isRequired: false,
+              suggestLocation: false,
+            },
+            minimumAttendeePercentage: 0,
+          }),
+        )
+        // Move to the next day
+        currentStart = nextDay
+      }
+
+      // Execute daily scheduling calls in parallel
+      const dailyResponses = await Promise.all(dailyPromises)
+      // Flatten all suggestions from each day
+      dailyResponses.forEach(response => {
+        if (
+          response &&
+          response.meetingTimeSuggestions &&
+          response.meetingTimeSuggestions.length !== 0
+        ) {
+          if (Array.isArray(response.meetingTimeSuggestions)) {
+            suggestionsResults.push(...response.meetingTimeSuggestions)
+          } else {
+            suggestionsResults.push(response.meetingTimeSuggestions)
+          }
+        }
       })
 
-      setAvailabilityData(response)
+      // Construct a SchedulingSlotsSuccessResponse object.
+      // Use the emptySuggestionsReason from the first response
+      const combinedAvailabilityData: SchedulingSlotsSuccessResponse = {
+        emptySuggestionsReason: dailyResponses[0]?.emptySuggestionsReason,
+        meetingTimeSuggestions: suggestionsResults,
+      }
+
+      setAvailabilityData(combinedAvailabilityData)
 
       // Now fetch each selected participant's calendar events for conflicts
       const conflictPromises = selectedParticipants.map(user =>
@@ -250,6 +290,7 @@ export function CreateEvent({
 
   const handleCreateManually = () => {
     onOpenChangeAction(false)
+    handleManualCreateEvent!(new Date())
   }
 
   return (
@@ -378,6 +419,7 @@ export function CreateEvent({
               rescheduleID={rescheduleID}
               selectedRange={memoizedRange}
               getRescheduleEvents={getRescheduleEvents}
+              availabilityLoading={isLoading}
             />
           </div>
         </div>

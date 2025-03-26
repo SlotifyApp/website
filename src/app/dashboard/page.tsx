@@ -22,9 +22,11 @@ import { format } from 'date-fns'
 export default function Dashboard() {
   const [calendar, setCalendar] = useState<CalendarEvent[]>([])
   const [invites, setInvites] = useState<InvitesMe[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchCalendar = async () => {
+      setIsLoading(true)
       const now = new Date()
       const endOfDay = new Date(now)
       endOfDay.setHours(23, 59, 59, 999)
@@ -46,6 +48,7 @@ export default function Dashboard() {
       } catch (error) {
         console.log('calendar me error', error)
       }
+      setIsLoading(false)
     }
 
     fetchCalendar()
@@ -130,7 +133,7 @@ export default function Dashboard() {
       <div className='flex flex-row justify-center w-screen gap-10 mt-5'>
         <div className='w-[45vw]'>
           <div className='mb-8'>
-            <EventsForToday events={calendar} />
+            <EventsForToday events={calendar} isLoading={isLoading} />
           </div>
           <div className='mb-8'>
             <h2 className='text-2xl font-bold mb-4'>Group Invites</h2>

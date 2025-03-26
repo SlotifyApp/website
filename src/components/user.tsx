@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react'
 import { Member } from '@/components/slotify-group-members'
 
-import { User as LucideUserIcon, CalendarDays } from 'lucide-react'
+import { User as LucideUserIcon, CalendarDays, Loader2 } from 'lucide-react'
 import slotifyClient from '@/hooks/fetch'
 import { errorToast } from '@/hooks/use-toast'
 
 export default function User() {
   const [user, setUser] = useState<Member | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const today = new Date()
   const formattedDate = today.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -17,6 +18,7 @@ export default function User() {
   })
 
   const fetchUser = async () => {
+    setIsLoading(true)
     try {
       const data = await slotifyClient.GetAPIUsersMe()
       setUser(data)
@@ -24,6 +26,7 @@ export default function User() {
       console.error(error)
       errorToast(error)
     }
+    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -35,7 +38,14 @@ export default function User() {
       <div className='flex flex-row justify-center items-center'>
         <div className='flex flex-row justify-center items-center gap-5 text-2xl font-semibold'>
           <LucideUserIcon className='h-10 w-10' />
-          Welcome {user ? user.firstName : 'User'}
+          Welcome{' '}
+          {isLoading ? (
+            <Loader2 className='h-10 w-10' />
+          ) : user ? (
+            user.firstName
+          ) : (
+            'User'
+          )}
         </div>
       </div>
       <div className='flex flex-row justify-center items-center gap-5 text-xl'>
